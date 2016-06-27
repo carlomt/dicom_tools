@@ -4,7 +4,9 @@ import dicom
 import glob
 import argparse
 import numpy as np
-from pyqtgraph.Qt import QtCore, QtGui
+from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
+import dicom_tools.pyqtgraph as pg
+from Qt import QtCore, QtGui
 import pyqtgraph as pg
 import sys
 
@@ -66,7 +68,7 @@ win.setCentralWidget(imv)
 win.show()
 win.setWindowTitle('pyqtgraph example: ImageView')
 
-roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True
+#roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True
 
 ## Display the data and assign each frame a time value from 1.0 to 3.0
 imv.setImage(data, xvals=np.linspace(0., len(data), data.shape[0]))

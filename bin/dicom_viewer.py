@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-import dicom
 import glob
 import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
-from Qt import QtCore, QtGui
-import pyqtgraph as pg
+import dicom_tools.pydicom
+#from Qt import QtCore, QtGui
+#import pyqtgraph as pg
 import sys
 
 #def main(argv=None):

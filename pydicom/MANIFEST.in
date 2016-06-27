@@ -1,2 +1,0 @@
-include pydicom/*
-include ez_setup.py

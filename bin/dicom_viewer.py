@@ -22,6 +22,12 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
 parser.add_argument("inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-y", "--yview", help="swap axes",
+                    action="store_true")
+group.add_argument("-x", "--xview", help="swap axes",
+                    action="store_true")
+
 
 args = parser.parse_args()
 
@@ -56,6 +62,9 @@ for i, thisdicom in enumerate(dicoms):
     data[i] = pix_arr.T
 
 
+dataswappedY = np.swapaxes(data,0,2)
+dataswappedX = np.swapaxes(data,0,1)
+    
 app = QtGui.QApplication([])
 
 ## Create window with ImageView widget
@@ -69,7 +78,12 @@ win.setWindowTitle('pyqtgraph example: ImageView')
 #roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True
 
 ## Display the data and assign each frame a time value from 1.0 to 3.0
-imv.setImage(data, xvals=np.linspace(0., len(data), data.shape[0]))
+if args.xview:
+    imv.setImage(dataswappedX, xvals=np.linspace(0., len(dataswappedX), dataswappedX.shape[0]))
+elif args.yview:
+    imv.setImage(dataswappedY, xvals=np.linspace(0., len(dataswappedY), dataswappedY.shape[0]))
+else:
+    imv.setImage(data, xvals=np.linspace(0., len(data), data.shape[0]))
     
 ## Start Qt event loop unless running in interactive mode.
 if __name__ == '__main__':

@@ -53,16 +53,16 @@ data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
 
 for i, thisdicom in enumerate(dicoms):
     pix_arr  = thisdicom.pixel_array
-    data[i] = pix_arr.T
+    np.swapaxes(pix_arr,0,1)
+    data[i] = pix_arr[::-1].T
 
 
 ## create GUI
 app = QtGui.QApplication([])
-w = pg.GraphicsWindow(size=(1000,800), border=True)
+w = pg.GraphicsWindow(size=(1280,768), border=True)
 w.setWindowTitle('dicom with  ROI')
 
-text = """User-Modifiable ROIs<br>
-Click on a line segment to add a new handle.
+text = """Click on a line segment to add a new handle.
 Right click on a handle to remove.
 """
 

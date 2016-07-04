@@ -7,11 +7,12 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
+# from skimage.filters.rank import entropy
+# from skimage.filters.rank import maximum
+# from skimage.morphology import disk
+from scipy import ndimage
 
 #def main(argv=None):
-
-
-
 
 outfname="out.root"
 inpath="."
@@ -50,7 +51,6 @@ for thisfile in infiles:
 
 data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
 
-
 for i, thisdicom in enumerate(dicoms):
     pix_arr  = thisdicom.pixel_array
     np.swapaxes(pix_arr,0,1)
@@ -85,7 +85,24 @@ v1b.autoRange()
 roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
 
 def update(roi):
-    img1b.setImage(roi.getArrayRegion(arr, img1a), levels=(0, arr.max()))
+    thisroi = roi.getArrayRegion(arr, img1a).astype(int)
+    img1b.setImage(thisroi, levels=(0, arr.max()))
+
+    print type(thisroi[0][0])
+    print "shape:\t",thisroi.shape
+    print "size:\t",thisroi.size
+    print "min:\t",thisroi.min()
+    print "max:\t",thisroi.max()
+    print "mean:\t",thisroi.mean()
+    print "mean:\t", ndimage.mean(thisroi)
+    print "sd:\t", ndimage.standard_deviation(thisroi)
+    print "sum:\t", ndimage.sum(thisroi)
+    # print thisroi
+    # print "entropy:\t",entropy(thisroi, disk(5))
+    # print "maximum:\t",maximum(thisroi, disk(5))
+    # print "\n"
+    # print disk(5)
+    print "\n"
     v1b.autoRange()
 
 roi.sigRegionChanged.connect(update)

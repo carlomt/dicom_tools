@@ -23,9 +23,17 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
+parser.add_argument("-l", "--layer", help="select layer",
+                    type=int)
 
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-y", "--yview", help="swap axes",
+                    action="store_true")
+group.add_argument("-x", "--xview", help="swap axes",
+                    action="store_true")
 
 args = parser.parse_args()
+layer=0
 
 if args.outfile:
     outfname = args.outfile
@@ -33,7 +41,10 @@ if args.outfile:
 if args.inputpath:
     inpath = args.inputpath
 
+if args.layer:
+    layer = args.layer
 
+    
 infiles=glob.glob(inpath+"/*.dcm")
 
 if args.verbose:
@@ -57,6 +68,8 @@ for i, thisdicom in enumerate(dicoms):
     np.swapaxes(pix_arr,0,1)
     data[i] = pix_arr[::-1].T
 
+dataswappedY = np.swapaxes(data,0,2)
+dataswappedX = np.swapaxes(data,0,1)
 
 ## create GUI
 app = QtGui.QApplication([])
@@ -71,7 +84,12 @@ w1 = w.addLayout(row=0, col=0)
 label1 = w1.addLabel(text, row=0, col=0)
 v1a = w1.addViewBox(row=1, col=0, lockAspect=True)
 v1b = w1.addViewBox(row=2, col=0, lockAspect=True)
-arr=data[0]
+if args.xview:
+    arr=dataswappedX[layer]
+elif args.yview:
+    arr=dataswappedY[layer]
+else:
+    arr=data[layer]
 img1a = pg.ImageItem(arr)
 v1a.addItem(img1a)
 img1b = pg.ImageItem()

@@ -15,12 +15,12 @@ import sys
 
 
 outfname="out.root"
-inpath="."
+inpath="./"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
-parser.add_argument("inputpath", help="path of the DICOM directory (default ./)")
+parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 
 group = parser.add_mutually_exclusive_group()

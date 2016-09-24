@@ -86,12 +86,12 @@ for i, thisdicom in enumerate(dicoms):
     pix_arr  = thisdicom.pixel_array
     data[i] = pix_arr.T
     dataRGB[i,:,:,0] = pix_arr.T 
-    dataRGB[i,:,:,1] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
-    dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
+    dataRGB[i,:,:,2] = dataRGB[i,:,:,1] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
+    # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
     
-dataswappedY = np.swapaxes(data,0,2)
-dataswappedX = np.swapaxes(data,0,1)
+dataswappedY = np.swapaxes(dataRGB,0,2)
+dataswappedX = np.swapaxes(dataRGB,0,1)
     
     
 dataM=np.multiply(data,ROI)

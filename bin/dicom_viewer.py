@@ -8,6 +8,7 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
+import matplotlib.pyplot as plt
 
 #def main(argv=None):
 
@@ -43,17 +44,28 @@ if args.inputpath:
 infiles = glob.glob(inpath+"/*.dcm")
 
 if args.verbose:
-    print "input directory:\n",inpath
-    print "output file name:\n",outfname
+    print("input directory:\n",inpath)
+    print("output file name:\n",outfname)
 
     # print "input files:\n",infiles
 
-    print len(infiles)," files will be imported"
+    print(len(infiles)," files will be imported")
 
 dicoms=[]
 
 for thisfile in infiles:
     dicoms.append(dicom.read_file(thisfile))
+
+
+# Load dimensions based on the number of rows, columns, and slices (along the Z axis)
+ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
+
+# Load spacing values (in mm)
+ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
+
+xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
+ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
+zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
 
 data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
 dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
@@ -65,13 +77,13 @@ ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
 if args.filterROI:
     inpathROI = args.filterROI
     if args.verbose:
-        print "ROI requested, path: ",inpathROI
+        print("ROI requested, path: ",inpathROI)
     infilesROI = glob.glob(inpathROI+"/*.dcm")
     if args.verbose:
-        print len(infilesROI)," files will be imported for the ROI"
+        print(len(infilesROI)," files will be imported for the ROI")
     if len(infilesROI) != len(infiles):
-        print "ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files"
-        print "while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files"
+        print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
+        print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
     dicomsROI=[]
     for infileROI in infilesROI:
         dicomsROI.append(dicom.read_file(infileROI))
@@ -102,19 +114,57 @@ app = QtGui.QApplication([])
 win = QtGui.QMainWindow()
 win.resize(800,800)
 imv = pg.ImageView()
+# p1.scene().addItem(imv)
+
+# if args.xview:
+#     imv.setMinimumSize(dataswappedX.shape[1], dataswappedX.shape[2])
+# elif args.yview:
+#     imv.setMinimumSize(dataswappedY.shape[1], dataswappedY.shape[2])
+    
 win.setCentralWidget(imv)
 win.show()
 win.setWindowTitle('dicom_viewer')
 
 #roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True
 
+# print "data.shape[0]", data.shape[0]
+# print "dataswappedX.shape[0]", dataswappedX.shape[0]
+# print "dataswappedY.shape[0]", dataswappedY.shape[0]
+# print np.linspace(0, len(dataswappedX), dataswappedX.shape[0])
+
 ## Display the data and assign each frame a time value from 1.0 to 3.0
+# if args.xview:
+#     imv.setImage(dataswappedX, xvals=np.linspace(0, len(dataswappedX), dataswappedX.shape[0]))
+# elif args.yview:
+#     imv.setImage(dataswappedY, xvals=np.linspace(0, len(dataswappedY), dataswappedY.shape[0]))
+# else:
+#     imv.setImage(dataRGB, xvals=np.linspace(0, len(data), data.shape[0]))
 if args.xview:
-    imv.setImage(dataswappedX, xvals=np.linspace(0., len(dataswappedX), dataswappedX.shape[0]))
+    # p1.setXRange(0,dicoms[0].SliceThickness*len(dicoms))
+    # imv.setXRange(0,dicoms[0].SliceThickness*len(dicoms))
+    imv.setImage(dataswappedX, xvals=np.linspace(0, dataswappedX.shape[0], dataswappedX.shape[0] ))
 elif args.yview:
-    imv.setImage(dataswappedY, xvals=np.linspace(0., len(dataswappedY), dataswappedY.shape[0]))
+    imv.setImage(dataswappedY, xvals=np.linspace(0,  dataswappedY.shape[0],  dataswappedY.shape[0] ))
 else:
-    imv.setImage(dataRGB, xvals=np.linspace(0., len(data), data.shape[0]))
+    imv.setImage(dataRGB, xvals=np.linspace(0, data.shape[0], data.shape[0] ))
+
+# ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
+# print("#D numpy dimensions x,y,z:\n",ConstPixelDims)
+# # Load spacing values (in mm)                                                                                            
+# ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
+# print("pixel spacing:\n",ConstPixelSpacing)
+# #calculate axis                                                                                                          
+# x = np.arange(0.0, (ConstPixelDims[0])*ConstPixelSpacing[0], ConstPixelSpacing[0])
+# y = np.arange(0.0, (ConstPixelDims[1])*ConstPixelSpacing[1], ConstPixelSpacing[1])
+# z = np.arange(0.0, (ConstPixelDims[2])*ConstPixelSpacing[2], ConstPixelSpacing[2])
+# # The array is sized based on 'ConstPixelDims'                                                                           
+# print(y)
+# plt.figure(dpi=100)
+# plt.axes().set_aspect('auto', 'box')
+# plt.set_cmap(plt.gray())
+# # plt.pcolormesh(z, y, np.flipud(data[:,:,2]))
+# plt.pcolormesh(z, y, np.flipud(data[:,: ,20].T))
+# plt.show()    
 
 ## Start Qt event loop unless running in interactive mode.
 if __name__ == '__main__':

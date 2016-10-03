@@ -10,8 +10,10 @@ on mac you could install them with:
 
 `brew install sip`
 
-after download install the package with
-python setup.py install
+
+install the package with:
+
+`python setup.py install`
 
 
 

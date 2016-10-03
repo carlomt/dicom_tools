@@ -1,0 +1,86 @@
+#!/usr/bin/python
+
+
+import glob
+import argparse
+import numpy as np
+import dicom
+import sys
+from dicom_tools.make_histo import make_histo
+import ROOT
+
+outfname="out.root"
+inpath="./"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
+parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
+parser.add_argument("-f", "--filterROI", help="filter the image with a ROI (path)")
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-y", "--yview", help="swap axes",
+                    action="store_true")
+group.add_argument("-x", "--xview", help="swap axes",
+                    action="store_true")
+
+
+args = parser.parse_args()
+
+if args.outfile:
+    outfname = args.outfile
+
+if args.inputpath:
+    inpath = args.inputpath
+
+
+infiles = glob.glob(inpath+"/*.dcm")
+
+if args.verbose:
+    print("input directory:\n",inpath)
+    print("output file name:\n",outfname)
+
+    print(len(infiles)," files will be imported")
+
+dicoms=[]
+
+for thisfile in infiles:
+    dicoms.append(dicom.read_file(thisfile))
+
+
+data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
+ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
+
+if args.filterROI:
+    inpathROI = args.filterROI
+    if args.verbose:
+        print("ROI requested, path: ",inpathROI)
+    infilesROI = glob.glob(inpathROI+"/*.dcm")
+    if args.verbose:
+        print(len(infilesROI)," files will be imported for the ROI")
+    if len(infilesROI) != len(infiles):
+        print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
+        print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
+    dicomsROI=[]
+    for infileROI in infilesROI:
+        dicomsROI.append(dicom.read_file(infileROI))
+
+    for i, thisROI in enumerate(dicomsROI):
+        pix_arr = thisROI.pixel_array
+        ROI[i] = pix_arr.T
+
+for i, thisdicom in enumerate(dicoms):
+    pix_arr  = thisdicom.pixel_array
+    data[i] = pix_arr.T
+
+his = make_histo(data,ROI)
+outfile= ROOT.TFile(outfname,"RECREATE")
+his.Write()
+outfile.Write()
+outfile.Close()
+    
+# canvas = ROOT.TCanvas("c","c",800,600)
+# his.Draw()
+
+

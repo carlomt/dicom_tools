@@ -8,7 +8,9 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
-import matplotlib.pyplot as plt
+from dicom_tools.make_histo import make_histo
+import ROOT
+#import matplotlib.pyplot as plt
 
 #def main(argv=None):
 
@@ -97,10 +99,11 @@ if args.filterROI:
 for i, thisdicom in enumerate(dicoms):
     pix_arr  = thisdicom.pixel_array
     data[i] = pix_arr.T
-    dataRGB[i,:,:,0] = pix_arr.T 
-    dataRGB[i,:,:,2] = dataRGB[i,:,:,1] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
+    dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T 
+    dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
     # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
+his = make_histo(data,ROI)
     
 dataswappedY = np.swapaxes(dataRGB,0,2)
 dataswappedX = np.swapaxes(dataRGB,0,1)
@@ -165,6 +168,9 @@ else:
 # # plt.pcolormesh(z, y, np.flipud(data[:,:,2]))
 # plt.pcolormesh(z, y, np.flipud(data[:,: ,20].T))
 # plt.show()    
+canvas = ROOT.TCanvas("C","c",800,600)
+his.Draw()
+
 
 ## Start Qt event loop unless running in interactive mode.
 if __name__ == '__main__':

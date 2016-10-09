@@ -43,9 +43,10 @@ for thisfile in infiles:
 #     # np.swapaxes(pix_arr,0,1)
 #     data[i] = pix_arr[::-1]
 
+outfile = ROOT.TFile(outfname, "recreate")
 
 hmin = -1000-0.5
-hmax = 1500+0.5
+hmax = 5000+0.5
 nbin = int(hmax-hmin)
 if args.verbose:
     print "hmin",hmin,"hmax",hmax,"nbin",nbin
@@ -60,5 +61,9 @@ for thisdicom in dicoms:
             his.Fill(pix)
 
 his.Print()            
-cc = ROOT.TCanvas("cc","cc",800,600)
-his.Draw()            
+# cc = ROOT.TCanvas("cc","cc",800,600)
+# his.Draw()            
+
+his.Write()
+outfile.Write()
+outfile.Close()

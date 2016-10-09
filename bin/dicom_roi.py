@@ -8,6 +8,7 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
+
 # from skimage.filters.rank import entropy
 # from skimage.filters.rank import maximum
 # from skimage.morphology import disk
@@ -49,12 +50,12 @@ if args.layer:
 infiles=glob.glob(inpath+"/*.dcm")
 
 if args.verbose:
-    print "input directory:\n",inpath
-    print "output file name:\n",outfname
+    print("input directory:\n",inpath)
+    print("output file name:\n",outfname)
 
     # print "input files:\n",infiles
 
-    print len(infiles)," files will be imported"
+    print(len(infiles)," files will be imported")
 
 dicoms=[]
 
@@ -91,7 +92,16 @@ elif args.yview:
     arr=dataswappedY[layer]
 else:
     arr=data[layer]
-img1a = pg.ImageItem(arr)
+# img1a = pg.ImageItem(arr)
+img1a = pg.ImageItem()
+imv = pg.ImageView(imageItem=img1a)
+if args.xview:
+    imv.setImage(dataswappedX, xvals=np.linspace(0, dataswappedX.shape[0], dataswappedX.shape[0] ))
+elif args.yview:
+    imv.setImage(dataswappedY, xvals=np.linspace(0,  dataswappedY.shape[0],  dataswappedY.shape[0] ))
+else:
+    imv.setImage(data, xvals=np.linspace(0, data.shape[0], data.shape[0] ))
+
 v1a.addItem(img1a)
 img1b = pg.ImageItem()
 v1b.addItem(img1b)
@@ -108,21 +118,21 @@ def update(roi):
     thisroi = roi.getArrayRegion(arr, img1a).astype(int)
     img1b.setImage(thisroi, levels=(0, arr.max()))
 
-    print type(thisroi[0][0])
-    print "shape:\t",thisroi.shape
-    print "size:\t",thisroi.size
-    print "min:\t",thisroi.min()
-    print "max:\t",thisroi.max()
-    print "mean:\t",thisroi.mean()
-    print "mean:\t", ndimage.mean(thisroi)
-    print "sd:\t", ndimage.standard_deviation(thisroi)
-    print "sum:\t", ndimage.sum(thisroi)
-    # print thisroi
-    # print "entropy:\t",entropy(thisroi, disk(5))
-    # print "maximum:\t",maximum(thisroi, disk(5))
-    # print "\n"
-    # print disk(5)
-    print "\n"
+    print(type(thisroi[0][0]))
+    print("shape:\t",thisroi.shape)
+    print("size:\t",thisroi.size)
+    print("min:\t",thisroi.min())
+    print("max:\t",thisroi.max())
+    print("mean:\t",thisroi.mean())
+    print("mean:\t", ndimage.mean(thisroi))
+    print("sd:\t", ndimage.standard_deviation(thisroi))
+    print("sum:\t", ndimage.sum(thisroi))
+    # print(thisroi
+    # print("entropy:\t",entropy(thisroi, disk(5))
+    # print("maximum:\t",maximum(thisroi, disk(5))
+    # print("\n"
+    # print(disk(5)
+    print("\n")
     v1b.autoRange()
 
 roi.sigRegionChanged.connect(update)

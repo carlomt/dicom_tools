@@ -9,11 +9,11 @@ import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
-import ROOT
+#import ROOT
 #import matplotlib.pyplot as plt
+#from scipy import interpolate
 
 #def main(argv=None):
-
 
 
 
@@ -64,17 +64,23 @@ ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
 
 # Load spacing values (in mm)
 ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
+if args.verbose:
+    print("Voxel dimensions: ",ConstPixelSpacing)
+
 
 xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
 ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
 zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
+# if args.verbose:
+#     print("Image dimensions: ",xsize,ysize,zsize)
 
+scaleFactorInt=5
+    
 data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
+dataRGB=np.zeros(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape+tuple([3]))
 
 
-
-ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
+ROI=np.full(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape,False,dtype=bool)
 
 if args.filterROI:
     inpathROI = args.filterROI
@@ -91,25 +97,54 @@ if args.filterROI:
         dicomsROI.append(dicom.read_file(infileROI))
     # ROI=np.zeros(tuple([len(dicomsROI)])+dicomsROI[0].pixel_array.shape)
 
-    for i, thisROI in enumerate(dicomsROI):
+    for i, thisROI in enumerate(reversed(dicomsROI)):
         pix_arr = thisROI.pixel_array
-        ROI[i] = pix_arr.T
+        ROI[i*scaleFactorInt] = pix_arr.T
+        if i < (len(dicomsROI)-1):
+            ROI[i*scaleFactorInt+1] = pix_arr.T
+            ROI[i*scaleFactorInt+2] = pix_arr.T
+        if i > 0:
+            ROI[i*scaleFactorInt-1] = pix_arr.T
+            ROI[i*scaleFactorInt-2] = pix_arr.T            
     # 
 
-for i, thisdicom in enumerate(dicoms):
+for i, thisdicom in enumerate(reversed(dicoms)):
     pix_arr  = thisdicom.pixel_array
-    data[i] = pix_arr.T
-    dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T 
-    dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
+    data[i] =  pix_arr.T
+    dataRGB[i*scaleFactorInt,:,:,2] = dataRGB[i*scaleFactorInt,:,:,0]= pix_arr.T 
+    dataRGB[i*scaleFactorInt,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt])
+    if i < (len(dicoms)-1):
+        dataRGB[i*scaleFactorInt+1,:,:,2] = dataRGB[i*scaleFactorInt+1,:,:,0]= pix_arr.T 
+        dataRGB[i*scaleFactorInt+1,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+1])
+        dataRGB[i*scaleFactorInt+2,:,:,2] = dataRGB[i*scaleFactorInt+2,:,:,0]= pix_arr.T 
+        dataRGB[i*scaleFactorInt+2,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+2])
+    if i > 0:
+        dataRGB[i*scaleFactorInt-1,:,:,2] = dataRGB[i*scaleFactorInt-1,:,:,0]= pix_arr.T 
+        dataRGB[i*scaleFactorInt-1,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt-1])
+        dataRGB[i*scaleFactorInt-2,:,:,2] = dataRGB[i*scaleFactorInt-2,:,:,0]= pix_arr.T 
+        dataRGB[i*scaleFactorInt-2,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt-2])
+        # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
     # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
-his = make_histo(data,ROI)
+# size=[]
+# for dim in data.shape :
+#     size.append(np.linspace(0,dim-1,dim))
+
+# my_interpolating_function = interpolate.RegularGridInterpolator((size[0], size[1], size[2]), data)
+
+# for k in xrange(0,data.shape[0]*scaleFactorInt):
+#     print "fetta ",k
+#     for j in xrange(0,data.shape[1]):
+#         print "colonna ",j
+#         for i in xrange(0,data.shape[2]):
+#             dataRGB[k,i,j] = my_interpolating_function([float(k)/5,j,i])
     
 dataswappedY = np.swapaxes(dataRGB,0,2)
-dataswappedX = np.swapaxes(dataRGB,0,1)
+#dataswappedX = np.fliplr(np.swapaxes(np.swapaxes(dataRGB,0,1),1,2))
+dataswappedX = np.swapaxes(np.swapaxes(dataRGB,0,1),1,2)
     
     
-dataM=np.multiply(data,ROI)
+# dataM=np.multiply(data,ROI)
 
 app = QtGui.QApplication([])
 
@@ -149,7 +184,7 @@ if args.xview:
 elif args.yview:
     imv.setImage(dataswappedY, xvals=np.linspace(0,  dataswappedY.shape[0],  dataswappedY.shape[0] ))
 else:
-    imv.setImage(dataRGB, xvals=np.linspace(0, data.shape[0], data.shape[0] ))
+    imv.setImage(dataRGB, xvals=np.linspace(0, dataRGB.shape[0], dataRGB.shape[0] ))
 
 # ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
 # print("#D numpy dimensions x,y,z:\n",ConstPixelDims)
@@ -168,8 +203,8 @@ else:
 # # plt.pcolormesh(z, y, np.flipud(data[:,:,2]))
 # plt.pcolormesh(z, y, np.flipud(data[:,: ,20].T))
 # plt.show()    
-canvas = ROOT.TCanvas("C","c",800,600)
-his.Draw()
+# canvas = ROOT.TCanvas("C","c",800,600)
+# his.Draw()
 
 
 ## Start Qt event loop unless running in interactive mode.

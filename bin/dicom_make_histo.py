@@ -74,9 +74,24 @@ for i, thisdicom in enumerate(dicoms):
     pix_arr  = thisdicom.pixel_array
     data[i] = pix_arr.T
 
-his = make_histo(data,ROI)
+    
 outfile= ROOT.TFile(outfname,"RECREATE")
+    
+his, allhistos = make_histo(data,ROI)
 his.Write()
+
+for thishisto in allhistos:
+    thishisto.Write()
+
+# histograms = []
+# for i, fetta, fettaROI in enumerate(zip(data,ROI)):
+#     if fettaROI.max() > 0 :
+#         histogram = make_histo(fetta, fettaROI)
+#         histogram.SetName("h"+str(i))
+#         histogram.SetTitle("h"+str(i))
+#         histogram.Write()
+
+
 outfile.Write()
 outfile.Close()
     

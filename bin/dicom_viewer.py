@@ -58,6 +58,7 @@ dicoms=[]
 for thisfile in infiles:
     dicoms.append(dicom.read_file(thisfile))
 
+dicoms.sort(key=lambda x: float(x.ImagePositionPatient[2]))
 
 # Load dimensions based on the number of rows, columns, and slices (along the Z axis)
 ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))

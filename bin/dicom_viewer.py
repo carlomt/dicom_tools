@@ -75,7 +75,11 @@ zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpa
 # if args.verbose:
 #     print("Image dimensions: ",xsize,ysize,zsize)
 
-scaleFactorInt=5
+scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
+scaleFactorInt=int(scaleFactor+0.5)
+if args.verbose:
+    print("scaleFactor",scaleFactor)
+    print("scaleFactorInt",scaleFactorInt)
     
 data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
 dataRGB=np.zeros(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape+tuple([3]))

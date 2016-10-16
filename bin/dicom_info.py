@@ -4,6 +4,7 @@ import glob
 import argparse
 import dicom
 import ROOT
+import os
 
 outfname="out.csv"
 

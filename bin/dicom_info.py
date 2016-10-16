@@ -65,7 +65,7 @@ for thisdir in dirs:
 
 if args.verbose:
     print "end loop"
-    print "printing results on ",out_file
+    print "printing results on ",outfname
     print header
     for line in table:
         print line

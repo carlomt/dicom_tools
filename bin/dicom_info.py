@@ -62,7 +62,7 @@ for thisdir in dirs:
             line.append(value)
 
         if line not in table:
-            talbe.append(line)
+            table.append(line)
 
     os.chdir("../")
 

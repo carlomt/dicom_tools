@@ -45,7 +45,7 @@ for thisdir in dirs:
         try:
             thisdicom = dicom.read_file(thisfile)
         except:
-            write thisfile," is not a DICOM"
+            print thisfile," is not a DICOM"
             pass
         line = []
         line.append(thisdir)

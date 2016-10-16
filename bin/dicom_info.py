@@ -46,6 +46,7 @@ for thisdir in dirs:
             thisdicom = dicom.read_file(thisfile)
         except:
             print thisfile," is not a DICOM"
+            continue
             pass
         line = []
         line.append(thisdir)
@@ -59,7 +60,8 @@ for thisdir in dirs:
 
         if line not in table:
             talbe.append(line)
-        os.chdir("../")
+
+    os.chdir("../")
 
 out_file = open(outfname,"w")
 for element in header:

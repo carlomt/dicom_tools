@@ -33,6 +33,8 @@ table = []
 header = []
     
 for thisdir in dirs:
+    print "working in dir: ",thisdir
+    
     os.chdir(inpath)
     infiles=glob.glob("*.dcm")
     
@@ -45,15 +47,12 @@ for thisdir in dirs:
             for attr, value in thisdicom.__dict__.iteritems():
                 header.append(value)
 
-        out_file.write(filen+", "+thisfile+", ")
         for attr, value in thisdicom.__dict__.iteritems():
             line.append(value)
-            out_file.write(value+", ")
-        out_file.write("\n")
 
     if line not in table:
         talbe.append(line)
-
+    os.chdir("../")
 
 out_file = open(outfname,"w")
 for element in header:

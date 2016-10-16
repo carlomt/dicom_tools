@@ -63,6 +63,13 @@ for thisdir in dirs:
 
     os.chdir("../")
 
+if args.verbose:
+    print "end loop"
+    print "printing results on ",out_file
+    print header
+    for line in table:
+        print line
+        
 out_file = open(outfname,"w")
 for element in header:
     out_file.write(element+", ")

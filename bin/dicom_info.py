@@ -31,9 +31,73 @@ if args.verbose:
     print len(dirs)," directories"
 
 table = []
-header = []
+# header = []
 
 os.chdir(inpath)
+
+names = []
+methods = []
+
+names.append("AcquisitionDate")
+methods.append(lambda x: x.AcquisitionDate)
+
+names.append("AcquisitionNumber")
+methods.append(lambda x: x.AcquisitionNumber)
+
+names.append("AcquisitionTime")
+methods.append(lambda x: x.AcquisitionTime)
+
+names.append("ContentDate")
+methods.append(lambda x: x.ContentDate)
+
+names.append("ContentTime")
+methods.append(lambda x: x.ContentTime)
+
+names.append("EchoTime")
+methods.append(lambda x: x.EchoTime)
+
+names.append("FlipAngle")
+methods.append(lambda x: x.FlipAngle)
+
+names.append("MRAcquisitionType")
+methods.append(lambda x: x.MRAcquisitionType)
+
+names.append("PatientName")
+methods.append(lambda x: x.PatientName)
+
+names.append("PerformedProcedureStepStartDate")
+methods.append(lambda x: x.PerformedProcedureStepStartDate)
+
+names.append("PerformedProcedureStepStartTime")
+methods.append(lambda x: x.PerformedProcedureStepStartTime)
+
+names.append("PixelRepresentation")
+methods.append(lambda x: x.PixelRepresentation)
+
+names.append("SAR")
+methods.append(lambda x: x.SAR)
+
+names.append("SeriesDate")
+methods.append(lambda x: x.SeriesDate)
+
+names.append("SeriesDescription")
+methods.append(lambda x: x.SeriesDescription)
+
+names.append("SeriesInstanceUID")
+methods.append(lambda x: x.SeriesInstanceUID)
+
+names.append("StudyID")
+methods.append(lambda x: x.StudyID)
+
+names.append("StudyInstanceUID")
+methods.append(lambda x: x.StudyInstanceUID)
+
+
+out_file = open(outfname,"w")
+
+for name in names:
+    out_file.write(name+", ")
+out_file.write("\n")
 
 
 for thisdir in dirs:
@@ -53,14 +117,10 @@ for thisdir in dirs:
             pass
         line = []
         line.append(thisdir)
+
+        for method in methods:
+            line.append(method(thisdicom))
         
-        if filen <=1 :
-            for attr, value in thisdicom.__dict__.iteritems():
-                header.append(value)
-
-        for attr, value in thisdicom.__dict__.iteritems():
-            line.append(value)
-
         if line not in table:
             table.append(line)
 
@@ -69,14 +129,14 @@ for thisdir in dirs:
 if args.verbose:
     print "end loop"
     print "printing results on ",outfname
-    print header
-    for line in table:
-        print line
+    # print header
+    # for line in table:
+    #     print line
         
-out_file = open(outfname,"w")
-for element in header:
-    out_file.write(element+", ")
-out_file.write("\n")
+
+# for element in header:
+#     out_file.write(element+", ")
+# out_file.write("\n")
 
 for line in table:
     for element in line:

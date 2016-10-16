@@ -42,7 +42,11 @@ for thisdir in dirs:
     for filen,thisfile in enumerate(infiles):
         if os.path.isdir(thisfile):
             continue
-        thisdicom = dicom.read_file(thisfile)
+        try:
+            thisdicom = dicom.read_file(thisfile)
+        except:
+            write thisfile," is not a DICOM"
+            pass
         line = []
         line.append(thisdir)
         

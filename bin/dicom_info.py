@@ -51,9 +51,9 @@ for thisdir in dirs:
         for attr, value in thisdicom.__dict__.iteritems():
             line.append(value)
 
-    if line not in table:
-        talbe.append(line)
-    os.chdir("../")
+        if line not in table:
+            talbe.append(line)
+        os.chdir("../")
 
 out_file = open(outfname,"w")
 for element in header:

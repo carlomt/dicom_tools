@@ -119,7 +119,12 @@ for thisdir in dirs:
         line.append(thisdir)
 
         for method in methods:
-            line.append(method(thisdicom))
+            result="none"
+            try:
+                result = method(thisdicom)
+            except:
+                pass
+            line.append(result)
         
         if line not in table:
             table.append(line)

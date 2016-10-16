@@ -37,7 +37,7 @@ for thisdir in dirs:
     print "working in dir: ",thisdir
     
     os.chdir(inpath)
-    infiles=glob.glob("*.dcm")
+    infiles=glob.glob("*")
     
     for filen,thisfile in enumerate(infiles):
         thisdicom = dicom.read_file(thisfile)

@@ -32,11 +32,14 @@ if args.verbose:
 
 table = []
 header = []
-    
+
+os.chdir(inpath)
+
+
 for thisdir in dirs:
-    print "working in dir: ",thisdir
+    os.chdir(thisdir)
+    print "working in dir: ",os.getcwd()
     
-    os.chdir(inpath)
     infiles=glob.glob("*")
     
     for filen,thisfile in enumerate(infiles):

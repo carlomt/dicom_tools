@@ -40,6 +40,8 @@ for thisdir in dirs:
     infiles=glob.glob("*")
     
     for filen,thisfile in enumerate(infiles):
+        if os.path.isdir(thisfile):
+            continue
         thisdicom = dicom.read_file(thisfile)
         line = []
         line.append(thisdir)

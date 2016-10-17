@@ -144,8 +144,14 @@ if args.verbose:
 # out_file.write("\n")
 
 for line in table:
-    for element in line:
-        out_file.write(element+", ")
+    for i, element in enumerate(line):
+        selement = "???"
+        try:
+            selement = str(element)
+        except:
+            print names[i], " in dir ",line[0], " is not convertible to string "
+            pass
+        out_file.write(selement+", ")
     out_file.write("\n")
 
         

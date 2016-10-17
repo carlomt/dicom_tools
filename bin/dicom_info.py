@@ -86,6 +86,9 @@ methods.append(lambda x: x.SeriesDescription)
 names.append("SeriesInstanceUID")
 methods.append(lambda x: x.SeriesInstanceUID)
 
+names.append("StudyDate")
+methods.append(lambda x: x.StudyDate)
+
 names.append("StudyID")
 methods.append(lambda x: x.StudyID)
 

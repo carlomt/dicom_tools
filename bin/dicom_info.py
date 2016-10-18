@@ -98,6 +98,7 @@ methods.append(lambda x: x.StudyInstanceUID)
 
 out_file = open(outfname,"w")
 
+out_file.write("dir, ")
 for name in names:
     out_file.write(name+", ")
 out_file.write("\n")

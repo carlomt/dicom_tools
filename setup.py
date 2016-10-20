@@ -6,7 +6,8 @@ scripts_list=glob.glob('./bin/*.py')
 install_req=[
     'pydicom>=0.9.9',
     'numpy>=1.10.0',
-    'scipy>=0.17.1'
+    'scipy>=0.17.1',
+    'pynrrd>=0.2.1'
 ]
 
 setup(name='dicom_tools',

@@ -8,6 +8,7 @@ import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
+import nrrd
 #import ROOT
 #import matplotlib.pyplot as plt
 #from scipy import interpolate
@@ -24,7 +25,7 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
-parser.add_argument("-f", "--filterROI", help="filter the image with a ROI (path)")
+parser.add_argument("-f", "--filterROI", help="filter the image with a ROI (folder path, nrrd file supported)")
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-y", "--yview", help="swap axes",
@@ -90,26 +91,42 @@ if args.filterROI:
     inpathROI = args.filterROI
     if args.verbose:
         print("ROI requested, path: ",inpathROI)
-    infilesROI = glob.glob(inpathROI+"/*.dcm")
-    if args.verbose:
-        print(len(infilesROI)," files will be imported for the ROI")
-    if len(infilesROI) != len(infiles):
-        print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
-        print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
-    dicomsROI=[]
-    for infileROI in infilesROI:
-        dicomsROI.append(dicom.read_file(infileROI))
-    # ROI=np.zeros(tuple([len(dicomsROI)])+dicomsROI[0].pixel_array.shape)
+    infilesROInrrd = glob.glob(inpathROI+"/*.nrrd")
+    if len(infilesROInrrd) ==1 :
+        nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
+        # print nrrdROItmp.shape
+        nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
+        for i, fetta in enumerate(reversed(nrrdROI)) :
+            ROI[i*scaleFactorInt] = fetta
+            if i < (len(nrrdROI)-1):
+                ROI[i*scaleFactorInt+1] = fetta
+                ROI[i*scaleFactorInt+2] = fetta
+            if i > 0:
+                ROI[i*scaleFactorInt-1] = fetta
+                ROI[i*scaleFactorInt-2] = fetta  
+    elif len(infilesROInrrd) >1:
+        print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
+    else:
+        infilesROI = glob.glob(inpathROI+"/*.dcm")
+        if args.verbose:
+            print(len(infilesROI)," files will be imported for the ROI")
+        if len(infilesROI) != len(infiles):
+            print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
+            print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
+        dicomsROI=[]
+        for infileROI in infilesROI:
+            dicomsROI.append(dicom.read_file(infileROI))
+        # ROI=np.zeros(tuple([len(dicomsROI)])+dicomsROI[0].pixel_array.shape)
 
-    for i, thisROI in enumerate(reversed(dicomsROI)):
-        pix_arr = thisROI.pixel_array
-        ROI[i*scaleFactorInt] = pix_arr.T
-        if i < (len(dicomsROI)-1):
-            ROI[i*scaleFactorInt+1] = pix_arr.T
-            ROI[i*scaleFactorInt+2] = pix_arr.T
-        if i > 0:
-            ROI[i*scaleFactorInt-1] = pix_arr.T
-            ROI[i*scaleFactorInt-2] = pix_arr.T            
+        for i, thisROI in enumerate(reversed(dicomsROI)):
+            pix_arr = thisROI.pixel_array
+            ROI[i*scaleFactorInt] = pix_arr.T
+            if i < (len(dicomsROI)-1):
+                ROI[i*scaleFactorInt+1] = pix_arr.T
+                ROI[i*scaleFactorInt+2] = pix_arr.T
+            if i > 0:
+                ROI[i*scaleFactorInt-1] = pix_arr.T
+                ROI[i*scaleFactorInt-2] = pix_arr.T            
     # 
 
 for i, thisdicom in enumerate(reversed(dicoms)):

@@ -99,11 +99,11 @@ if args.filterROI:
         for i, fetta in enumerate(reversed(nrrdROI)) :
             ROI[i*scaleFactorInt] = fetta
             if i < (len(nrrdROI)-1):
-                ROI[i*scaleFactorInt+1] = fetta
-                ROI[i*scaleFactorInt+2] = fetta
+                for j in xrange(1,int(scaleFactorInt/2)+1):
+                    ROI[i*scaleFactorInt+j] = fetta
             if i > 0:
-                ROI[i*scaleFactorInt-1] = fetta
-                ROI[i*scaleFactorInt-2] = fetta  
+                for j in xrange(int(-scaleFactorInt/2)+1,0):
+                    ROI[i*scaleFactorInt+j] = fetta
     elif len(infilesROInrrd) >1:
         print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
     else:
@@ -122,11 +122,11 @@ if args.filterROI:
             pix_arr = thisROI.pixel_array
             ROI[i*scaleFactorInt] = pix_arr.T
             if i < (len(dicomsROI)-1):
-                ROI[i*scaleFactorInt+1] = pix_arr.T
-                ROI[i*scaleFactorInt+2] = pix_arr.T
+                for j in xrange(1,int(scaleFactorInt/2)+1):
+                    ROI[i*scaleFactorInt+j] = pix_arr.T
             if i > 0:
-                ROI[i*scaleFactorInt-1] = pix_arr.T
-                ROI[i*scaleFactorInt-2] = pix_arr.T            
+                for j in xrange(int(-scaleFactorInt/2)+1,0):
+                    ROI[i*scaleFactorInt+j] = pix_arr.T
     # 
 
 for i, thisdicom in enumerate(reversed(dicoms)):
@@ -135,15 +135,15 @@ for i, thisdicom in enumerate(reversed(dicoms)):
     dataRGB[i*scaleFactorInt,:,:,2] = dataRGB[i*scaleFactorInt,:,:,0]= pix_arr.T 
     dataRGB[i*scaleFactorInt,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt])
     if i < (len(dicoms)-1):
-        dataRGB[i*scaleFactorInt+1,:,:,2] = dataRGB[i*scaleFactorInt+1,:,:,0]= pix_arr.T 
-        dataRGB[i*scaleFactorInt+1,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+1])
-        dataRGB[i*scaleFactorInt+2,:,:,2] = dataRGB[i*scaleFactorInt+2,:,:,0]= pix_arr.T 
-        dataRGB[i*scaleFactorInt+2,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+2])
+         for j in xrange(1,int(scaleFactorInt/2)+1):
+             dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
+             dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
+
     if i > 0:
-        dataRGB[i*scaleFactorInt-1,:,:,2] = dataRGB[i*scaleFactorInt-1,:,:,0]= pix_arr.T 
-        dataRGB[i*scaleFactorInt-1,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt-1])
-        dataRGB[i*scaleFactorInt-2,:,:,2] = dataRGB[i*scaleFactorInt-2,:,:,0]= pix_arr.T 
-        dataRGB[i*scaleFactorInt-2,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt-2])
+        for j in xrange(int(-scaleFactorInt/2)+1,0):
+            dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
+            dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
+
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
     # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 

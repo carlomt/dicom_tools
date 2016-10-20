@@ -86,6 +86,9 @@ methods.append(lambda x: x.SeriesDescription)
 names.append("SeriesInstanceUID")
 methods.append(lambda x: x.SeriesInstanceUID)
 
+names.append("StudyDate")
+methods.append(lambda x: x.StudyDate)
+
 names.append("StudyID")
 methods.append(lambda x: x.StudyID)
 
@@ -95,6 +98,7 @@ methods.append(lambda x: x.StudyInstanceUID)
 
 out_file = open(outfname,"w")
 
+out_file.write("dir, ")
 for name in names:
     out_file.write(name+", ")
 out_file.write("\n")

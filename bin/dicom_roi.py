@@ -47,13 +47,15 @@ if args.inputpath:
 if args.layer:
     layer = args.layer
 
-data, ROI, dataRGB = read_files(inpath, False, args.verbose)
+dataRGB, ROI = read_files(inpath, False, args.verbose)
+data = dataRGB[:,:,:,0]
 
 if args.verbose:
     print(data.shape)
+    print("layer: ",layer)
 
 dataswappedY = np.swapaxes(data,0,2)
-dataswappedX = np.swapaxes(data,0,1)
+dataswappedX = np.swapaxes(np.swapaxes(data,0,1),1,2)
 
 ## create GUI
 app = QtGui.QApplication([])
@@ -74,15 +76,16 @@ elif args.yview:
     arr=dataswappedY[layer]
 else:
     arr=data[layer]
-# img1a = pg.ImageItem(arr)
-img1a = pg.ImageItem()
+
+img1a = pg.ImageItem(np.fliplr(arr))
+#img1a = pg.ImageItem()
 imv = pg.ImageView(imageItem=img1a)
-if args.xview:
-    imv.setImage(dataswappedX, xvals=np.linspace(0, dataswappedX.shape[0], dataswappedX.shape[0] ))
-elif args.yview:
-    imv.setImage(dataswappedY, xvals=np.linspace(0,  dataswappedY.shape[0],  dataswappedY.shape[0] ))
-else:
-    imv.setImage(data, xvals=np.linspace(0, data.shape[0], data.shape[0] ))
+# if args.xview:
+#     imv.setImage(dataswappedX, xvals=np.linspace(0, dataswappedX.shape[0], dataswappedX.shape[0] ))
+# elif args.yview:
+#     imv.setImage(dataswappedY, xvals=np.linspace(0,  dataswappedY.shape[0],  dataswappedY.shape[0] ))
+# else:
+#     imv.setImage(data, xvals=np.linspace(0, data.shape[0], data.shape[0] ))
 
 v1a.addItem(img1a)
 img1b = pg.ImageItem()

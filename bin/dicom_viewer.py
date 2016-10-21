@@ -43,9 +43,9 @@ if args.outfile:
 if args.inputpath:
     inpath = args.inputpath
 
-data, ROI, dataRGB = read_files(inpath,  args.filterROI, args.verbose)
+dataRGB, ROI = read_files(inpath,  args.filterROI, args.verbose)
 if args.verbose:
-    print(data.shape)    
+    print(dataRGB.shape)    
     
 dataswappedY = np.swapaxes(dataRGB,0,2)
 #dataswappedX = np.fliplr(np.swapaxes(np.swapaxes(dataRGB,0,1),1,2))

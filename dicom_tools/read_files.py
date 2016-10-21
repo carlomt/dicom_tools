@@ -32,7 +32,7 @@ def read_files(inpath, inpathROI=False, verbose=False):
     xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
     ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
     zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
-    # if args.verbose:
+    # if verbose:
     #     print("Image dimensions: ",xsize,ysize,zsize)
 
     scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
@@ -100,7 +100,7 @@ def read_files(inpath, inpathROI=False, verbose=False):
                 dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
                 dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
 
-    return data, ROI, dataRGB
+    return dataRGB, ROI
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
         # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])

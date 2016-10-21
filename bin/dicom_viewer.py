@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import glob
+#import glob
 import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
@@ -8,7 +8,8 @@ import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
-import nrrd
+from dicom_tools.read_files import read_files
+#import nrrd
 #import ROOT
 #import matplotlib.pyplot as plt
 #from scipy import interpolate
@@ -42,123 +43,9 @@ if args.outfile:
 if args.inputpath:
     inpath = args.inputpath
 
-
-infiles = glob.glob(inpath+"/*.dcm")
-
+data, ROI, dataRGB = read_files(inpath,  args.filterROI, args.verbose)
 if args.verbose:
-    print("input directory:\n",inpath)
-    print("output file name:\n",outfname)
-
-    # print "input files:\n",infiles
-
-    print(len(infiles)," files will be imported")
-
-dicoms=[]
-
-for thisfile in infiles:
-    dicoms.append(dicom.read_file(thisfile))
-
-dicoms.sort(key=lambda x: float(x.ImagePositionPatient[2]))
-
-# Load dimensions based on the number of rows, columns, and slices (along the Z axis)
-ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
-
-# Load spacing values (in mm)
-ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
-if args.verbose:
-    print("Voxel dimensions: ",ConstPixelSpacing)
-
-
-xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
-ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
-zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
-# if args.verbose:
-#     print("Image dimensions: ",xsize,ysize,zsize)
-
-scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
-scaleFactorInt=int(scaleFactor+0.5)
-if args.verbose:
-    print("scaleFactor",scaleFactor)
-    print("scaleFactorInt",scaleFactorInt)
-    
-data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-dataRGB=np.zeros(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape+tuple([3]))
-
-
-ROI=np.full(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape,False,dtype=bool)
-
-if args.filterROI:
-    inpathROI = args.filterROI
-    if args.verbose:
-        print("ROI requested, path: ",inpathROI)
-    infilesROInrrd = glob.glob(inpathROI+"/*.nrrd")
-    if len(infilesROInrrd) ==1 :
-        nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
-        # print nrrdROItmp.shape
-        nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
-        for i, fetta in enumerate(reversed(nrrdROI)) :
-            ROI[i*scaleFactorInt] = fetta
-            if i < (len(nrrdROI)-1):
-                for j in xrange(1,int(scaleFactorInt/2)+1):
-                    ROI[i*scaleFactorInt+j] = fetta
-            if i > 0:
-                for j in xrange(int(-scaleFactorInt/2)+1,0):
-                    ROI[i*scaleFactorInt+j] = fetta
-    elif len(infilesROInrrd) >1:
-        print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
-    else:
-        infilesROI = glob.glob(inpathROI+"/*.dcm")
-        if args.verbose:
-            print(len(infilesROI)," files will be imported for the ROI")
-        if len(infilesROI) != len(infiles):
-            print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
-            print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
-        dicomsROI=[]
-        for infileROI in infilesROI:
-            dicomsROI.append(dicom.read_file(infileROI))
-        # ROI=np.zeros(tuple([len(dicomsROI)])+dicomsROI[0].pixel_array.shape)
-
-        for i, thisROI in enumerate(reversed(dicomsROI)):
-            pix_arr = thisROI.pixel_array
-            ROI[i*scaleFactorInt] = pix_arr.T
-            if i < (len(dicomsROI)-1):
-                for j in xrange(1,int(scaleFactorInt/2)+1):
-                    ROI[i*scaleFactorInt+j] = pix_arr.T
-            if i > 0:
-                for j in xrange(int(-scaleFactorInt/2)+1,0):
-                    ROI[i*scaleFactorInt+j] = pix_arr.T
-    # 
-
-for i, thisdicom in enumerate(reversed(dicoms)):
-    pix_arr  = thisdicom.pixel_array
-    data[i] =  pix_arr.T
-    dataRGB[i*scaleFactorInt,:,:,2] = dataRGB[i*scaleFactorInt,:,:,0]= pix_arr.T 
-    dataRGB[i*scaleFactorInt,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt])
-    if i < (len(dicoms)-1):
-         for j in xrange(1,int(scaleFactorInt/2)+1):
-             dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
-             dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
-
-    if i > 0:
-        for j in xrange(int(-scaleFactorInt/2)+1,0):
-            dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
-            dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
-
-        # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
-    # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
-
-# size=[]
-# for dim in data.shape :
-#     size.append(np.linspace(0,dim-1,dim))
-
-# my_interpolating_function = interpolate.RegularGridInterpolator((size[0], size[1], size[2]), data)
-
-# for k in xrange(0,data.shape[0]*scaleFactorInt):
-#     print "fetta ",k
-#     for j in xrange(0,data.shape[1]):
-#         print "colonna ",j
-#         for i in xrange(0,data.shape[2]):
-#             dataRGB[k,i,j] = my_interpolating_function([float(k)/5,j,i])
+    print(data.shape)    
     
 dataswappedY = np.swapaxes(dataRGB,0,2)
 #dataswappedX = np.fliplr(np.swapaxes(np.swapaxes(dataRGB,0,1),1,2))

@@ -8,6 +8,7 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 import sys
+from dicom_tools.read_files import read_files
 
 # from skimage.filters.rank import entropy
 # from skimage.filters.rank import maximum
@@ -23,7 +24,7 @@ inpath="."
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
-parser.add_argument("inputpath", help="path of the DICOM directory (default ./)")
+parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 parser.add_argument("-l", "--layer", help="select layer",
                     type=int)
@@ -46,29 +47,10 @@ if args.inputpath:
 if args.layer:
     layer = args.layer
 
-    
-infiles=glob.glob(inpath+"/*.dcm")
+data, ROI, dataRGB = read_files(inpath, False, args.verbose)
 
 if args.verbose:
-    print("input directory:\n",inpath)
-    print("output file name:\n",outfname)
-
-    # print "input files:\n",infiles
-
-    print(len(infiles)," files will be imported")
-
-dicoms=[]
-
-
-for thisfile in infiles:
-    dicoms.append(dicom.read_file(thisfile))
-
-data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-
-for i, thisdicom in enumerate(dicoms):
-    pix_arr  = thisdicom.pixel_array
-    np.swapaxes(pix_arr,0,1)
-    data[i] = pix_arr[::-1].T
+    print(data.shape)
 
 dataswappedY = np.swapaxes(data,0,2)
 dataswappedX = np.swapaxes(data,0,1)
@@ -119,17 +101,17 @@ def update(roi):
     img1b.setImage(thisroi, levels=(0, arr.max()))
 
     print(type(thisroi[0][0]))
-    print("shape:\t",thisroi.shape)
-    print("size:\t",thisroi.size)
-    print("min:\t",thisroi.min())
-    print("max:\t",thisroi.max())
-    print("mean:\t",thisroi.mean())
-    print("mean:\t", ndimage.mean(thisroi))
-    print("sd:\t", ndimage.standard_deviation(thisroi))
-    print("sum:\t", ndimage.sum(thisroi))
+    print("shape: ",thisroi.shape)
+    print("size:  ",thisroi.size)
+    print("min:   ",thisroi.min())
+    print("max:   ",thisroi.max())
+    print("mean:  ",thisroi.mean())
+    print("mean:  ", ndimage.mean(thisroi))
+    print("sd:    ", ndimage.standard_deviation(thisroi))
+    print("sum:   ", ndimage.sum(thisroi))
     # print(thisroi
-    # print("entropy:\t",entropy(thisroi, disk(5))
-    # print("maximum:\t",maximum(thisroi, disk(5))
+    # print("entropy: ",entropy(thisroi, disk(5))
+    # print("maximum: ",maximum(thisroi, disk(5))
     # print("\n"
     # print(disk(5)
     print("\n")

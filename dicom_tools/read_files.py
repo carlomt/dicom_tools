@@ -45,6 +45,7 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
     
     data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
     dataRGB=np.zeros(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape+tuple([3]))
+    rawROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
     ROI=np.full(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape,False,dtype=bool)
 
     if inpathROI:
@@ -56,6 +57,7 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
             # print nrrdROItmp.shape
             nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
             for i, fetta in enumerate(reversed(nrrdROI)) :
+                rawROI[i] = fetta
                 ROI[i*scaleFactorInt] = fetta
                 if i < (len(nrrdROI)-1):
                     for j in xrange(1,int(scaleFactorInt/2)+1):
@@ -79,6 +81,7 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
             for i, thisROI in enumerate(reversed(dicomsROI)):
                 pix_arr = thisROI.pixel_array
                 ROI[i*scaleFactorInt] = pix_arr.T
+                rawROI[i] = pix_arr.T
                 if i < (len(dicomsROI)-1):
                     for j in xrange(1,int(scaleFactorInt/2)+1):
                         ROI[i*scaleFactorInt+j] = pix_arr.T
@@ -103,8 +106,11 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
                 dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
 
     if raw:
-        return data,ROI
+        if verbose:
+            print("returning raw data")
+        return data, rawROI
     
+
     return dataRGB, ROI
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2

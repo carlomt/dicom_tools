@@ -7,6 +7,7 @@ import numpy as np
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
+from dicom_tools.read_files import read_files
 import ROOT
 
 outfname="out.root"
@@ -35,45 +36,46 @@ if args.inputpath:
     inpath = args.inputpath
 
 
-infiles = glob.glob(inpath+"/*.dcm")
+# infiles = glob.glob(inpath+"/*.dcm")
 
-if args.verbose:
-    print("input directory:\n",inpath)
-    print("output file name:\n",outfname)
+# if args.verbose:
+#     print("input directory:\n",inpath)
+#     print("output file name:\n",outfname)
 
-    print(len(infiles)," files will be imported")
+#     print(len(infiles)," files will be imported")
 
-dicoms=[]
+# dicoms=[]
 
-for thisfile in infiles:
-    dicoms.append(dicom.read_file(thisfile))
+# for thisfile in infiles:
+#     dicoms.append(dicom.read_file(thisfile))
 
 
-data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
+# data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
+# ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
 
-if args.filterROI:
-    inpathROI = args.filterROI
-    if args.verbose:
-        print("ROI requested, path: ",inpathROI)
-    infilesROI = glob.glob(inpathROI+"/*.dcm")
-    if args.verbose:
-        print(len(infilesROI)," files will be imported for the ROI")
-    if len(infilesROI) != len(infiles):
-        print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
-        print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
-    dicomsROI=[]
-    for infileROI in infilesROI:
-        dicomsROI.append(dicom.read_file(infileROI))
+# if args.filterROI:
+#     inpathROI = args.filterROI
+#     if args.verbose:
+#         print("ROI requested, path: ",inpathROI)
+#     infilesROI = glob.glob(inpathROI+"/*.dcm")
+#     if args.verbose:
+#         print(len(infilesROI)," files will be imported for the ROI")
+#     if len(infilesROI) != len(infiles):
+#         print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
+#         print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
+#     dicomsROI=[]
+#     for infileROI in infilesROI:
+#         dicomsROI.append(dicom.read_file(infileROI))
 
-    for i, thisROI in enumerate(dicomsROI):
-        pix_arr = thisROI.pixel_array
-        ROI[i] = pix_arr.T
+#     for i, thisROI in enumerate(dicomsROI):
+#         pix_arr = thisROI.pixel_array
+#         ROI[i] = pix_arr.T
 
-for i, thisdicom in enumerate(dicoms):
-    pix_arr  = thisdicom.pixel_array
-    data[i] = pix_arr.T
+# for i, thisdicom in enumerate(dicoms):
+#     pix_arr  = thisdicom.pixel_array
+#     data[i] = pix_arr.T
 
+data, ROI = read_files(inpath,args.filterROI, args.verbose, True)
     
 outfile= ROOT.TFile(outfname,"RECREATE")
     

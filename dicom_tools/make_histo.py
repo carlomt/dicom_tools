@@ -5,7 +5,7 @@ import numpy as np
 def make_histo(data, mask):
     nbin = 200
     binmin=0
-    binmax=1400
+    binmax=1600
 
     # table = []
     

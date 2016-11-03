@@ -4,7 +4,9 @@ import numpy as np
 import dicom
 import nrrd
 
-def read_files(inpath, inpathROI=False, verbose=False):
+# se raw=True torna un tensore con esattamente le dimensioni dei dicom, altrimenti replica le fette per riprodurre l'aspect ratio (ovvero tenere conto del fatto che i voxel sono molto piu' profondi delle dimensioni su X e Y)
+
+def read_files(inpath, inpathROI=False, verbose=False, raw=False):
     
     infiles = glob.glob(inpath+"/*.dcm")
 
@@ -100,6 +102,9 @@ def read_files(inpath, inpathROI=False, verbose=False):
                 dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
                 dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
 
+    if raw:
+        return data,ROI
+    
     return dataRGB, ROI
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2

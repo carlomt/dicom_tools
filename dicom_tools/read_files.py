@@ -11,6 +11,7 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
     infiles = glob.glob(inpath+"/*.dcm")
 
     if verbose:
+        print("funciont read file V 1.0")
         print("input directory:\n",inpath)
         print(len(infiles)," files will be imported")
 
@@ -52,7 +53,11 @@ def read_files(inpath, inpathROI=False, verbose=False, raw=False):
         if verbose:
             print("ROI requested, path: ",inpathROI)
         infilesROInrrd = glob.glob(inpathROI+"/*.nrrd")
+        if verbose:
+            print(len(infilesROInrrd),"nrrd files found in ROI path: ")
         if len(infilesROInrrd) ==1 :
+            if verbose:
+                print("nrrd ROI file: ",infilesROInrrd)
             nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
             # print nrrdROItmp.shape
             nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)

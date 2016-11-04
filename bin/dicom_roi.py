@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 import glob
 import argparse
 import numpy as np
@@ -47,7 +46,7 @@ if args.inputpath:
 if args.layer:
     layer = args.layer
 
-dataRGB, ROI = read_files(inpath, False, args.verbose)
+dataRGB, ROI = read_files(inpath, False, args.verbose, False)
 data = dataRGB[:,:,:,0]
 
 if args.verbose:

@@ -47,7 +47,7 @@ if args.layer:
     layer = args.layer
 
 dataRGB, ROI = read_files(inpath, False, args.verbose, False)
-data = dataRGB[:,:,:,0]
+data = dataRGB[:,:,::-1,0]
 
 if args.verbose:
     print(data.shape)
@@ -76,7 +76,9 @@ elif args.yview:
 else:
     arr=data[layer]
 
-img1a = pg.ImageItem(np.fliplr(arr))
+# orig = np.fliplr(arr)
+    
+img1a = pg.ImageItem(arr)
 #img1a = pg.ImageItem()
 imv = pg.ImageView(imageItem=img1a)
 # if args.xview:
@@ -89,10 +91,11 @@ imv = pg.ImageView(imageItem=img1a)
 v1a.addItem(img1a)
 img1b = pg.ImageItem()
 v1b.addItem(img1b)
-v1a.disableAutoRange('xy')
-v1b.disableAutoRange('xy')
+# v1a.disableAutoRange('xy')
 v1a.autoRange()
-v1b.autoRange()
+#v1b.autoRange()
+v1b.disableAutoRange('xy')
+
 
 #rois = []
 

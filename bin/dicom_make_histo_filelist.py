@@ -9,6 +9,7 @@ import sys
 from dicom_tools.make_histo import make_histo
 from dicom_tools.read_files import read_files
 import ROOT
+from array import array
 
 outfname="out.root"
 
@@ -22,11 +23,11 @@ args = parser.parse_args()
 
 if args.outfile:
     outfname = args.outfile
-
+    
 outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
 timeflag = array('i', [0])
-nVoxel   = array('f', [0])
+nVoxel   = array('i', [0])
 mean     = array('f', [0])
 stdDev   = array('f', [0])
 skewness = array('f', [0])
@@ -34,8 +35,13 @@ kurtosis = array('f', [0])
 
 
 tree = ROOT.TTree("analisi_T2","analisi_T2")
-tree.Branch(nVoxel
-
+tree.Branch("patientID",patientID,"patientID/C")
+tree.Branch("timeflag",timeflag,"timeflag/I")
+tree.Branch("mean",mean,"mean/F")
+tree.Branch("stdDev",stdDev,"stdDev/F")
+tree.Branch("skewness",skewness,"skewness/F")
+tree.Branch("kurtosis",kurtosis,"kurtosis/F")
+            
 if args.verbose:
     print("Reading configuration file: ",inputfile)
             

@@ -23,6 +23,8 @@ args = parser.parse_args()
 
 if args.outfile:
     outfname = args.outfile
+
+inputfile = args.inputfile
     
 outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
@@ -37,6 +39,7 @@ kurtosis = array('f', [0])
 tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch("patientID",patientID,"patientID/C")
 tree.Branch("timeflag",timeflag,"timeflag/I")
+tree.Branch("nVoxel",nVoxel,"nVoxel/I")
 tree.Branch("mean",mean,"mean/F")
 tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
@@ -48,21 +51,24 @@ if args.verbose:
 with open(inputfile,'r') as fin:
     for line in fin:
         lines = line.split()
-        patientID = lines[0]
+        if args.verbose:
+            print(lines)
+        patientID[:63] = lines[0]
         pathT2 = lines[1]
         pathROI = lines[2]
-        timeflag = lines[3]
+        timeflag[0] = int(lines[3])
 
-    data, ROI = read_files(pathT2, pathROI, args.verbose, True)
-    his, allhistos = make_histo(data,ROI)
+        data, ROI = read_files(pathT2, pathROI, args.verbose, True)
+        his, allhistos = make_histo(data,ROI,lines[0])
     
-    nVoxel   = his.GetEntries()
-    mean     = his.GetMean()
-    stdDev   = his.GetStdDev()
-    skewness = his.GetSkewness()
-    kurtosis = his.GetKurtosis()
-
-    tree.Fill()
-            
-outfile.Write()
+        nVoxel[0]   = int(his.GetEntries())
+        mean[0]     = his.GetMean()
+        stdDev[0]   = his.GetStdDev()
+        skewness[0] = his.GetSkewness()
+        kurtosis[0] = his.GetKurtosis()
+        if args.verbose:
+            print(patientID, timeflag, nVoxel, mean, stdDev, skewness, kurtosis)
+        tree.Fill()
+tree.Write()            
+# outfile.Write()
 outfile.Close()

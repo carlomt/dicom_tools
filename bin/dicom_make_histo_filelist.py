@@ -36,6 +36,9 @@ kurtosis = array('f', [0])
 tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch(nVoxel
 
+if args.verbose:
+    print("Reading configuration file: ",inputfile)
+            
 with open(inputfile,'r') as fin:
     for line in fin:
         lines = line.split()

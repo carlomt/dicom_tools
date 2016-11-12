@@ -5,7 +5,8 @@ import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
-from dicom_tools.read_files import read_files
+from dicom_tools.FileReader import FileReader
+#from dicom_tools.read_files import read_files
 
 class Window(QtGui.QWidget):
 
@@ -48,8 +49,11 @@ class Window(QtGui.QWidget):
             
         if args.layer:
             self.layer = args.layer
-                
-        dataRGB, ROI = read_files(inpath, False, args.verbose, False)
+
+        freader = FileReader(inpath, False, args.verbose)
+        # dataRGB, unusedROI = read_files(inpath, False, args.verbose, False)
+        dataRGB, unusedROI = freader.read(False)
+        self.scaleFactor = freader.scaleFactor
         self.data = dataRGB[:,:,::-1,0]
                 
         if args.verbose:
@@ -82,11 +86,17 @@ class Window(QtGui.QWidget):
         self.img1a.updateImage()
         
     def nextimg(self):
-        self.layer +=1
+        if self.xview or self.yview:
+            self.layer +=1
+        else:
+            self.layer += int(self.scaleFactor+0.5)
         self.updatemain()
 
     def previmg(self):
-        self.layer -=1
+        if self.xview or self.yview:
+            self.layer -=1
+        else:
+            self.layer -= int(self.scaleFactor+0.5)
         self.updatemain()        
 
 

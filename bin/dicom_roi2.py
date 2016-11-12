@@ -7,20 +7,12 @@ import dicom_tools.pyqtgraph as pg
 import dicom
 from dicom_tools.FileReader import FileReader
 #from dicom_tools.read_files import read_files
+from scipy import ndimage
 
 class Window(QtGui.QWidget):
 
     def __init__(self):
         QtGui.QWidget.__init__(self)
-        self.button_next = QtGui.QPushButton('Next', self)
-        self.button_prev = QtGui.QPushButton('Prev', self)
-        self.button_next.clicked.connect(self.nextimg)
-        self.button_prev.clicked.connect(self.previmg)
-        # layout = QtGui.QVBoxLayout(self)
-        layout = QtGui.QGridLayout(self)
-        layout.addWidget(self.button_next,0,1)
-        layout.addWidget(self.button_prev,1,1)
-
 
         outfname="out.root"
         inpath="."
@@ -80,6 +72,7 @@ class Window(QtGui.QWidget):
         self.yview = args.yview
 
         self.img1a = pg.ImageItem()
+        self.arr = None
         self.updatemain()
 
         if self.xview:
@@ -88,27 +81,73 @@ class Window(QtGui.QWidget):
             imgScaleFactor= 1./freader.scaleFactor
         else:
             imgScaleFactor= 1.
+
+            
+        self.button_next = QtGui.QPushButton('Next', self)
+        self.button_prev = QtGui.QPushButton('Prev', self)
+        self.button_next.clicked.connect(self.nextimg)
+        self.button_prev.clicked.connect(self.previmg)
+        # layout = QtGui.QVBoxLayout(self)
+        layout = QtGui.QGridLayout(self)
+        layout.addWidget(self.button_next,1,1)
+        layout.addWidget(self.button_prev,2,1)
+
+        label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")
         
+        # label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(label,0,0)    
+        
+            
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,imgScaleFactor)
         self.p1.addItem(self.img1a)
         # imv = pg.ImageView(imageItem=img1a)
-        layout.addWidget(self.p1,0,0,10,1)
+        layout.addWidget(self.p1,1,0,10,1)
 
+        self.img1b = pg.ImageItem()
+        self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
+        self.p2 = pg.PlotWidget()
+        # self.p2.disableAutoRange('xy')
+        self.p2.setAspectLocked(True,imgScaleFactor)
+        self.p2.addItem(self.img1b)
+        self.p1.addItem(self.roi)
+        self.roi.sigRegionChanged.connect(self.update)
+        layout.addWidget(self.p2,11,0,10,1)
+
+    def update(self):
+        thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(int)
+        self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
+
+        # print(type(thisroi[0][0]))
+        # print("shape: ",thisroi.shape)
+        # print("size:  ",thisroi.size)
+        # print("min:   ",thisroi.min())
+        # print("max:   ",thisroi.max())
+        # print("mean:  ",thisroi.mean())
+        # print("mean:  ", ndimage.mean(thisroi))
+        # print("sd:    ", ndimage.standard_deviation(thisroi))
+        # print("sum:   ", ndimage.sum(thisroi))
+        # # print(thisroi
+        # # print("entropy: ",entropy(thisroi, disk(5))
+        # # print("maximum: ",maximum(thisroi, disk(5))
+        # # print("\n"
+        # # print(disk(5)
+        # print("\n")
+        self.p2.autoRange()
+
+       
 
     def updatemain(self):
         print "updating",self.layer
         if self.xview:
-
             # dataswappedX = np.swapaxes(self.data,0,1)
-            arr=self.dataswappedX[self.layer]
+            self.arr=self.dataswappedX[self.layer]
         elif self.yview:
-
             # dataswappedY = np.swapaxes(self.data,0,2)
-            arr=self.dataswappedY[self.layer]
+            self.arr=self.dataswappedY[self.layer]
         else:
-            arr=self.data[self.layer]
-        self.img1a.setImage(arr)
+            self.arr=self.data[self.layer]
+        self.img1a.setImage(self.arr)
         self.img1a.updateImage()
         
     def nextimg(self):

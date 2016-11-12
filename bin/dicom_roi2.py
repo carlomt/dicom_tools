@@ -9,29 +9,6 @@ from dicom_tools.read_files import read_files
 
 class Window(QtGui.QWidget):
 
-    def updatemain(self):
-        print "updating",self.layer
-        if self.xview:
-            dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)
-            arr=dataswappedX[self.layer]
-        elif self.yview:
-            dataswappedY = np.swapaxes(self.data,0,2)
-            arr=dataswappedY[self.layer]
-        else:
-            arr=self.data[self.layer]
-        self.img1a.setImage(arr)
-        self.img1a.updateImage()
-        
-    def nextimg(self):
-        self.layer +=1
-        self.updatemain()
-
-    def previmg(self):
-        self.layer -=1
-        self.updatemain()        
-
-
-    
     def __init__(self):
         QtGui.QWidget.__init__(self)
         self.button_next = QtGui.QPushButton('Next', self)
@@ -86,9 +63,35 @@ class Window(QtGui.QWidget):
         self.updatemain()
 
         self.p1 = pg.PlotWidget()
+        self.p1.addItem(self.img1a)
         # imv = pg.ImageView(imageItem=img1a)
         layout.addWidget(self.p1)
 
+
+    def updatemain(self):
+        print "updating",self.layer
+        if self.xview:
+            dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)
+            arr=dataswappedX[self.layer]
+        elif self.yview:
+            dataswappedY = np.swapaxes(self.data,0,2)
+            arr=dataswappedY[self.layer]
+        else:
+            arr=self.data[self.layer]
+        self.img1a.setImage(arr)
+        self.img1a.updateImage()
+        
+    def nextimg(self):
+        self.layer +=1
+        self.updatemain()
+
+    def previmg(self):
+        self.layer -=1
+        self.updatemain()        
+
+
+    
+        
 
         
     # def handleButton(self):

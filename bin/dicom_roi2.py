@@ -73,6 +73,7 @@ class Window(QtGui.QWidget):
 
         self.img1a = pg.ImageItem()
         self.arr = None
+        self.firsttime = True
         self.updatemain()
 
         if self.xview:
@@ -92,12 +93,40 @@ class Window(QtGui.QWidget):
         layout.addWidget(self.button_next,1,1)
         layout.addWidget(self.button_prev,2,1)
 
-        label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")
-        
+        label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label,0,0)    
-        
-            
+
+        self.label_shape = QtGui.QLabel("shape: "+str(self.arr.shape))
+        self.label_size = QtGui.QLabel("size: "+str(self.arr.size))
+        self.label_min = QtGui.QLabel("min: "+str(self.arr.min()))
+        self.label_max = QtGui.QLabel("max: "+str(self.arr.max()))
+        self.label_mean = QtGui.QLabel("mean: "+str(self.arr.mean()))
+        self.label_sd = QtGui.QLabel("sd: "+str(ndimage.mean(self.arr)))
+        self.label_sum = QtGui.QLabel("sum: "+str(ndimage.sum(self.arr)))
+        layout.addWidget(self.label_shape,4,1)
+        layout.addWidget(self.label_size,5,1)
+        layout.addWidget(self.label_min,6,1)
+        layout.addWidget(self.label_max,7,1)
+        layout.addWidget(self.label_mean,8,1)
+        layout.addWidget(self.label_sd,9,1)
+        layout.addWidget(self.label_sum,10,1)
+
+        self.label2_shape = QtGui.QLabel()
+        self.label2_size = QtGui.QLabel()
+        self.label2_min = QtGui.QLabel()
+        self.label2_max = QtGui.QLabel()
+        self.label2_mean = QtGui.QLabel()
+        self.label2_sd = QtGui.QLabel()
+        self.label2_sum = QtGui.QLabel()
+        layout.addWidget(self.label2_shape,14,1)
+        layout.addWidget(self.label2_size,15,1)
+        layout.addWidget(self.label2_min,16,1)
+        layout.addWidget(self.label2_max,17,1)
+        layout.addWidget(self.label2_mean,18,1)
+        layout.addWidget(self.label2_sd,19,1)
+        layout.addWidget(self.label2_sum,20,1)
+                                      
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,imgScaleFactor)
         self.p1.addItem(self.img1a)
@@ -115,19 +144,15 @@ class Window(QtGui.QWidget):
         layout.addWidget(self.p2,11,0,10,1)
 
     def update(self):
-        thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(int)
+        thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
         self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
-
-        # print(type(thisroi[0][0]))
-        # print("shape: ",thisroi.shape)
-        # print("size:  ",thisroi.size)
-        # print("min:   ",thisroi.min())
-        # print("max:   ",thisroi.max())
-        # print("mean:  ",thisroi.mean())
-        # print("mean:  ", ndimage.mean(thisroi))
-        # print("sd:    ", ndimage.standard_deviation(thisroi))
-        # print("sum:   ", ndimage.sum(thisroi))
-        # # print(thisroi
+        self.label2_shape.setText("shape: "+str(thisroi.shape))
+        self.label2_size.setText("size: "+str(thisroi.size))
+        self.label2_min.setText("min: "+str(thisroi.min()))
+        self.label2_max.setText("max: "+str(thisroi.max()))
+        self.label2_mean.setText("mean: "+str(thisroi.mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi) ))
         # # print("entropy: ",entropy(thisroi, disk(5))
         # # print("maximum: ",maximum(thisroi, disk(5))
         # # print("\n"
@@ -149,6 +174,10 @@ class Window(QtGui.QWidget):
             self.arr=self.data[self.layer]
         self.img1a.setImage(self.arr)
         self.img1a.updateImage()
+        if self.firsttime:
+            self.firsttime = False
+        else:
+            self.update()
         
     def nextimg(self):
         if self.xview or self.yview:

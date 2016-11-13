@@ -81,19 +81,19 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         freader = FileReader(self.inpath, False, args.verbose)
         # dataRGB, unusedROI = read_files(inpath, False, args.verbose, False)
         if self.raw:
-            data, unusedROI = freader.read(True)
+            dataBW, unusedROI = freader.read(True)
             self.scaleFactor = 1
-            self.data = data[:,:,::-1]
+            self.dataZ = dataBW[:,:,::-1]
         else:
             dataRGB, unusedROI = freader.read(False)
             self.scaleFactor = freader.scaleFactor
-            self.data = dataRGB[:,:,::-1,0]
+            self.dataZ = dataRGB[:,:,::-1,0]
         # 
         # self.data = dataRGB[:,:,::-1,:]
 
         #dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)
-        self.dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)[:,::-1,::-1]
-        self.dataswappedY = np.swapaxes(self.data,0,2)[:,:,::-1]
+        self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1]
+        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1]
         
         if args.verbose:
             print(data.shape)
@@ -105,15 +105,22 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         self.img1a = pg.ImageItem()
         self.arr = None
         self.firsttime = True
-        self.updatemain()
 
         if self.xview:
             imgScaleFactor= 1./freader.scaleFactor
+            self.data =  self.dataswappedX
         elif self.yview:
             imgScaleFactor= 1./freader.scaleFactor
+            self.data =  self.dataswappedY
         else:
             imgScaleFactor= 1.
+            self.data =  self.dataZ
 
+        if self.verbose:
+            print("data len:",len(self.data))
+
+        self.updatemain()            
+            
         self.rois = [None]*len(self.data)
             
         self.button_next = QtGui.QPushButton('Next', self)
@@ -177,14 +184,19 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         # imv = pg.ImageView(imageItem=img1a)
         layout.addWidget(self.p1,1,0,10,1)
 
-        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        # self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.slider = QtGui.QScrollBar(QtCore.Qt.Horizontal)
         self.slider.setMinimum(1)
-        self.slider.setMaximum(len(data))
+        self.slider.setMaximum(len(self.data))
         self.slider.setValue(self.layer+1)
         self.slider.setSingleStep(1)
-        self.slider.setTickPosition(QtGui.QSlider.TicksBelow)
-        self.slider.setTickInterval(5)
-        self.slider.sliderMoved.connect(self.slider_jump_to)
+        self.slider.setFocus()
+        self.slider.setFocusPolicy(QtCore.Qt.StrongFocus) 
+        # self.slider.setTickPosition(QtGui.QSlider.TicksBelow)
+        # self.slider.setTickInterval(5)
+
+        # self.slider.sliderMoved.connect(self.slider_jump_to)
+        self.slider.valueChanged.connect(self.slider_jump_to)
         layout.addWidget(self.slider,11,0)
 
         self.img1b = pg.ImageItem()

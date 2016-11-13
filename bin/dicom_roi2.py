@@ -12,11 +12,11 @@ import os
 from dicom_tools.roiFileHandler import roiFileHandler
 
 # class Window(QtGui.QWidget):
-class Window(QtGui.QMainWindow): 
+class Window_dicom_roi2(QtGui.QMainWindow): 
 
     def __init__(self):
         # QtGui.QWidget.__init__(self)
-        super(Window, self).__init__()
+        super(Window_dicom_roi2, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
         self.setWindowTitle("DICOM roi (v2)")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
@@ -127,10 +127,10 @@ class Window(QtGui.QMainWindow):
         layout.addWidget(self.button_prev,2,1)
         self.button_setroi = QtGui.QPushButton('Set ROI', self)
         self.button_setroi.clicked.connect(self.setROI)
-        layout.addWidget(self.button_setroi,11,1)
+        layout.addWidget(self.button_setroi,12,1)
         self.button_delroi = QtGui.QPushButton('Del ROI', self)
         self.button_delroi.clicked.connect(self.delROI)
-        layout.addWidget(self.button_delroi,12,1)
+        layout.addWidget(self.button_delroi,13,1)
         
         label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
@@ -162,20 +162,30 @@ class Window(QtGui.QMainWindow):
         self.label2_mean = QtGui.QLabel()
         self.label2_sd = QtGui.QLabel()
         self.label2_sum = QtGui.QLabel()
-        layout.addWidget(self.label2_roisSetted,13,1)
-        layout.addWidget(self.label2_shape,14,1)
-        layout.addWidget(self.label2_size,15,1)
-        layout.addWidget(self.label2_min,16,1)
-        layout.addWidget(self.label2_max,17,1)
-        layout.addWidget(self.label2_mean,18,1)
-        layout.addWidget(self.label2_sd,19,1)
-        layout.addWidget(self.label2_sum,20,1)
+        layout.addWidget(self.label2_roisSetted,14,1)
+        layout.addWidget(self.label2_shape,15,1)
+        layout.addWidget(self.label2_size,16,1)
+        layout.addWidget(self.label2_min,17,1)
+        layout.addWidget(self.label2_max,18,1)
+        layout.addWidget(self.label2_mean,19,1)
+        layout.addWidget(self.label2_sd,20,1)
+        layout.addWidget(self.label2_sum,21,1)
                                       
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,imgScaleFactor)
         self.p1.addItem(self.img1a)
         # imv = pg.ImageView(imageItem=img1a)
         layout.addWidget(self.p1,1,0,10,1)
+
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.slider.setMinimum(1)
+        self.slider.setMaximum(len(data))
+        self.slider.setValue(self.layer+1)
+        self.slider.setSingleStep(1)
+        self.slider.setTickPosition(QtGui.QSlider.TicksBelow)
+        self.slider.setTickInterval(5)
+        self.slider.sliderMoved.connect(self.slider_jump_to)
+        layout.addWidget(self.slider,11,0)
 
         self.img1b = pg.ImageItem()
         self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
@@ -187,7 +197,7 @@ class Window(QtGui.QMainWindow):
         self.p2.addItem(self.img1b)
         self.p1.addItem(self.roi)
         self.roi.sigRegionChanged.connect(self.update)
-        layout.addWidget(self.p2,11,0,10,1)
+        layout.addWidget(self.p2,12,0,10,1)
 
     def update(self):
         thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
@@ -206,9 +216,8 @@ class Window(QtGui.QMainWindow):
         # print("\n")
         self.p2.autoRange()
 
-       
-
     def updatemain(self):
+
         if self.verbose:
             print "updating",self.layer
         if self.xview:
@@ -234,7 +243,7 @@ class Window(QtGui.QMainWindow):
             self.update()
             self.label_layer.setText("layer: "+str(self.layer+1)+"/"+str(len(self.data)))
         self.img1a.updateImage()
-                    
+
         
     def nextimg(self):
         if self.layer < (len(self.data)-1):
@@ -242,6 +251,7 @@ class Window(QtGui.QMainWindow):
                 self.layer +=1
             else:
                 self.layer += int(self.scaleFactor+0.5)
+            self.slider.setValue(self.layer+1)
             self.updatemain()
 
     def previmg(self):
@@ -250,6 +260,7 @@ class Window(QtGui.QMainWindow):
                 self.layer -=1
             else:
                 self.layer -= int(self.scaleFactor+0.5)
+            self.slider.setValue(self.layer+1)                
             self.updatemain()        
 
     def setROI(self):
@@ -278,10 +289,14 @@ class Window(QtGui.QMainWindow):
         self.rois = reader.read(filename)
         self.updatemain()
 
+    def slider_jump_to(self):
+        self.layer = self.slider.value()-1
+        self.updatemain()
+        
 if __name__ == '__main__':
 
     import sys
     app = QtGui.QApplication(sys.argv)
-    window = Window()
+    window = Window_dicom_roi2()
     window.show()
     sys.exit(app.exec_())

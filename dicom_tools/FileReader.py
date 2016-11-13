@@ -53,7 +53,7 @@ class FileReader:
         self.scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
         scaleFactorInt=int(self.scaleFactor+0.5)
         if verbose:
-            print("scaleFactor",scaleFactor)
+            print("scaleFactor",self.scaleFactor)
             print("scaleFactorInt",scaleFactorInt)
     
         data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)

@@ -1,0 +1,39 @@
+import cPickle as pickle
+from dicom_tools.roiData import roiData
+
+class roiFileHandler:
+
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+        self.dicomsPath = None
+
+        
+    def write(self, filename, roistates):
+        tobesaved = roiData(roistates, self.dicomsPath)
+        with open(filename,'w') as file:
+            pickle.dump(tobesaved, file)
+            # if self.dicomsPath:
+            #     pickle.dump(True, file)
+            #     pickle.dump(self.dicomsPath, file)
+            # else:
+            #     pickle.dump(False, file)                
+            # for i, roistate in enumerate(roistates):
+            #     if roistate:
+            #         if self.verbose:
+            #             print("saving ",i)
+            #         pickle.dump(i, file)
+            #         pickle.dump(roistate, file)
+        file.close()
+
+    def read(self, filename):
+        with open(filename,'r') as file:
+            buffer = pickle.load(file)
+            file.close()
+        self.dicomsPath = buffer.dicomsPath
+        roistates = [None]* buffer.originalLenght
+
+        for i, roistate in zip(buffer.layers, buffer.roistates):
+            roistates[i] = roistate
+
+        return roistates
+

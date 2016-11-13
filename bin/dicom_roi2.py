@@ -9,6 +9,7 @@ from dicom_tools.FileReader import FileReader
 #from dicom_tools.read_files import read_files
 from scipy import ndimage
 import os
+from dicom_tools.roiFileHandler import roiFileHandler
 
 # class Window(QtGui.QWidget):
 class Window(QtGui.QMainWindow): 
@@ -55,19 +56,24 @@ class Window(QtGui.QMainWindow):
             self.layer = args.layer
 
         self.raw = not args.raw
+
+        openFile = QtGui.QAction("&Open File", self)
+        openFile.setShortcut("Ctrl+O")
+        openFile.setStatusTip('Open File')
+        openFile.triggered.connect(self.file_open)
         
         saveFile = QtGui.QAction("&Save File", self)
         saveFile.setShortcut("Ctrl+S")
         saveFile.setStatusTip('Save File')
         saveFile.triggered.connect(self.file_save)
-
+        
         # self.statusBar()
 
         mainMenu = self.menuBar()
         
         fileMenu = mainMenu.addMenu('&File')
         # fileMenu.addAction(extractAction)
-        # fileMenu.addAction(openFile)
+        fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
 
         self.verbose = args.verbose
@@ -259,31 +265,18 @@ class Window(QtGui.QMainWindow):
             self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))        
         
     def file_save(self):
-        name = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
-        file = open(name,'w')
-        text = os.path.abspath(self.inpath)
-        file.write(text)
-        file.close()
-        
-    # def savePolyLineState(self, pl):
-    #     state = pl.getState()
-    #     state['closed'] = pl.closed
-    #     state['points'] = [tuple(h.pos()) for h in pl.getHandles()]
-    #     return state
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
+        writer = roiFileHandler()
+        writer.dicomsPath = os.path.abspath(self.inpath)
+        writer.write(filename, self.rois)
 
-    # def restorePolyLineState(self, pl, state):
-    #     print state
-    #     while len(pl.getHandles()) > 0:
-    #         pl.removeHandle(pl.getHandles()[0])
-    #     for p in state['points']:
-    #         pl.addFreeHandle(p)
-    #     pl.closed = state['closed']        
-    #     start = -1 if pl.closed else 0
-    #     for i in range(start, len(pl.handles)-1):
-    #         pl.addSegment(pl.handles[i]['item'], pl.handles[i+1]['item'])
-        
-    # def handleButton(self):
-    #     print ('Hello World')
+
+    def file_open(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File')
+        reader = roiFileHandler()
+        originalpath = reader.dicomsPath
+        self.rois = reader.read(filename)
+        self.updatemain()
 
 if __name__ == '__main__':
 

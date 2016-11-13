@@ -70,6 +70,7 @@ class Window(QtGui.QMainWindow):
         # fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)
 
+        self.verbose = args.verbose
         
         freader = FileReader(self.inpath, False, args.verbose)
         # dataRGB, unusedROI = read_files(inpath, False, args.verbose, False)
@@ -202,7 +203,8 @@ class Window(QtGui.QMainWindow):
        
 
     def updatemain(self):
-        print "updating",self.layer
+        if self.verbose:
+            print "updating",self.layer
         if self.xview:
             # dataswappedX = np.swapaxes(self.data,0,1)
             self.arr=self.dataswappedX[self.layer]
@@ -215,9 +217,9 @@ class Window(QtGui.QMainWindow):
         if self.firsttime:
             self.firsttime = False
         else:
-            print self.rois
+            if self.verbose:
+                print self.rois
             if self.rois[self.layer]:
-                print "dentro"
                 # self.p1.removeItem(self.roi)
                 # self.restorePolyLineState(self.roi, self.rois[self.layer])
                 self.roi.setState(self.rois[self.layer])
@@ -229,18 +231,20 @@ class Window(QtGui.QMainWindow):
                     
         
     def nextimg(self):
-        if self.xview or self.yview:
-            self.layer +=1
-        else:
-            self.layer += int(self.scaleFactor+0.5)
-        self.updatemain()
+        if self.layer < (len(self.data)-1):
+            if self.xview or self.yview:
+                self.layer +=1
+            else:
+                self.layer += int(self.scaleFactor+0.5)
+            self.updatemain()
 
     def previmg(self):
-        if self.xview or self.yview:
-            self.layer -=1
-        else:
-            self.layer -= int(self.scaleFactor+0.5)
-        self.updatemain()        
+        if self.layer > 0:            
+            if self.xview or self.yview:
+                self.layer -=1
+            else:
+                self.layer -= int(self.scaleFactor+0.5)
+            self.updatemain()        
 
     def setROI(self):
         # self.rois[self.layer] = self.savePolyLineState(self.roi)

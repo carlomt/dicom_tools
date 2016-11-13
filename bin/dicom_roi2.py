@@ -57,21 +57,21 @@ class Window(QtGui.QMainWindow):
 
         self.raw = not args.raw
 
-        openFile = QtGui.QAction("&Open File", self)
+        openFile = QtGui.QAction("&Open ROI File", self)
         openFile.setShortcut("Ctrl+O")
-        openFile.setStatusTip('Open File')
+        openFile.setStatusTip('Open ROI File')
         openFile.triggered.connect(self.file_open)
         
-        saveFile = QtGui.QAction("&Save File", self)
+        saveFile = QtGui.QAction("&Save ROI on File", self)
         saveFile.setShortcut("Ctrl+S")
-        saveFile.setStatusTip('Save File')
+        saveFile.setStatusTip('Save ROI on File')
         saveFile.triggered.connect(self.file_save)
         
         # self.statusBar()
 
         mainMenu = self.menuBar()
         
-        fileMenu = mainMenu.addMenu('&File')
+        fileMenu = mainMenu.addMenu('&ROI')
         # fileMenu.addAction(extractAction)
         fileMenu.addAction(openFile)
         fileMenu.addAction(saveFile)

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 import glob
 import argparse
 import numpy as np
@@ -19,6 +18,7 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 
+
 args = parser.parse_args()
 
 if args.outfile:
@@ -30,6 +30,7 @@ outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
 timeflag = array('i', [0])
 nVoxel   = array('i', [0])
+ypT      = array('i', [0])
 mean     = array('f', [0])
 stdDev   = array('f', [0])
 skewness = array('f', [0])
@@ -40,6 +41,7 @@ tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch("patientID",patientID,"patientID/C")
 tree.Branch("timeflag",timeflag,"timeflag/I")
 tree.Branch("nVoxel",nVoxel,"nVoxel/I")
+tree.Branch("ypT",ypT,"ypT/I")
 tree.Branch("mean",mean,"mean/F")
 tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
@@ -57,6 +59,7 @@ with open(inputfile,'r') as fin:
         pathT2 = lines[1]
         pathROI = lines[2]
         timeflag[0] = int(lines[3])
+        ypT[0] = int(lines[4])
 
         data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         his, allhistos = make_histo(data,ROI,lines[0])
@@ -67,7 +70,7 @@ with open(inputfile,'r') as fin:
         skewness[0] = his.GetSkewness()
         kurtosis[0] = his.GetKurtosis()
         if args.verbose:
-            print(patientID, timeflag, nVoxel, mean, stdDev, skewness, kurtosis)
+            print(patientID, timeflag[0], nVoxel[0], ypT[0], mean[0], stdDev[0], skewness[0], kurtosis[0])
         tree.Fill()
 tree.Write()            
 # outfile.Write()

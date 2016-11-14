@@ -47,8 +47,8 @@ tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
             
-if args.verbose:
-    print("Reading configuration file: ",inputfile)
+#if args.verbose:
+print("Reading configuration file: ",inputfile)
             
 with open(inputfile,'r') as fin:
     for line in fin:
@@ -56,7 +56,9 @@ with open(inputfile,'r') as fin:
         if args.verbose:
             print(lines)
         patientID[:63] = lines[0]
+        print("working on patient:",patientID)
         pathT2 = lines[1]
+        print("in the directory: ",pathT2)
         pathROI = lines[2]
         timeflag[0] = int(lines[3])
         ypT[0] = int(lines[4])

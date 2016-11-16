@@ -57,6 +57,10 @@ with open(inputfile,'r') as fin:
         lines = line.split()
         if len(lines) == 0:
             continue
+        elif len(lines) !=5:
+            print("ERROR line "+str(linenumber)+ " length is not 5, check it!")
+            for wordnum, word in enumerate(lines):
+                print(wordnum, word)
         if args.verbose:
             print(lines)
         if lines[0][0] == '#':
@@ -70,7 +74,11 @@ with open(inputfile,'r') as fin:
         ypT[0] = int(lines[4])
 
         data, ROI = read_files(pathT2, pathROI, args.verbose, True)
-        his, allhistos = make_histo(data,ROI,lines[0]+str(linenumber))
+        patientsuffix=lines[0]+str(timeflag[0])
+        if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
+            print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
+            raise NameError('OutOfRange')
+        his, allhistos = make_histo(data,ROI,patientsuffix)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
@@ -80,6 +88,10 @@ with open(inputfile,'r') as fin:
         if args.verbose:
             print(patientID, timeflag[0], nVoxel[0], ypT[0], mean[0], stdDev[0], skewness[0], kurtosis[0])
         tree.Fill()
+        his.Write()
+        for thishisto in allhistos:
+            if thishisto.GetEntries() >0:
+                thishisto.Write()
 tree.Write()            
 # outfile.Write()
 outfile.Close()

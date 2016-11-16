@@ -52,9 +52,15 @@ print("Reading configuration file: ",inputfile)
             
 with open(inputfile,'r') as fin:
     for line in fin:
+        if line[0] == '#':
+            continue
         lines = line.split()
+        if len(lines) == 0:
+            continue
         if args.verbose:
             print(lines)
+        if lines[0][0] == '#':
+            continue
         patientID[:63] = lines[0]
         print("working on patient: "+patientID)
         pathT2 = lines[1]
@@ -64,7 +70,7 @@ with open(inputfile,'r') as fin:
         ypT[0] = int(lines[4])
 
         data, ROI = read_files(pathT2, pathROI, args.verbose, True)
-        his, allhistos = make_histo(data,ROI,lines[0])
+        his, allhistos = make_histo(data,ROI,lines[0]+str(ypT[0]))
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

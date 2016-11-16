@@ -36,6 +36,14 @@ stdDev   = array('f', [0])
 skewness = array('f', [0])
 kurtosis = array('f', [0])
 
+nmax = 100
+nFette   = array('i', [0])
+
+nVoxelPF   = array('i', nmax*[0])
+meanPF     = array('f', nmax*[0])
+stdDevPF   = array('f', nmax*[0])
+skewnessPF = array('f', nmax*[0])
+kurtosisPF = array('f', nmax*[0])
 
 tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch("patientID",patientID,"patientID/C")
@@ -46,12 +54,21 @@ tree.Branch("mean",mean,"mean/F")
 tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
-            
+
+tree.Branch("nFette",nFette,"nFette/I")
+
+tree.Branch("nVoxelPF",nVoxelPF,"nVoxelPF[nFette]/I")
+tree.Branch("meanPF",meanPF,"meanPF[nFette]/F")
+tree.Branch("stdDevPF",stdDevPF,"stdDevPF[nFette]/F")
+tree.Branch("skewnessPF",skewnessPF,"skewnessPF[nFette]/F")
+tree.Branch("kurtosisPF",kurtosisPF,"kurtosisPF[nFette]/F")
+
 #if args.verbose:
 print("Reading configuration file: ",inputfile)
             
 with open(inputfile,'r') as fin:
     for linenumber, line in enumerate(fin):
+        nFette[0] = 0
         if line[0] == '#':
             continue
         lines = line.split()
@@ -87,11 +104,19 @@ with open(inputfile,'r') as fin:
         kurtosis[0] = his.GetKurtosis()
         if args.verbose:
             print(patientID, timeflag[0], nVoxel[0], ypT[0], mean[0], stdDev[0], skewness[0], kurtosis[0])
-        tree.Fill()
         his.Write()
         for thishisto in allhistos:
             if thishisto.GetEntries() >0:
+                nVoxelPF[nFette[0]]   = int(thishisto.GetEntries())
+                meanPF[nFette[0]]     = thishisto.GetMean()
+                stdDevPF[nFette[0]]   = thishisto.GetStdDev()  
+                skewnessPF[nFette[0]] = thishisto.GetSkewness()
+                kurtosisPF[nFette[0]] = thishisto.GetKurtosis()
+                
+                nFette[0] +=1
                 thishisto.Write()
+        tree.Fill()
+                
 tree.Write()            
 # outfile.Write()
 outfile.Close()

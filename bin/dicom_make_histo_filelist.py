@@ -51,7 +51,7 @@ tree.Branch("kurtosis",kurtosis,"kurtosis/F")
 print("Reading configuration file: ",inputfile)
             
 with open(inputfile,'r') as fin:
-    for line in fin:
+    for linenumber, line in enumerate(fin):
         if line[0] == '#':
             continue
         lines = line.split()
@@ -70,7 +70,7 @@ with open(inputfile,'r') as fin:
         ypT[0] = int(lines[4])
 
         data, ROI = read_files(pathT2, pathROI, args.verbose, True)
-        his, allhistos = make_histo(data,ROI,lines[0]+str(ypT[0]))
+        his, allhistos = make_histo(data,ROI,lines[0]+str(linenumber))
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

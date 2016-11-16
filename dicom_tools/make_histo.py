@@ -11,7 +11,7 @@ def make_histo(data, mask, suffix=""):
     
     nFette = len(data)
     
-    his = ROOT.TH1F("histo","histo",nbin,binmin,binmax)
+    his = ROOT.TH1F("histo"+suffix,"histo",nbin,binmin,binmax)
 
     hEntries = ROOT.TH1F("hEntries"+suffix,"Entries",nFette,-0.5,nFette+0.5)
     hMean = ROOT.TH1F("hMean"+suffix,"Mean",nFette,-0.5,nFette+0.5)

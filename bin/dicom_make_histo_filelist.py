@@ -6,7 +6,8 @@ import numpy as np
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
-from dicom_tools.read_files import read_files
+# from dicom_tools.read_files import read_files
+from dicom_tools.FileReader import FileReader
 import ROOT
 from array import array
 
@@ -90,7 +91,12 @@ with open(inputfile,'r') as fin:
         timeflag[0] = int(lines[3])
         ypT[0] = int(lines[4])
 
-        data, ROI = read_files(pathT2, pathROI, args.verbose, True)
+        # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
+        freader = FileReader(pathT2, pathROI, args.verbose)
+        dataBW, ROIbw = freader.read(True)
+        data =  dataBW[:,:,::-1]
+        ROI = ROIbw[:,:,::-1]
+        
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])

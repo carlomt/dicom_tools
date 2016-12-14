@@ -21,7 +21,10 @@ def make_histo(data, mask, suffix=""):
     allhistos = []
     nfetta=0
     
-    for fetta,fettaROI in zip(data,mask) :
+    # for fetta,fettaROI in zip(data,mask) :
+    for layer in xrange(0,nFette):
+        fetta = data[layer]
+        fettaROI = mask[layer]
         # res = []
         thishisto = ROOT.TH1F("h"+str(nfetta)+suffix,"h"+str(nfetta),nbin,binmin,binmax)
         if fettaROI.max() > 0 :

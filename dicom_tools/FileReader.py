@@ -125,10 +125,10 @@ class FileReader:
         if raw:
             if verbose:
                 print("returning raw data")
-            return data, rawROI
+            return data[:,:,::-1], rawROI[:,:,::-1]
     
 
-        return dataRGB, ROI
+        return dataRGB[:,:,::-1], ROI[:,:,::-1]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
         # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])

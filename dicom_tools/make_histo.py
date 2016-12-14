@@ -2,7 +2,7 @@ import ROOT
 import numpy as np
 # from tabulate import tabulate
 
-def make_histo(data, mask, suffix=""):
+def make_histo(data, mask, suffix="", verbose=False):
     nbin = 200
     binmin=0
     binmax=1600
@@ -19,26 +19,29 @@ def make_histo(data, mask, suffix=""):
     hSkewness = ROOT.TH1F("hSkewness"+suffix,"Skewness",nFette,-0.5,nFette+0.5)
     hKurtosis = ROOT.TH1F("hKurtosis"+suffix,"Kurtosis",nFette,-0.5,nFette+0.5)
     allhistos = []
-    nfetta=0
+    histogiafatti = []
+    # nfetta=0
     
     # for fetta,fettaROI in zip(data,mask) :
     for layer in xrange(0,nFette):
         fetta = data[layer]
         fettaROI = mask[layer]
         # res = []
-        thishisto = ROOT.TH1F("h"+str(nfetta)+suffix,"h"+str(nfetta),nbin,binmin,binmax)
+        thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
         if fettaROI.max() > 0 :
-            # res.append(nfetta)
+            # res.append(layer)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
                     his.Fill(val)
                     thishisto.Fill(val)
-            hEntries.SetBinContent(nfetta,thishisto.GetEntries())
-            hMean.SetBinContent(nfetta,thishisto.GetMean())
-            hStdDev.SetBinContent(nfetta,thishisto.GetStdDev())
-            hSkewness.SetBinContent(nfetta,thishisto.GetSkewness())
-            hKurtosis.SetBinContent(nfetta,thishisto.GetKurtosis())
-        nfetta+=1
+            hEntries.SetBinContent(layer,thishisto.GetEntries())
+            hMean.SetBinContent(layer,thishisto.GetMean())
+            hStdDev.SetBinContent(layer,thishisto.GetStdDev())
+            hSkewness.SetBinContent(layer,thishisto.GetSkewness())
+            hKurtosis.SetBinContent(layer,thishisto.GetKurtosis())
+        if verbose:
+            print layer, thishisto.GetEntries()
+        # layer+=1
         allhistos.append(thishisto)
 
     #         norm = fetta.mean()
@@ -55,9 +58,10 @@ def make_histo(data, mask, suffix=""):
     #     if inROI>0 :
     #         his.Fill(val)
             #            print val
-    allhistos.append(hEntries)
-    allhistos.append(hMean)
-    allhistos.append(hStdDev)
-    allhistos.append(hSkewness)
-    allhistos.append(hKurtosis)
-    return his, allhistos
+
+    histogiafatti.append(hEntries)
+    histogiafatti.append(hMean)
+    histogiafatti.append(hStdDev)
+    histogiafatti.append(hSkewness)
+    histogiafatti.append(hKurtosis)
+    return his, allhistos, histogiafatti

@@ -99,7 +99,7 @@ with open(inputfile,'r') as fin:
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
             raise NameError('OutOfRange')
-        his, allhistos = make_histo(data,ROI,patientsuffix)
+        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
@@ -119,6 +119,10 @@ with open(inputfile,'r') as fin:
                 
                 nFette[0] +=1
                 thishisto.Write()
+        for thishisto in histogiafatti:
+                thishisto.Write()
+        if args.verbose:
+            print(patientID, nFette[0])
         tree.Fill()
                 
 tree.Write()            

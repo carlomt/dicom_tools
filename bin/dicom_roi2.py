@@ -291,16 +291,19 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
         writer = roiFileHandler()
         writer.dicomsPath = os.path.abspath(self.inpath)
-        writer.write(filename, self.rois)
+        if not str(filename).endswith('.myroi'):
+            filename = filename+".myroi"
+        writer.write(filename, self.rois, self.roisSetted)
 
 
     def file_open(self):
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File')
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
         reader = roiFileHandler()
         originalpath = reader.dicomsPath
-        self.rois = reader.read(filename)
+        self.rois, self.roisSetted = reader.read(filename)
         self.updatemain()
-
+        self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
+                
     def slider_jump_to(self):
         self.layer = self.slider.value()-1
         self.updatemain()

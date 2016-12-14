@@ -8,8 +8,8 @@ class roiFileHandler:
         self.dicomsPath = None
 
         
-    def write(self, filename, roistates):
-        tobesaved = roiData(roistates, self.dicomsPath)
+    def write(self, filename, roistates, numberOfROIs):
+        tobesaved = roiData(roistates, numberOfROIs, self.dicomsPath)
         with open(filename,'w') as file:
             pickle.dump(tobesaved, file)
             # if self.dicomsPath:
@@ -35,5 +35,5 @@ class roiFileHandler:
         for i, roistate in zip(buffer.layers, buffer.roistates):
             roistates[i] = roistate
 
-        return roistates
+        return roistates, buffer.numberOfROIs
 

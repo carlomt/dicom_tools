@@ -93,9 +93,7 @@ with open(inputfile,'r') as fin:
 
         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
-        dataBW, ROIbw = freader.read(True)
-        data =  dataBW[:,:,::-1]
-        ROI = ROIbw[:,:,::-1]
+        data, ROI = freader.read(True)
         
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:

@@ -91,3 +91,6 @@ ENV/
 # emacs temporary
 *~
 \#*
+
+*.pdf
+*.root

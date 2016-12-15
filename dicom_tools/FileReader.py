@@ -51,15 +51,13 @@ class FileReader:
         #     print("Image dimensions: ",xsize,ysize,zsize)
 
         self.scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
-        scaleFactorInt=int(self.scaleFactor+0.5)
         if verbose:
             print("scaleFactor",self.scaleFactor)
-            print("scaleFactorInt",scaleFactorInt)
     
         data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-        dataRGB=np.zeros(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape+tuple([3]))
+        dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
         rawROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
-        ROI=np.full(tuple([len(dicoms)*scaleFactorInt])+dicoms[0].pixel_array.shape,False,dtype=bool)
+        ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
 
         if inpathROI:
             if verbose:
@@ -75,13 +73,7 @@ class FileReader:
                 nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
                 for i, fetta in enumerate(reversed(nrrdROI)) :
                     rawROI[i] = fetta
-                    ROI[i*scaleFactorInt] = fetta
-                    if i < (len(nrrdROI)-1):
-                        for j in xrange(1,int(scaleFactorInt/2)+1):
-                            ROI[i*scaleFactorInt+j] = fetta
-                    if i > 0:
-                        for j in xrange(int(-scaleFactorInt/2)+1,0):
-                            ROI[i*scaleFactorInt+j] = fetta
+                    ROI[i] = fetta
             elif len(infilesROInrrd) >1:
                 print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
             else:
@@ -97,30 +89,15 @@ class FileReader:
 
                 for i, thisROI in enumerate(reversed(dicomsROI)):
                     pix_arr = thisROI.pixel_array
-                    ROI[i*scaleFactorInt] = pix_arr.T
+                    ROI[i] = pix_arr.T
                     rawROI[i] = pix_arr.T
-                    if i < (len(dicomsROI)-1):
-                        for j in xrange(1,int(scaleFactorInt/2)+1):
-                            ROI[i*scaleFactorInt+j] = pix_arr.T
-                    if i > 0:
-                        for j in xrange(int(-scaleFactorInt/2)+1,0):
-                            ROI[i*scaleFactorInt+j] = pix_arr.T
         # 
         
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
             data[i] =  pix_arr.T
-            dataRGB[i*scaleFactorInt,:,:,2] = dataRGB[i*scaleFactorInt,:,:,0]= pix_arr.T 
-            dataRGB[i*scaleFactorInt,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt])
-            if i < (len(dicoms)-1):
-                for j in xrange(1,int(scaleFactorInt/2)+1):
-                    dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
-                    dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
-
-            if i > 0:
-                for j in xrange(int(-scaleFactorInt/2)+1,0):
-                    dataRGB[i*scaleFactorInt+j,:,:,2] = dataRGB[i*scaleFactorInt+j,:,:,0]= pix_arr.T 
-                    dataRGB[i*scaleFactorInt+j,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i*scaleFactorInt+j])
+            dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T 
+            dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
         if raw:
             if verbose:

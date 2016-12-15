@@ -83,6 +83,7 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         if self.raw:
             dataBW, unusedROI = freader.read(True)
             self.scaleFactor = 1
+            # self.scaleFactor = freader.scaleFactor
             self.dataZ = dataBW#[:,:,::-1]
         else:
             dataRGB, unusedROI = freader.read(False)
@@ -96,7 +97,7 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1]
         
         if args.verbose:
-            print(data.shape)
+            print(self.dataZ.shape)
             print("layer: ",self.layer)
 
         self.xview = args.xview

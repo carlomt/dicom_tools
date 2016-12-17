@@ -10,6 +10,7 @@ from dicom_tools.FileReader import FileReader
 from scipy import ndimage
 import os
 from dicom_tools.roiFileHandler import roiFileHandler
+from dicom_tools.MyStatusBar import MyStatusBar
 
 # class Window(QtGui.QWidget):
 class Window_dicom_roi2(QtGui.QMainWindow): 
@@ -202,6 +203,11 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         self.slider.valueChanged.connect(self.slider_jump_to)
         layout.addWidget(self.slider,11,0)
 
+        self.statusBar = MyStatusBar()
+        self.statusBar.setSize(len(self.data))
+        layout.addWidget(self.statusBar,12,0)        
+        
+
         self.img1b = pg.ImageItem()
         if not args.filterROI:
             self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
@@ -214,7 +220,7 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         if not args.filterROI:
             self.p1.addItem(self.roi)
             self.roi.sigRegionChanged.connect(self.update)
-        layout.addWidget(self.p2,12,0,10,1)
+        layout.addWidget(self.p2,13,0,10,1)
 
     def update(self):
         if not self.filterROI:

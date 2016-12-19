@@ -36,17 +36,17 @@ class FileReader:
         dicoms.sort(key=lambda x: float(x.ImagePositionPatient[2]))
 
         # Load dimensions based on the number of rows, columns, and slices (along the Z axis)
-        ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
+        self.ConstPixelDims = (int(dicoms[0].Rows), int(dicoms[0].Columns), len(dicoms))
 
         # Load spacing values (in mm)
-        ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
+        self.ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
         if verbose:
             print("Voxel dimensions: ",ConstPixelSpacing)
 
 
-        xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
-        ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
-        zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
+        # self.xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])
+        # self.ysize = np.arange(0.0, (ConstPixelDims[1]+1)*ConstPixelSpacing[1], ConstPixelSpacing[1])
+        # self.zsize = np.arange(0.0, (ConstPixelDims[2]+1)*ConstPixelSpacing[2], ConstPixelSpacing[2])
         # if verbose:
         #     print("Image dimensions: ",xsize,ysize,zsize)
 

@@ -11,6 +11,7 @@ from scipy import ndimage
 import os
 from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.MyStatusBar import MyStatusBar
+from dicom_tools.roi2myroi import roi2myroi
 
 # class Window(QtGui.QWidget):
 class Window_dicom_roi2(QtGui.QMainWindow): 
@@ -95,6 +96,9 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         #dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)
         self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1]
         self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1]
+
+        self.ConstPixelDims = freader.ConstPixelDims
+        self.ConstPixelSpacing = freader.ConstPixelSpacing
         
         if args.verbose:
             print(self.dataZ.shape)
@@ -111,14 +115,26 @@ class Window_dicom_roi2(QtGui.QMainWindow):
             imgScaleFactor= 1./freader.scaleFactor
             self.data =  self.dataswappedX
             self.ROI = np.swapaxes(np.swapaxes(ROI,0,1),1,2)[:,::-1,::-1]
+            self.xscale = self.ConstPixelSpacing[1]
+            self.yscale = self.ConstPixelSpacing[2]
         elif self.yview:
             imgScaleFactor= 1./freader.scaleFactor
             self.data =  self.dataswappedY
             self.ROI = np.swapaxes(ROI,0,2)[:,:,::-1]
+            self.xscale = self.ConstPixelSpacing[0]
+            self.yscale = self.ConstPixelSpacing[2]
         else:
             imgScaleFactor= 1.
             self.data =  self.dataZ
             self.ROI = ROI
+            self.xscale = self.ConstPixelSpacing[0]
+            self.yscale = self.ConstPixelSpacing[1]            
+
+        self.xshift= 0
+        self.yshift=0
+            
+
+
             
         if self.verbose:
             print("data len:",len(self.data))
@@ -209,32 +225,48 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         
 
         self.img1b = pg.ImageItem()
+
+        # self.img1a.scale(self.xscale, self.yscale)
+        # self.img1a.translate(self.xshift, self.yshift)
+        # self.img1b.scale(self.xscale, self.yscale)
+        # self.img1b.translate(self.xshift, self.yshift)
+        
         if not args.filterROI:
             self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
+        else:
+            self.rois = roi2myroi(self.ROI)
+            if self.rois[self.layer]:
+                self.roi = self.rois[self.layer]
+            else:
+                self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
+            # for simplex in hull.simplices:
+                
         # if self.rois[self.layer]:
         #     self.roi = self.rois[self.layer]
         self.p2 = pg.PlotWidget()
         # self.p2.disableAutoRange('xy')
         self.p2.setAspectLocked(True,imgScaleFactor)
         self.p2.addItem(self.img1b)
-        if not args.filterROI:
-            self.p1.addItem(self.roi)
-            self.roi.sigRegionChanged.connect(self.update)
+        # if not args.filterROI:
+        self.p1.addItem(self.roi)
+        self.roi.sigRegionChanged.connect(self.update)
         layout.addWidget(self.p2,13,0,10,1)
 
     def update(self):
-        if not self.filterROI:
-            thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
-            self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
-            self.label2_shape.setText("shape: "+str(thisroi.shape))
-            self.label2_size.setText("size: "+str(thisroi.size))
-            self.label2_min.setText("min: "+str(thisroi.min()))
-            self.label2_max.setText("max: "+str(thisroi.max()))
-            self.label2_mean.setText("mean: "+str(thisroi.mean()))
-            self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi) ))
-            self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi) ))
-        else:
-            self.img1b.setImage(self.data[self.layer,:,:,0]*self.ROI[self.layer])
+        # if not self.filterROI:
+        thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
+        self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
+        self.label2_shape.setText("shape: "+str(thisroi.shape))
+        self.label2_size.setText("size: "+str(thisroi.size))
+        self.label2_min.setText("min: "+str(thisroi.min()))
+        self.label2_max.setText("max: "+str(thisroi.max()))
+        self.label2_mean.setText("mean: "+str(thisroi.mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi) ))
+        # self.img1b.scale(self.xscale, self.yscale)
+        # self.img1b.translate(self.xshift, self.yshift)
+        # else:
+        #     self.img1b.setImage(self.data[self.layer,:,:,0]*self.ROI[self.layer])
         # # print("entropy: ",entropy(thisroi, disk(5))
         # # print("maximum: ",maximum(thisroi, disk(5))
         # # print("\n"
@@ -255,6 +287,8 @@ class Window_dicom_roi2(QtGui.QMainWindow):
         else:
             self.arr=self.data[self.layer]
         self.img1a.setImage(self.arr)
+
+
         if self.firsttime:
             self.firsttime = False
         else:

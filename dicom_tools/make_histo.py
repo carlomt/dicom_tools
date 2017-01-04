@@ -4,8 +4,8 @@ import numpy as np
 
 def make_histo(data, mask, suffix="", verbose=False):
     nbin = 200
-    binmin=0
-    binmax=1600
+    binmin=data.min() *0.8
+    binmax=data.max() *1.2
 
     # table = []
     

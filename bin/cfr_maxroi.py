@@ -6,7 +6,10 @@ import argparse
 from dicom_tools.roiFileHandler import roiFileHandler
 import os
 from dicom_tools.FileReader import FileReader
+from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
+
+app = QtGui.QApplication([])
 
 inpath="."
 outfname="max-roi.txt"

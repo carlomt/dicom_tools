@@ -44,7 +44,8 @@ if nFette != len(rois):
 
 for layer in xrange(0,nFette):
     fetta = data[layer]
-    roi = rois[layer]
+    roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
+    roi.setState(rois[layer])
     img1a = pg.ImageItem()
     img1a.setImage(fetta)
     thisroi = roi.getArrayRegion(fetta, img1a).astype(float)

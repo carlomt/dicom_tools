@@ -38,7 +38,7 @@ roireader = roiFileHandler()
 rois, roisSetted = roireader.read(myroifilename)
 
 nFette = len(data)
-if n Fette != len(rois):
+if nFette != len(rois):
     print("error: len rois = ",len(rois)," but len dicom=",nFette)
 
 for layer in xrange(0,nFette):

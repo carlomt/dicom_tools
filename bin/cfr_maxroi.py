@@ -29,9 +29,9 @@ if args.outfile:
     outfname = args.outfile    
 
 out_file = open(outfname,"w")
-out_file.write("#layer","max","meaninroi")
+out_file.write("#layer \t max \t meaninroi \n")
     
-freader = FileReader(inpath, inpathROI=False, args.verbose)
+freader = FileReader(inpath, False, args.verbose)
 data, unusedROI = freader.read(True)
 
 roireader = roiFileHandler()
@@ -46,6 +46,6 @@ for layer in xrange(0,nFette):
     roi = rois[layer]
     maximum = fetta.max()
     meaninroi = roi.mean()
-    out_file.write(layer,maximum,meaninroi)
+    out_file.write(str(layer)+"\t"+str(maximum)+"\t"+str(meaninroi)+"\n")
 
 out_file.close()

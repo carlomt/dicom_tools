@@ -8,6 +8,7 @@ import os
 from dicom_tools.FileReader import FileReader
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
+from skimage.measure import grid_points_in_poly
 
 app = QtGui.QApplication([])
 
@@ -45,17 +46,12 @@ nFette = len(data)
 if nFette != len(rois):
     print("error: len rois = ",len(rois)," but len dicom=",nFette)
 
-roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)    
     
 for layer in xrange(0,nFette):
-    fetta = data[layer]
-    roi.setState(rois[layer])
-    img1a = pg.ImageItem()
-    img1a.setImage(fetta)
-    thisroi = roi.getArrayRegion(fetta, img1a).astype(float)
-
-    maximum = fetta.max()
-    meaninroi = thisroi.mean()
+    thisroi = grid_points_in_poly(data[layer].shape, rois[layer]['points'])
+    masked = data[layer]*thisroi
+    maximum = data[layer].max()
+    meaninroi = masked.mean()
     out_file.write(str(layer)+"\t"+str(maximum)+"\t"+str(meaninroi)+"\n")
 
 out_file.close()

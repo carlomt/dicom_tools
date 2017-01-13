@@ -42,9 +42,10 @@ nFette = len(data)
 if nFette != len(rois):
     print("error: len rois = ",len(rois)," but len dicom=",nFette)
 
+roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)    
+    
 for layer in xrange(0,nFette):
     fetta = data[layer]
-    roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
     roi.setState(rois[layer])
     img1a = pg.ImageItem()
     img1a.setImage(fetta)

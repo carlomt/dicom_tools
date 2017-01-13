@@ -6,6 +6,7 @@ import argparse
 from dicom_tools.roiFileHandler import roiFileHandler
 import os
 from dicom_tools.FileReader import FileReader
+import dicom_tools.pyqtgraph as pg
 
 inpath="."
 outfname="max-roi.txt"
@@ -44,8 +45,12 @@ if nFette != len(rois):
 for layer in xrange(0,nFette):
     fetta = data[layer]
     roi = rois[layer]
+    img1a = pg.ImageItem()
+    img1a.setImage(fetta)
+    thisroi = roi.getArrayRegion(fetta, img1a).astype(float)
+
     maximum = fetta.max()
-    meaninroi = roi.mean()
+    meaninroi = thisroi.mean()
     out_file.write(str(layer)+"\t"+str(maximum)+"\t"+str(meaninroi)+"\n")
 
 out_file.close()

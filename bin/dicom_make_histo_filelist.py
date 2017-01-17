@@ -10,6 +10,8 @@ from dicom_tools.make_histo import make_histo
 from dicom_tools.FileReader import FileReader
 import ROOT
 from array import array
+from dicom_tools.roiFileHandler import roiFileHandler
+from dicom_tools.myroi2roi import myroi2roi
 
 outfname="out.root"
 
@@ -18,7 +20,7 @@ parser.add_argument("inputfile", help="input configuration file \n")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
-
+parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file")
 
 args = parser.parse_args()
 
@@ -26,7 +28,7 @@ if args.outfile:
     outfname = args.outfile
 
 inputfile = args.inputfile
-    
+
 outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
 timeflag = array('i', [0])
@@ -75,10 +77,16 @@ with open(inputfile,'r') as fin:
         lines = line.split()
         if len(lines) == 0:
             continue
-        elif len(lines) !=5:
-            print("ERROR line "+str(linenumber)+ " length is not 5, check it!")
-            for wordnum, word in enumerate(lines):
-                print(wordnum, word)
+        if args.norm:
+            if len(lines) !=6:
+                print("ERROR line "+str(linenumber)+ " length is not 6 (because you requested normalization), check it!")
+                for wordnum, word in enumerate(lines):
+                    print(wordnum, word)
+        else:
+            if len(lines) !=5:
+                print("ERROR line "+str(linenumber)+ " length is not 5, check it!")
+                for wordnum, word in enumerate(lines):
+                    print(wordnum, word)
         if args.verbose:
             print(lines)
         if lines[0][0] == '#':
@@ -94,12 +102,22 @@ with open(inputfile,'r') as fin:
         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
         data, ROI = freader.read(True)
+
+        if args.norm:
+            myroifilename = lines[5]
+        
+            roireader = roiFileHandler()
+            myroisnorm, roisnormSetted = roireader.read(myroifilename)
+            
+            roinorm = myroi2roi(myroisnorm, data.shape)
+    
+
         
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
             raise NameError('OutOfRange')
-        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose)
+        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

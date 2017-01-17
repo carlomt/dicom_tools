@@ -10,7 +10,6 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 from skimage.measure import grid_points_in_poly
 
-app = QtGui.QApplication([])
 
 inpath="."
 outfname="max-roi.txt"

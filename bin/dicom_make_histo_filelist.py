@@ -20,7 +20,8 @@ parser.add_argument("inputfile", help="input configuration file \n")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
-parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file")
+parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
+                    action="store_true")
 
 args = parser.parse_args()
 

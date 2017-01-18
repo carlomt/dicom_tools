@@ -34,7 +34,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False):
             # res.append(layer)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
-                    if ROInorm:
+                    if ROInorm.any():
                         normarea = ROInorm[layer]*data[layer]
                         meaninroi = normarea.mean()
                         val = val/meaninroi

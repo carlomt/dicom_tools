@@ -107,10 +107,10 @@ with open(inputfile,'r') as fin:
         if args.norm:
             myroifilename = lines[5]
         
-            roireader = roiFileHandler()
+            roireader = roiFileHandler(args.verbose)
             myroisnorm, roisnormSetted = roireader.read(myroifilename)
             
-            roinorm = myroi2roi(myroisnorm, data.shape)
+            roinorm = myroi2roi(myroisnorm, data.shape, args.verbose)
     
 
         

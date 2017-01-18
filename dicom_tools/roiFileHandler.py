@@ -26,6 +26,8 @@ class roiFileHandler:
         file.close()
 
     def read(self, filename):
+        if self.verbose:
+            print("roiFileHandler: reading file "+filename+"\n")
         with open(filename,'r') as file:
             buffer = pickle.load(file)
             file.close()
@@ -34,6 +36,7 @@ class roiFileHandler:
 
         for i, roistate in zip(buffer.layers, buffer.roistates):
             roistates[i] = roistate
-
+        if self.verbose:
+            print("roiFileHandler: returning \n")
         return roistates, buffer.numberOfROIs
 

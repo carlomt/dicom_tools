@@ -18,7 +18,7 @@ class FileReader:
 
     def read(self,  raw=False):
         if self.verbose:
-            print("FileReader: reading\n")
+            print("FileReader: init verbose\n")
         inpath = self.inpath
         inpathROI = self.inpathROI
         verbose = self.verbose
@@ -44,7 +44,7 @@ class FileReader:
         # Load spacing values (in mm)
         self.ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
         if verbose:
-            print("Voxel dimensions: ",ConstPixelSpacing)
+            print("Voxel dimensions: ", self.ConstPixelSpacing)
 
 
         # self.xsize = np.arange(0.0, (ConstPixelDims[0]+1)*ConstPixelSpacing[0], ConstPixelSpacing[0])

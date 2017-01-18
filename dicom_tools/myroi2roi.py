@@ -11,7 +11,8 @@ def myroi2roi(myrois, shape, verbose=False):
         print("error: len rois = ",len(rois)," but len dicom=",len(outroi))
 
     for myroi, layer in zip(myrois,outroi):
-        layer = grid_points_in_poly(layer.shape, myroi['points'])
+        if not myroi is None:
+            layer = grid_points_in_poly(layer.shape, myroi['points'])
     if verbose:
         print("myroi2roi: returning \n")
     return outroi

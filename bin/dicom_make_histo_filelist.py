@@ -30,6 +30,9 @@ if args.outfile:
 
 inputfile = args.inputfile
 
+if args.verbose:
+    print("Verbose\n")
+
 outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
 timeflag = array('i', [0])
@@ -103,7 +106,9 @@ with open(inputfile,'r') as fin:
         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
         data, ROI = freader.read(True)
-
+        if args.verbose:
+            print("dicom file read")
+            
         if args.norm:
             myroifilename = lines[5]
         
@@ -112,7 +117,8 @@ with open(inputfile,'r') as fin:
             
             roinorm = myroi2roi(myroisnorm, data.shape, args.verbose)
     
-
+        if args.verbose:
+            print("norm file read")
         
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:

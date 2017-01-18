@@ -4,7 +4,7 @@ from dicom_tools.roiFileHandler import roiFileHandler
 
 
 def myroi2roi(myrois, shape, verbose=False):
-    if self.verbose:
+    if verbose:
         print("myroi2roi: called \n")
     outroi = np.full(shape,False,dtype=bool)
     if len(myrois) != len(outroi):
@@ -12,6 +12,6 @@ def myroi2roi(myrois, shape, verbose=False):
 
     for myroi, layer in zip(myrois,outroi):
         layer = grid_points_in_poly(layer.shape, myroi['points'])
-    if self.verbose:
+    if verbose:
         print("myroi2roi: returning \n")
     return outroi

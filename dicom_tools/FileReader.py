@@ -13,9 +13,12 @@ class FileReader:
         self.inpathROI = inpathROI
         self.verbose = verbose
         self.scaleFactor = None
+        if self.verbose:
+            print("FileReader: init verbose\n")
 
     def read(self,  raw=False):
-
+        if self.verbose:
+            print("FileReader: reading\n")
         inpath = self.inpath
         inpathROI = self.inpathROI
         verbose = self.verbose

@@ -12,7 +12,7 @@ install_req=[
 ]
 
 setup(name='dicom_tools',
-      version='0.4',
+      version='0.41',
       description='',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

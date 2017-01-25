@@ -39,7 +39,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                         if ROInorm.any():
                             normarea = ROInorm[layer]*data[layer]
                             meaninroi = normarea.mean()
-                            val = val/meaninroi
+                            val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
                     his.Fill(val)
                     thishisto.Fill(val)
 

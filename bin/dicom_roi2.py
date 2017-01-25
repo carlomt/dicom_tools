@@ -6,7 +6,6 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
 import dicom
 from dicom_tools.FileReader import FileReader
-#from dicom_tools.read_files import read_files
 from scipy import ndimage
 import os
 from dicom_tools.roiFileHandler import roiFileHandler

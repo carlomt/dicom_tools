@@ -2,7 +2,7 @@ import ROOT
 import numpy as np
 # from tabulate import tabulate
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False):
     nbin = 200
     binmin=data.min() *0.8
     binmax=data.max() *1.2
@@ -30,16 +30,22 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False):
         fettaROI = mask[layer]
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
+        meaninroi = 0
         if fettaROI.max() > 0 :
             # res.append(layer)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
-                    if ROInorm.any():
-                        normarea = ROInorm[layer]*data[layer]
-                        meaninroi = normarea.mean()
-                        val = val/meaninroi
+                    if normalize:
+                        if ROInorm.any():
+                            normarea = ROInorm[layer]*data[layer]
+                            meaninroi = normarea.mean()
+                            val = val/meaninroi
                     his.Fill(val)
                     thishisto.Fill(val)
+
+            if verbose:
+                print("make_histo: layer",layer,"meaninroi",meaninroi)
+                    
             hEntries.SetBinContent(layer,thishisto.GetEntries())
             hMean.SetBinContent(layer,thishisto.GetMean())
             hStdDev.SetBinContent(layer,thishisto.GetStdDev())

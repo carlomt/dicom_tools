@@ -106,6 +106,9 @@ with open(inputfile,'r') as fin:
         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
         data, ROI = freader.read(True)
+
+        roinorm=False
+        
         if args.verbose:
             print("dicom file read")
             
@@ -117,14 +120,14 @@ with open(inputfile,'r') as fin:
             
             roinorm = myroi2roi(myroisnorm, data.shape, args.verbose)
     
-        if args.verbose:
-            print("norm file read")
+            if args.verbose:
+                print("norm file read")
         
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
             raise NameError('OutOfRange')
-        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm)
+        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

@@ -278,13 +278,18 @@ class Window_dicom_roi2(QtGui.QMainWindow):
     def setROI(self):
         # self.rois[self.layer] = self.savePolyLineState(self.roi)
         self.rois[self.layer] = self.roi.saveState()
-        self.roisSetted += 1
+        self.roisSetted = 0
+        for thisroi in self.rois:
+            if thisroi:
+                self.roisSetted +=1
         self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
 
     def delROI(self):
         if self.rois[self.layer]:
             self.rois[self.layer] = None
-            self.roisSetted -= 1
+            for thisroi in self.rois:
+                if thisroi:
+                    self.roisSetted -= 1
             self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))        
         
     def file_save(self):

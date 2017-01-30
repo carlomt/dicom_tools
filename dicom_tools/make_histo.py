@@ -11,12 +11,14 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     #     binmin=0.
     #     binmax=1.
     # table = []
+    if normalize:
+        perCalcolareMedia = ROInorm*data
+        meannorm = perCalcolareMedia.mean()
+        # binmin=data.min() *0.8
+        # binmax=data.max() *1.2
     if verbose:
-        print("make_histo:  ROInorm.mean() ",  ROInorm.mean())
-    # if normalize:
-    #     meannorm = ROInorm.mean()
-    # binmin=data.min() *0.8
-    # binmax=data.max() *1.2
+        print("make_histo:  meannorm ", meannorm)
+
         
     nFette = len(data)
     
@@ -46,7 +48,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                         if ROInorm.any():
                             normarea = ROInorm[layer]*data[layer]
                             meaninroi = normarea.mean()
-                            val = val/meaninroi*ROInorm.mean() #per avere valori dello stesso ordine di grandezza dell'originale
+                            # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
+                            val = val/meaninroi*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
                     his.Fill(val)
                     thishisto.Fill(val)
 

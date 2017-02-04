@@ -85,6 +85,7 @@ class Window_dicom_roi2(QtGui.QMainWindow):
             # self.scaleFactor = freader.scaleFactor
             self.dataZ = dataBW#[:,:,::-1]
         else:
+            print("RGB")
             dataRGB, unusedROI = freader.read(False)
             self.scaleFactor = freader.scaleFactor
             self.dataZ = dataRGB[:,:,:,0]

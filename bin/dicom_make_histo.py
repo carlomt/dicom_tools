@@ -7,6 +7,7 @@ import numpy as np
 import dicom
 import sys
 from dicom_tools.make_histo import make_histo
+from dicom_tools.make_histo_ofallpixels import make_histo_ofallpixels
 from dicom_tools.read_files import read_files
 import ROOT
 
@@ -78,9 +79,14 @@ if args.inputpath:
 data, ROI = read_files(inpath,args.filterROI, args.verbose, True)
     
 outfile= ROOT.TFile(outfname,"RECREATE")
+
+if args.filterROI:
+    his, allhistos = make_histo(data,ROI)
+    his.Write()
+
+else:
+    allhistos = make_histo_ofallpixels(data)
     
-his, allhistos = make_histo(data,ROI)
-his.Write()
 
 for thishisto in allhistos:
     thishisto.Write()

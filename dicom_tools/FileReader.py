@@ -59,6 +59,8 @@ class FileReader:
     
         data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
         dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
+        if verbose:
+            print("dataRGB.shape",dataRGB.shape)
         rawROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
         ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
 
@@ -99,7 +101,7 @@ class FileReader:
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
             data[i] =  pix_arr.T
-            dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T 
+            dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T
             dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
         if raw:
@@ -108,7 +110,7 @@ class FileReader:
             return data[:,:,::-1], rawROI[:,:,::-1]
     
 
-        return dataRGB[:,:,::-1], ROI[:,:,::-1]
+        return dataRGB[:,:,::-1,:], ROI[:,:,::-1]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
         # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])

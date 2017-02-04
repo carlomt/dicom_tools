@@ -3,7 +3,7 @@ import numpy as np
 # from tabulate import tabulate
 
 def make_histo_ofallpixels(data, suffix="", verbose=False, ROInorm=False, normalize=False):
-    nbin = 200
+    nbin = 1000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     nFette = len(data)

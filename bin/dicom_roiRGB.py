@@ -10,7 +10,7 @@ from scipy import ndimage
 import os
 from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.highlight_color import highlight_color
-from dicom_tools.hist_match import match_all
+from dicom_tools.Normalizer import Normalizer
 
 # class Window(QtGui.QWidget):
 class Window_dicom_roi_RGB(QtGui.QMainWindow): 
@@ -85,7 +85,10 @@ class Window_dicom_roi_RGB(QtGui.QMainWindow):
         self.scaleFactor = freader.scaleFactor
 
         if not args.raw:
-            self.dataZ = match_all(dataRGB)
+            thisNormalizer = Normalizer(self.verbose)
+            thisNormalizer.setRootOutput()
+            self.dataZ = thisNormalizer.match_all(dataRGB)
+            thisNormalizer.writeRootOutputOnFile("checkNorm.root")
         else:
             self.dataZ = dataRGB 
         

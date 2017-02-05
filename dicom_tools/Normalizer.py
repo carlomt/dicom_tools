@@ -70,6 +70,7 @@ class Normalizer:
         # interpolate linearly to find the pixel values in the template image
         # that correspond most closely to the quantiles in the source image
         interp_t_values = np.interp(s_quantiles, t_quantiles, t_values)
+        
         if self.RootOutput:
             suffix=str(self.layer)
             prefix=self.RootPrefix

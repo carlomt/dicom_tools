@@ -49,5 +49,13 @@ def match_all(data):
         matched[0,:,:,0]=matched[0,:,:,1]=matched[0,:,:,2] = data[0,:,:,0]
         for layer in xrange(1,layers):
             matched[layer,:,:,0]=matched[layer,:,:,1]=matched[layer,:,:,2]= hist_match(data[layer,:,:,0], data[0,:,:,0])
+    elif len(data.shape)==3:
+        layers = len(data)
+        matched[0] = data[0]
+        for layer in xrange(1,layers):
+            matched[layer] = hist_match(data[layer], data[0])
 
+    else:
+        print("ERROR hist_match data has not 4 axis nor 3")
+            
     return matched

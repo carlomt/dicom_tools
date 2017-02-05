@@ -42,18 +42,26 @@ def hist_match(source, template):
 
     return interp_t_values[bin_idx].reshape(oldshape)
 
-def match_all(data):
+def match_all(data, norm_layer=-1):
+
+    
     matched=np.zeros(data.shape)
     if len(data.shape)==4:
         layers = len(data[:,:,:,0])
-        matched[0,:,:,0]=matched[0,:,:,1]=matched[0,:,:,2] = data[0,:,:,0]
-        for layer in xrange(1,layers):
-            matched[layer,:,:,0]=matched[layer,:,:,1]=matched[layer,:,:,2]= hist_match(data[layer,:,:,0], data[0,:,:,0])
+        if norm_layer <0:
+            norm_layer = int(layers/2+0.5)
+        matched[norm_layer,:,:,0]=matched[norm_layer,:,:,1]=matched[norm_layer,:,:,2] = data[norm_layer,:,:,0]
+        for layer in xrange(0,layers):
+            if layer == norm_layer:
+                continue
+            matched[layer,:,:,0]=matched[layer,:,:,1]=matched[layer,:,:,2]= hist_match(data[layer,:,:,0], data[norm_layer,:,:,0])
     elif len(data.shape)==3:
         layers = len(data)
-        matched[0] = data[0]
-        for layer in xrange(1,layers):
-            matched[layer] = hist_match(data[layer], data[0])
+        if norm_layer <0:
+            norm_layer = int(layers/2+0.5)
+        matched[norm_layer] = data[norm_layer]
+        for layer in xrange(0,layers):
+            matched[layer] = hist_match(data[layer], data[norm_layer])
 
     else:
         print("ERROR hist_match data has not 4 axis nor 3")

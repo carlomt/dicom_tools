@@ -20,6 +20,8 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
 parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 parser.add_argument("-f", "--filterROI", help="filter the image with a ROI (path)")
+parser.add_argument("-n", "--normalize", help="normalize the intensities using Histogram Matching",
+                    action="store_true")
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-y", "--yview", help="swap axes",
@@ -85,7 +87,7 @@ if args.filterROI:
     his.Write()
 
 else:
-    allhistos = make_histo_ofallpixels(data)
+    allhistos = make_histo_ofallpixels(data,"",args.verbose,args.normalize)
     
 
 for thishisto in allhistos:

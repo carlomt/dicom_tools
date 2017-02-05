@@ -1,9 +1,15 @@
 import ROOT
 import numpy as np
+from dicom_tools.hist_match import match_all
 # from tabulate import tabulate
 
-def make_histo_ofallpixels(data, suffix="", verbose=False, ROInorm=False, normalize=False):
+def make_histo_ofallpixels(data, suffix="", verbose=False, normalize=False):
     nbin = 1000
+    if normalize:
+        datan = match_all(data)
+    else:
+        datan = data
+    
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     nFette = len(data)

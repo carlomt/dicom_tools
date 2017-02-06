@@ -8,9 +8,11 @@ import dicom
 from dicom_tools.FileReader import FileReader
 from scipy import ndimage
 import os
+import nrrd
 from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.highlight_color import highlight_color
 from dicom_tools.Normalizer import Normalizer
+from dicom_tools.myroi2roi import myroi2roi
 
 # class Window(QtGui.QWidget):
 class Window_dicom_tool(QtGui.QMainWindow): 
@@ -19,7 +21,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
-        self.setWindowTitle("DICOM roi (vRGB)")
+        self.setWindowTitle("DICOM tool")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
 
         widgetWindow = QtGui.QWidget(self)
@@ -73,6 +75,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveMyROIFile.setShortcut("Ctrl+S")
         saveMyROIFile.setStatusTip('Save ROI on File (myroi format)')
         saveMyROIFile.triggered.connect(self.myroi_file_save)
+
+        highlightnrrdROIaction = QtGui.QAction("&Highlight nrrd ROI", self)
+        highlightnrrdROIaction.setStatusTip("&Highlight ROI (nrrd files)")
+        highlightnrrdROIaction.triggered.connect(self.highlightnrrdROI)
+        
+        highlightMyROIaction = QtGui.QAction("&Highlight myroi ROI", self)
+        highlightMyROIaction.setStatusTip("&Highlight ROI (myroi files)")
+        highlightMyROIaction.triggered.connect(self.highlightMyROI)        
         
         # self.statusBar()
         normalizeHistogramMatching = QtGui.QAction("&Normalize using hm", self)
@@ -101,7 +111,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # fileMenu.addAction(extractAction)
         ROIfileMenu.addAction(openMyROIFile)
         ROIfileMenu.addAction(saveMyROIFile)
-
+        ROIfileMenu.addAction(highlightnrrdROIaction)
+        ROIfileMenu.addAction(highlightMyROIaction)        
+        
         normMenu = mainMenu.addMenu('&Normalization')
         normMenu.addAction(normalizeHistogramMatching)
 
@@ -124,32 +136,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.dataZ = highlight_color(dataRGB,args.colorRange,args.verbose)
         
 
-        # self.dataZ = np.swapaxes(dataRGB[:,:,:,:],0,1)
-        # 
-        # self.data = dataRGB[:,:,::-1,:]
-
-        #dataswappedX = np.swapaxes(np.swapaxes(self.data,0,1),1,2)
-
-        
-
-
         self.img1a = pg.ImageItem()
         self.arr = None
-        self.firsttime = True
-
-        # if self.xview:
-        #     self.imgScaleFactor= 1./freader.scaleFactor
-        #     self.data =  self.dataswappedX
-        # elif self.yview:
-        #     self.imgScaleFactor= 1./freader.scaleFactor
-        #     self.data =  self.dataswappedY
-        # else:
-
-
-
-
-
-            
+        self.firsttime = True            
             
         self.button_next = QtGui.QPushButton('Next', self)
         self.button_prev = QtGui.QPushButton('Prev', self)
@@ -271,7 +260,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             # dataswappedY = np.swapaxes(self.data,0,2)
             self.arr=self.dataswappedY[self.layer]
         else:
-            self.arr=self.data[self.layer]
+            self.arr=self.dataZ[self.layer]
         self.img1a.setImage(self.arr)
         if self.firsttime:
             self.firsttime = False
@@ -366,7 +355,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if tmpYview:
             self.switchToYView()
         self.layer=tmpLayer
+        self.slider.setValue(self.layer+1)        
         self.updatemain()
+
             
          
     def read_dicom_in_folder(self, path):
@@ -443,7 +434,26 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layer=0
         self.slider.setValue(self.layer+1)
         self.updatemain()            
-            
+
+    def highlightROI(self, ROI):
+        self.dataZ[:,:,:,2] = self.dataZ[:,:,:,2] - self.dataZ[:,:,:,2]*ROI
+        self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]        
+        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
+        self.updatemain()
+        
+    def highlightnrrdROI(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
+        nrrdROItmp, nrrdROIoptions = nrrd.read(filename)
+        ROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
+        self.highlightROI(ROI)
+
+    def highlightMyROI(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        
+        reader = roiFileHandler()
+        myroi, roisSetted = reader.read(filename)
+        ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
+        self.highlightROI(ROI)
+        
 if __name__ == '__main__':
 
     import sys

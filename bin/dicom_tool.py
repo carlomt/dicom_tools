@@ -28,6 +28,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.setCentralWidget(widgetWindow)
         
         outfname="roi.txt"
+        self.inpath="."        
         
         parser = argparse.ArgumentParser()
         parser.add_argument("-v", "--verbose", help="increase output verbosity",

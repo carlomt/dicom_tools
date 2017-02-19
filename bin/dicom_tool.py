@@ -10,6 +10,7 @@ from scipy import ndimage
 import os
 import nrrd
 from dicom_tools.roiFileHandler import roiFileHandler
+from dicom_tools.nrrdFileHandler import nrrdFileHandler
 from dicom_tools.highlight_color import highlight_color
 from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
@@ -509,13 +510,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
-        nrrdROItmp, nrrdROIoptions = nrrd.read(filename)
-        ROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
+        roiFileReader = nrrdFileHandler(self.verbose)
+        ROI = roiFileReader.read(filename)
         self.highlightROI(ROI)
 
     def highlightMyROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        
-        reader = roiFileHandler()
+        reader = roiFileHandler(self.verbose)
         myroi, roisSetted = reader.read(filename)
         ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
         self.highlightROI(ROI)

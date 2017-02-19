@@ -1,21 +1,22 @@
 import ROOT
 import numpy as np
 # from tabulate import tabulate
+from dicom_tools.calculateMeanInROI import calculateMeanInROI
 
 def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False):
     nbin = 200
     binmin=data.min() *0.8
     binmax=data.max() *1.2
-    meannorm = 1
+    # meannorm = 1
     # if ROInorm:
     #     binmin=0.
     #     binmax=1.
     # table = []
-    if normalize:
-        perCalcolareMedia = ROInorm*data
-        meannorm = perCalcolareMedia.mean()
-        # binmin=data.min() *0.8
-        # binmax=data.max() *1.2
+    # if normalize:
+    #     perCalcolareMedia = ROInorm*data
+    #     meannorm = perCalcolareMedia.mean()
+    # binmin=data.min() *0.8
+    # binmax=data.max() *1.2
     if verbose:
         print("make_histo:  meannorm ", meannorm)
 
@@ -46,10 +47,11 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                 if inROI>0 :
                     if normalize:
                         if ROInorm.any():
-                            normarea = ROInorm[layer]*data[layer]
-                            meaninroi = normarea.mean()
+                            # normarea = ROInorm[layer]*data[layer]
+                            # meaninroi = normarea.mean()
+                            meaninroi = calculateMeanInROI(data[layer], ROInorm[layer])
                             # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
-                            val = val/meaninroi*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
+                            val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
                     his.Fill(val)
                     thishisto.Fill(val)
 

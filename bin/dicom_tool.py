@@ -13,6 +13,7 @@ from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.highlight_color import highlight_color
 from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
+from dicom_tools.calculateMeanInROI import calculateMeanInROI
 
 # class Window(QtGui.QWidget):
 class Window_dicom_tool(QtGui.QMainWindow): 
@@ -236,13 +237,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def update(self):
         thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
         self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
-        self.label2_shape.setText("shape: "+str(thisroi.shape))
-        self.label2_size.setText("size: "+str(thisroi.size))
-        self.label2_min.setText("min: "+str(thisroi.min()))
-        self.label2_max.setText("max: "+str(thisroi.max()))
-        self.label2_mean.setText("mean: "+str(thisroi.mean()))
-        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi) ))
-        self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi) ))
+        self.label2_shape.setText("shape: "+str(thisroi[:,:,2].shape))
+        self.label2_size.setText("size: "+str(thisroi[:,:,2].size))
+        self.label2_min.setText("min: "+str(thisroi[:,:,2].min()))
+        self.label2_max.setText("max: "+str(thisroi[:,:,2].max()))
+        self.label2_mean.setText("mean: "+str(thisroi[:,:,2].mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi[:,:,2]) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi[:,:,2]) ))
         # # print("entropy: ",entropy(thisroi, disk(5))
         # # print("maximum: ",maximum(thisroi, disk(5))
         # # print("\n"
@@ -276,13 +277,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
                 
             self.update()
             self.label_layer.setText("layer: "+str(self.layer+1)+"/"+str(len(self.data[:,:,:,0])))
-            self.label_shape.setText("shape: "+str(self.arr[:,:,0].shape))
-            self.label_size.setText("size: "+str(self.arr[:,:,0].size))
-            self.label_min.setText("min: "+str(self.arr[:,:,0].min()))
-            self.label_max.setText("max: "+str(self.arr[:,:,0].max()))
-            self.label_mean.setText("mean: "+str(self.arr[:,:,0].mean()))
-            self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,0])))
-            self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,0])))
+            self.label_shape.setText("shape: "+str(self.arr[:,:,2].shape))
+            self.label_size.setText("size: "+str(self.arr[:,:,2].size))
+            self.label_min.setText("min: "+str(self.arr[:,:,2].min()))
+            self.label_max.setText("max: "+str(self.arr[:,:,2].max()))
+            self.label_mean.setText("mean: "+str(self.arr[:,:,2].mean()))
+            self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,2])))
+            self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,2])))
         self.img1a.updateImage()
 
         
@@ -314,9 +315,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.rois[self.layer] = self.roi.saveState()
         if thisroiswassetted:
             self.dehighlightROI(myroi2roi)
-
-        print(self.rois[self.layer])
-        self.highlightROI1layer(myroi2roi(self.rois[self.layer], self.data[0,:,:,0].shape, self.verbose))
+        if self.verbose:
+            print(self.rois[self.layer])
+        convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
+        toshowvalues = convertedROI*self.arr[:,:,2]
+        self.label2_min.setText("min: "+str(toshowvalues.min()))
+        self.label2_max.setText("max: "+str(toshowvalues.max()))
+        # self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
+        self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI) ))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
+        self.highlightROI1layer(convertedROI)
         self.roisSetted = 0
         for thisroi in self.rois:
             if thisroi:
@@ -398,7 +407,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def select_dicom_folder(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
-        print path
+        if self.verbose:
+            print path
         self.read_dicom_in_folder(str(path))
 
     def switchToXView(self):
@@ -459,7 +469,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI
         referenceValue = self.dataZ[:,:,:,colorchannel].max()/regiontohighlight.max()/4.
         #referenceValue = self.dataZ[:,:,:,colorchannel].max()
-        self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] + regiontohighlight*referenceValue 
+        self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - regiontohighlight*referenceValue 
         self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]        
         self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
         self.updatemain()

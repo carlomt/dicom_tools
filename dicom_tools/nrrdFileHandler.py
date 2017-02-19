@@ -14,7 +14,7 @@ class nrrdFileHandler:
 
     def write(self, outFileName, data):
         if self.verbose:
-        print("nrrdFileHandler: type(data)",type(data),"len(data)",len(data))
+            print("nrrdFileHandler: type(data)",type(data),"len(data)",len(data))
             
         outData = data.astype(int)
         outData = outData[::-1,:,:]

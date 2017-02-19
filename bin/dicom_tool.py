@@ -82,6 +82,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveMyROIFile.setStatusTip('Save ROI on File (myroi format)')
         saveMyROIFile.triggered.connect(self.myroi_file_save)
 
+        saveROIonNRRD = QtGui.QAction("&Save ROI on nrrd File", self)
+        saveROIonNRRD.setStatusTip('Save ROI on File (nrrd format)')
+        saveROIonNRRD.triggered.connect(self.nrrdroi_file_save)
+
         highlightnrrdROIaction = QtGui.QAction("&Highlight nrrd ROI", self)
         highlightnrrdROIaction.setStatusTip("&Highlight ROI (nrrd files)")
         highlightnrrdROIaction.triggered.connect(self.highlightnrrdROI)
@@ -117,6 +121,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # fileMenu.addAction(extractAction)
         ROIfileMenu.addAction(openMyROIFile)
         ROIfileMenu.addAction(saveMyROIFile)
+        ROIfileMenu.addAction(saveROIonNRRD)
         ROIfileMenu.addAction(highlightnrrdROIaction)
         ROIfileMenu.addAction(highlightMyROIaction)        
         
@@ -318,7 +323,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             thisroiswassetted=True
         self.rois[self.layer] = self.roi.saveState()
         if thisroiswassetted:
-            self.dehighlightROI(myroi2roi)
+            self.dehighlightROI()
         if self.verbose:
             print(self.rois[self.layer])
         convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
@@ -339,7 +344,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def delROI(self):
         if self.rois[self.layer]:
             self.rois[self.layer] = None
-            self.dehighlightROI(myroi2roi)
+            self.dehighlightROI()
             for thisroi in self.rois:
                 if thisroi:
                     self.roisSetted -= 1
@@ -347,13 +352,21 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
     def myroi_file_save(self):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
-        writer = roiFileHandler()
+        writer = roiFileHandler(self.verbose)
         writer.dicomsPath = os.path.abspath(self.inpath)
         if not str(filename).endswith('.myroi'):
             filename = filename+".myroi"
         writer.write(filename, self.rois, self.roisSetted)
 
 
+    def nrrdroi_file_save(self):
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
+        writer = nrrdFileHandler(self.verbose)
+        if not str(filename).endswith('.nrrd'):
+            filename = filename+".nrrd"
+        ROI = myroi2roi(self.rois, self.data[:,:,:,0].shape, self.verbose)            
+        writer.write(filename, ROI)
+            
     def myroi_file_open(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
         reader = roiFileHandler()
@@ -480,7 +493,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.slider.setValue(self.layer+1)
         self.updatemain()
 
-    def dehighlightROI(self, ROI, colorchannel = 0):
+    def dehighlightROI(self, colorchannel = 0):
         referencecolorchannel = colorchannel+1
         if referencecolorchannel>2:
             referencecolorchannel = 0

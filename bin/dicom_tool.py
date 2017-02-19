@@ -49,6 +49,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
         args = parser.parse_args()
         self.layer=0
+        self.layerZ=0
+        self.layerX=0
+        self.layerY=0        
         self.verbose = args.verbose
         self.xview = args.xview
         self.yview = args.yview
@@ -389,7 +392,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.dataZ = dataRGB
         if self.verbose:
             print("shape:", self.dataZ.shape)
-            print("shape of a channel:", self.dataZ[:,:,:,0].shape)
+            print("shape of a color channel:", self.dataZ[:,:,:,0].shape)
             print("layer: ",self.layer)
 
         self.imgScaleFactor= 1.
@@ -398,7 +401,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2.setAspectLocked(True,self.imgScaleFactor)
         self.rois = [None]*len(self.data[:,:,:,0])
         self.slider.setMaximum(len(self.data[:,:,:,0]))
-        self.layer=0
+        self.layerZ=int(len(self.data[:,:,:,0])/2)
+        self.layerX=int(len(self.data[0,:,0,0])/2)
+        self.layerY=int(len(self.data[0,0,:,0])/2)
+        self.layer = self.layerZ
         self.slider.setValue(self.layer+1)
         self.updatemain()
 
@@ -412,6 +418,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.read_dicom_in_folder(str(path))
 
     def switchToXView(self):
+        if self.xview:
+            return
+        if self.zview:
+            self.layerZ = self.layer
+        elif self.yview:
+            self.layerY = self.layer
         self.xview=True
         self.yview=False
         self.zview=False
@@ -422,11 +434,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.data = self.dataswappedX
         self.rois = [None]*len(self.data[:,:,:,0])
         self.slider.setMaximum(len(self.data[:,:,:,0]))
-        self.layer=0
+        self.layer = self.layerX
         self.slider.setValue(self.layer+1)
         self.updatemain()
 
     def switchToYView(self):
+        if self.yview:
+            return
+        if self.zview:
+            self.layerZ = self.layer
+        elif self.xview:
+            self.layerX = self.layer        
         self.yview=True
         self.xview=False
         self.zview=False
@@ -437,11 +455,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.data = self.dataswappedY
         self.rois = [None]*len(self.data[:,:,:,0])
         self.slider.setMaximum(len(self.data[:,:,:,0]))
-        self.layer=0
+        self.layer=self.layerY
         self.slider.setValue(self.layer+1)
         self.updatemain()
 
     def switchToZView(self):
+        if self.zview:
+            return
+        if self.yview:
+            self.layerY = self.layer
+        elif self.xview:
+            self.layerX = self.layer                
         self.zview=True
         self.yview=False
         self.xview=False
@@ -451,7 +475,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.data = self.dataZ
         self.rois = [None]*len(self.data[:,:,:,0])
         self.slider.setMaximum(len(self.data[:,:,:,0]))
-        self.layer=0
+        self.layer=self.layerZ
         self.slider.setValue(self.layer+1)
         self.updatemain()
 

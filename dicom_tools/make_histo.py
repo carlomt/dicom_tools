@@ -69,6 +69,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                                 val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
                                 his.Fill(val)
                                 thishisto.Fill(val)
+                            else:
+                                print("make_histo WARNING: patient",suffix,"layer",layer,"is in ROI but doesn't have a normalization")
                     else:
                         his.Fill(val)
                         thishisto.Fill(val)

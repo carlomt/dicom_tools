@@ -29,7 +29,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         # except ValueError:
         #     binmin = 0
         binmin = 0
-        nbin = binmax-binmin
+        nbin = int(binmax-binmin)
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()
     # binmin=data.min() *0.8

@@ -14,17 +14,16 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     # table = []
     if normalize:
         layerOfMax = np.where(data == data.max())[0][0]
-        binmax = int(data.max()/calculateMeanInROI(data[layerOfMax], ROInorm[layerOfMax]) * 1.2)
+        binmax = int(data.max()/calculateMeanInROI(data[layerOfMax], ROInorm[layerOfMax]))
         layerOfMin = np.where(data == data.min())[0][0]
-        binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]) * 0.8)
+        binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]))
+        nbin = binmax-binmin
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()
     # binmin=data.min() *0.8
     # binmax=data.max() *1.2
     if verbose:
-        print("make_histo: bin min:",binmin,"bin max:",binmax)        
-        print("make_histo:  meannorm ", meannorm)
-
+        print("make_histo: bin min:",binmin,"bin max:",binmax,"nbin:",nbin)        
         
     nFette = len(data)
     

@@ -15,8 +15,12 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     if normalize:
         layerOfMax = np.where(data == data.max())[0][0]
         binmax = int(data.max()/calculateMeanInROI(data[layerOfMax], ROInorm[layerOfMax]))
-        layerOfMin = np.where(data == data.min())[0][0]
-        binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]))
+        # layerOfMin = np.where(data == data.min())[0][0]
+        # try:
+        #     binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]))
+        # except ValueError:
+        #     binmin = 0
+        binmin = 0
         nbin = binmax-binmin
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()

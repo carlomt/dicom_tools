@@ -13,16 +13,14 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     #     binmax=1.
     # table = []
     if normalize:
-        layerOfMax = np.where(data == data.max())[0][0]
-        try:
-            normformaxbin = calculateMeanInROI(data[layerOfMax], ROInorm[layerOfMax])
-        except ValueError:
-            print("layerOfMax",layerOfMax)
-        try:
-            binmax = int(data.max()/normformaxbin)
-        except ValueError:
-            print("normformaxbin",normformaxbin)        
-
+        dataN = data*ROInorm
+        layerOfMax = np.where(dataN == dataN.max())[0][0]
+        normformaxbin = calculateMeanInROI(dataN[layerOfMax], ROInorm[layerOfMax])
+        # if normformaxbin >0:
+        binmax = int(dataN.max()/normformaxbin)
+        # else:
+        #     print("make_histo WARNING: patient",suffix,"has at least a layer without normalization ROI")
+        #     binmax = int(data.max())
         # layerOfMin = np.where(data == data.min())[0][0]
         # try:
         #     binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]))
@@ -67,9 +65,13 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                             # meaninroi = normarea.mean()
                             meaninroi = calculateMeanInROI(data[layer], ROInorm[layer])
                             # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
-                            val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
-                    his.Fill(val)
-                    thishisto.Fill(val)
+                            if meaninroi>0:
+                                val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
+                                his.Fill(val)
+                                thishisto.Fill(val)
+                    else:
+                        his.Fill(val)
+                        thishisto.Fill(val)
 
             if verbose:
                 print("make_histo: layer",layer,"meaninroi",meaninroi)

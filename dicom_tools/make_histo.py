@@ -4,7 +4,7 @@ import numpy as np
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 
 def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False):
-    nbin = 200
+    nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     # meannorm = 1
@@ -12,12 +12,17 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     #     binmin=0.
     #     binmax=1.
     # table = []
-    # if normalize:
+    if normalize:
+        layerOfMax = np.where(data == data.max())[0][0]
+        binmax = int(data.max()/calculateMeanInROI(data[layerOfMax], ROInorm[layerOfMax]) * 1.2)
+        layerOfMin = np.where(data == data.min())[0][0]
+        binmin = int(data.min()/calculateMeanInROI(data[layerOfMin], ROInorm[layerOfMin]) * 0.8)
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()
     # binmin=data.min() *0.8
     # binmax=data.max() *1.2
     if verbose:
+        print("make_histo: bin min:",binmin,"bin max:",binmax)        
         print("make_histo:  meannorm ", meannorm)
 
         

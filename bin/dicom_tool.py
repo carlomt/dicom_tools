@@ -374,7 +374,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.rois, self.roisSetted = reader.read(filename)
         self.updatemain()
         self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
-                
+        ROI = myroi2roi(self.rois, self.data[:,:,:,0].shape, self.verbose)
+        colorchannel = 0
+        regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI                
+        referenceValue = self.dataZ[:,:,:,colorchannel].max()/regiontohighlight.max()/2.        
+        self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] + regiontohighlight*referenceValue 
+
+        
     def slider_jump_to(self):
         self.layer = self.slider.value()-1
         self.updatemain()
@@ -527,7 +533,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         ROI = roiFileReader.read(filename)
         self.highlightROI(ROI)
 
-    def highlightMyROI(self):
+    def highlightMyROI(self, colorchannel=0):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        
         reader = roiFileHandler(self.verbose)
         myroi, roisSetted = reader.read(filename)

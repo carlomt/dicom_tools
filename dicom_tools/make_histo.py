@@ -15,7 +15,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     if normalize:
         dataN = data*ROInorm
         layerOfMax = np.where(dataN == dataN.max())[0][0]
-        normformaxbin = calculateMeanInROI(dataN[layerOfMax], ROInorm[layerOfMax])
+        normformaxbin = calculateMeanInROI(dataN[layerOfMax], ROInorm[layerOfMax],verbose)
         # if normformaxbin >0:
         binmax = int(dataN.max()/normformaxbin)
         # else:
@@ -59,7 +59,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
             if ROInorm.any():
                 # normarea = ROInorm[layer]*data[layer]
                 # meaninroi = normarea.mean()
-                meaninroi = calculateMeanInROI(data[layer], ROInorm[layer])
+                meaninroi = calculateMeanInROI(data[layer], ROInorm[layer],verbose)
             if verbose:
                 print("make_histo: layer",layer,"meaninroi",meaninroi)
 

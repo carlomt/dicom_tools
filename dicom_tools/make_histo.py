@@ -17,7 +17,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         layerOfMax = np.where(dataN == dataN.max())[0][0]
         normformaxbin = calculateMeanInROI(dataN[layerOfMax], ROInorm[layerOfMax],verbose)
         # if normformaxbin >0:
-        binmax = int(dataN.max()/normformaxbin)
+        binmax = dataN.max()/normformaxbin
         # else:
         #     print("make_histo WARNING: patient",suffix,"has at least a layer without normalization ROI")
         #     binmax = int(data.max())

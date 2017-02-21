@@ -100,8 +100,7 @@ class FileReader:
         
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
-            data[i] =  pix_arr.T
-            dataRGB[i,:,:,2] = dataRGB[i,:,:,0]= pix_arr.T
+            dataRGB[i,:,:,2] = dataRGB[i,:,:,0] = data[i] = pix_arr.T
             dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
 
         if raw:

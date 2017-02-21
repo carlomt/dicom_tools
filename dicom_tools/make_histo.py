@@ -55,15 +55,20 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
         meaninroi = 0
+        if normalize:
+            if ROInorm.any():
+                # normarea = ROInorm[layer]*data[layer]
+                # meaninroi = normarea.mean()
+                meaninroi = calculateMeanInROI(data[layer], ROInorm[layer])
+            if verbose:
+                print("make_histo: layer",layer,"meaninroi",meaninroi)
+
         if fettaROI.max() > 0 :
             # res.append(layer)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
                     if normalize:
                         if ROInorm.any():
-                            # normarea = ROInorm[layer]*data[layer]
-                            # meaninroi = normarea.mean()
-                            meaninroi = calculateMeanInROI(data[layer], ROInorm[layer])
                             # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
                             if meaninroi>0:
                                 val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
@@ -75,8 +80,6 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                         his.Fill(val)
                         thishisto.Fill(val)
 
-            if verbose:
-                print("make_histo: layer",layer,"meaninroi",meaninroi)
                     
             hEntries.SetBinContent(layer,thishisto.GetEntries())
             hMean.SetBinContent(layer,thishisto.GetMean())

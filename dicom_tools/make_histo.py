@@ -76,6 +76,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                         # else:
                         #     print("make_histo WARNING: patient",suffix,"layer",layer,"is in ROI but doesn't have a normalization")
                     # else:
+                    if val >  binmax:
+                        print("make_histo: Warning in layer",layer,"there is a value in overflow:",val,"normalization",meaninroi)
                     his.Fill(val)
                     thishisto.Fill(val)
 

@@ -31,7 +31,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         # nbin += int(nbin*0.3)
         # binmax *= 1.3
         if verbose:
-            print("make_histo: layerOfMax",layerOfMax,"dataN.max()",dataN.max(),"binmax",binmax,"nbin",nbin)
+            print("make_histo: layerOfMax",layerOfMax,"data.max()",data.max(),"binmax",binmax,"nbin",nbin)
 
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()

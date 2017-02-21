@@ -29,8 +29,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         binmin = 0
         nbin = int(dataN.max()-binmin)
         bindim = (binmax-binmin)/nbin
-        nbin += int(nbin*0.1)
-        binmax *= 1.1
+        nbin += int(nbin*0.3)
+        binmax *= 1.3
         if verbose:
             print("make_histo: layerOfMax",layerOfMax,"dataN.max()",dataN.max(),"binmax",binmax,"nbin",nbin)
 
@@ -61,30 +61,23 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
         meaninroi = 0
-        if normalize:
-            if ROInorm.any():
-                # normarea = ROInorm[layer]*data[layer]
-                # meaninroi = normarea.mean()
-                meaninroi = calculateMeanInROI(data[layer], ROInorm[layer],verbose)
+        if fettaROI.any():
+            if normalize:
+            meaninroi = calculateMeanInROI(fetta, ROInorm[layer],verbose)
             if verbose:
                 print("make_histo: layer",layer,"meaninroi",meaninroi)
-
-        if fettaROI.max() > 0 :
-            # res.append(layer)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
                     if normalize:
-                        if ROInorm.any():
                             # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale
-                            if meaninroi>0:
-                                val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
-                                his.Fill(val)
-                                thishisto.Fill(val)
-                            else:
-                                print("make_histo WARNING: patient",suffix,"layer",layer,"is in ROI but doesn't have a normalization")
-                    else:
-                        his.Fill(val)
-                        thishisto.Fill(val)
+                        val = val/meaninroi#*meannorm #per avere valori dello stesso ordine di grandezza dell'originale
+                        # his.Fill(val)
+                        # thishisto.Fill(val)
+                        # else:
+                        #     print("make_histo WARNING: patient",suffix,"layer",layer,"is in ROI but doesn't have a normalization")
+                    # else:
+                    his.Fill(val)
+                    thishisto.Fill(val)
 
                     
             hEntries.SetBinContent(layer,thishisto.GetEntries())

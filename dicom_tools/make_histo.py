@@ -28,6 +28,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         #     binmin = 0
         binmin = 0
         nbin = int(binmax-binmin)
+        if verbose:
+            print("make_histo: layerOfMax",layerOfMax,"dataN.max()",dataN.max(),"binmax",binmax,"nbin",nbin)
+
     #     perCalcolareMedia = ROInorm*data
     #     meannorm = perCalcolareMedia.mean()
     # binmin=data.min() *0.8

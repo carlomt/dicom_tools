@@ -60,12 +60,12 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         fettaROI = mask[layer]
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
-        meaninroi = 0
+        meaninroi = 1
         if fettaROI.any():
             if normalize:
-            meaninroi = calculateMeanInROI(fetta, ROInorm[layer],verbose)
-            if verbose:
-                print("make_histo: layer",layer,"meaninroi",meaninroi)
+                meaninroi = calculateMeanInROI(fetta, ROInorm[layer],verbose)
+                if verbose:
+                    print("make_histo: layer",layer,"meaninroi",meaninroi)
             for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
                 if inROI>0 :
                     if normalize:

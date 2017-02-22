@@ -15,6 +15,7 @@ from dicom_tools.highlight_color import highlight_color
 from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
+import scipy
 
 # class Window(QtGui.QWidget):
 class Window_dicom_tool(QtGui.QMainWindow): 
@@ -115,6 +116,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         switchToYViewAction = QtGui.QAction("&Switch to Y view", self)
         switchToYViewAction.setStatusTip('Switch to Y view')
         switchToYViewAction.triggered.connect(self.switchToYView)
+
+        saveToTiffAction = QtGui.QAction("&Save to TIFF", self)
+        saveToTiffAction.setStatusTip('Save current view to TIFF file')
+        saveToTiffAction.triggered.connect(self.saveToTIFFImage)
+        saveToPngAction = QtGui.QAction("&Save to PNG", self)
+        saveToPngAction.setStatusTip('Save current view to PNG file')
+        saveToPngAction.triggered.connect(self.saveToPNGImage)        
         
         mainMenu = self.menuBar()
 
@@ -137,9 +145,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         viewMenu.addAction(switchToZViewAction)
         viewMenu.addAction(switchToXViewAction)
         viewMenu.addAction(switchToYViewAction)
-        
 
-
+        imageMenu = mainMenu.addMenu('&Image')
+        imageMenu.addAction(saveToTiffAction)
+        imageMenu.addAction(saveToPngAction)        
+            
         # if not args.raw:
         #     thisNormalizer = Normalizer(self.verbose)
         #     thisNormalizer.setRootOutput()
@@ -443,6 +453,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layerX=int(len(self.data[0,:,0,0])/2)
         self.layerY=int(len(self.data[0,0,:,0])/2)
         self.layer = self.layerZ
+        self.arr = self.dataZ[self.layerZ]
         self.slider.setValue(self.layer+1)
         self.updatemain()
 
@@ -560,6 +571,25 @@ class Window_dicom_tool(QtGui.QMainWindow):
         myroi, roisSetted = reader.read(filename)
         ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
         self.highlightROI(ROI)
+
+    def saveToImage(self, extension):
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
+        if not str(filename).endswith(extension):
+            filename = filename+extension
+        if self.verbose:
+            print(type(self.arr))
+            print(self.arr.shape)
+        image = self.arr.transpose(1,0,2)[::-1,:,:]
+        sides = image.shape
+        image = scipy.misc.imresize(image,size=tuple([int(sides[0]/self.imgScaleFactor),sides[1]]))
+        scipy.misc.imsave("prova"+extension,image)        
+        
+    def saveToTIFFImage(self):
+        self.saveToImage(".tiff")
+
+    def saveToPNGImage(self):
+        self.saveToImage(".png")        
+
         
 if __name__ == '__main__':
 

@@ -573,16 +573,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.highlightROI(ROI)
 
     def saveToImage(self, extension):
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
-        if not str(filename).endswith(extension):
+        filename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File'))
+        if not filename.endswith(extension):
             filename = filename+extension
+        print(filename)
+            
         if self.verbose:
             print(type(self.arr))
             print(self.arr.shape)
         image = self.arr.transpose(1,0,2)[::-1,:,:]
         sides = image.shape
         image = scipy.misc.imresize(image,size=tuple([int(sides[0]/self.imgScaleFactor),sides[1]]))
-        scipy.misc.imsave("prova"+extension,image)        
+        scipy.misc.imsave(filename,image)        
         
     def saveToTIFFImage(self):
         self.saveToImage(".tiff")

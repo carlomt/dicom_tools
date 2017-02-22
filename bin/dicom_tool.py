@@ -245,18 +245,20 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
     def update(self):
         thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
+        convertedROI = myroi2roi(self.roi.saveState(), self.arr[:,:,2].shape, self.verbose)
+        toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
         self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
-        # self.label2_shape.setText("shape: "+str(thisroi[:,:,2].shape))
-        # self.label2_size.setText("size: "+str(thisroi[:,:,2].size))
-        # self.label2_min.setText("min: "+str(thisroi[:,:,2].min()))
-        # self.label2_max.setText("max: "+str(thisroi[:,:,2].max()))
-        # self.label2_mean.setText("mean: "+str(thisroi[:,:,2].mean()))
-        # self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(thisroi[:,:,2]) ))
-        # self.label2_sum.setText("sum: "+str( ndimage.sum(thisroi[:,:,2]) ))
-        # # print("entropy: ",entropy(thisroi, disk(5))
-        # # print("maximum: ",maximum(thisroi, disk(5))
-        # # print("\n"
-        # # print(disk(5)
+        self.label2_shape.setText("shape: "+str(toshowvalues.shape))
+        self.label2_size.setText("size: "+str(toshowvalues.size))
+        self.label2_min.setText("min: "+str(toshowvalues.min()))
+        self.label2_max.setText("max: "+str(toshowvalues.max()))
+        self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))
+        # print("entropy: ",entropy(thisroi, disk(5))
+        # print("maximum: ",maximum(thisroi, disk(5))
+        # print("\n"
+        # print(disk(5)
         # print("\n")
         self.p2.autoRange()
 
@@ -327,11 +329,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.verbose:
             print(self.rois[self.layer])
         convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
-        toshowvalues = convertedROI*self.arr[:,:,2]
+        toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
         self.label2_min.setText("min: "+str(toshowvalues.min()))
         self.label2_max.setText("max: "+str(toshowvalues.max()))
-        # self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
-        self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
+        self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
+        # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
         self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
         self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
         self.highlightROI1layer(convertedROI)

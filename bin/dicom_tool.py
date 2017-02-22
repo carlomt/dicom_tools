@@ -329,13 +329,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.verbose:
             print(self.rois[self.layer])
         convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
-        toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
-        self.label2_min.setText("min: "+str(toshowvalues.min()))
-        self.label2_max.setText("max: "+str(toshowvalues.max()))
-        self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
-        # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
-        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
-        self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
+        # toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
+        # self.label2_min.setText("min: "+str(toshowvalues.min()))
+        # self.label2_max.setText("max: "+str(toshowvalues.max()))
+        # self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
+        # # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
+        # self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
+        # self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
         self.highlightROI1layer(convertedROI)
         self.roisSetted = 0
         for thisroi in self.rois:

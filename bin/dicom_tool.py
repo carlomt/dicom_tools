@@ -87,11 +87,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveROIonNRRD.triggered.connect(self.nrrdroi_file_save)
 
         highlightnrrdROIaction = QtGui.QAction("&Highlight nrrd ROI", self)
-        highlightnrrdROIaction.setStatusTip("&Highlight ROI (nrrd files)")
+        highlightnrrdROIaction.setStatusTip("&Highlight ROI (nrrd file)")
         highlightnrrdROIaction.triggered.connect(self.highlightnrrdROI)
         
         highlightMyROIaction = QtGui.QAction("&Highlight myroi ROI", self)
-        highlightMyROIaction.setStatusTip("&Highlight ROI (myroi files)")
+        highlightMyROIaction.setStatusTip("&Highlight ROI (myroi file)")
         highlightMyROIaction.triggered.connect(self.highlightMyROI)        
         
         # self.statusBar()
@@ -100,6 +100,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         normalizeHistogramMatching.setStatusTip('Normalize using histogram matching')
         normalizeHistogramMatching.triggered.connect(self.histogram_matching_normalization)
 
+        normalizeToROIAction = QtGui.QAction("&Normalize to ROI", self)
+        normalizeToROIAction.setStatusTip("&Normalize to a ROI (myroi file)")
+        normalizeToROIAction.triggered.connect(self.normalizeToROI)
+        
         switchToZViewAction = QtGui.QAction("&Switch to Z view", self)
         switchToZViewAction.setStatusTip('Switch to Z view')
         switchToZViewAction.triggered.connect(self.switchToZView)
@@ -127,6 +131,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
         normMenu = mainMenu.addMenu('&Normalization')
         normMenu.addAction(normalizeHistogramMatching)
+        normMenu.addAction(normalizeToROIAction)
 
         viewMenu = mainMenu.addMenu('&View')
         viewMenu.addAction(switchToZViewAction)
@@ -402,8 +407,19 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.slider.setValue(self.layer+1)        
         self.updatemain()
 
-            
-         
+    def normalizeToROI(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
+        reader = roiFileHandler()
+        roisForNorm, roisNormSetted = reader.read(filename)
+        if len(roisForNorm) != len(self.dataZ[:,:,:,2]):
+            print("ERROR: not all the layers have a ROI, I can't normalize.")
+        convertedRoi = myroi2roi(roisForNorm, self.dataZ[:,:,:,2].shape, self.verbose)
+        for thislayer in xrange(0,len(self.dataZ[:,:,:,2])):
+            meaninroi = calculateMeanInROI(self.dataZ[thislayer,:,:,2], convertedRoi[thislayer],self.verbose)
+            self.dataZ[thislayer] /= meaninroi
+        self.allineateViews()            
+        self.updatemain()
+        
     def read_dicom_in_folder(self, path):
         freader = FileReader(path, False, self.verbose)
         dataRGB, unusedROI = freader.read(False)
@@ -449,7 +465,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.xview=True
         self.yview=False
         self.zview=False
-        self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]
+        self.allineateViews()        
         self.imgScaleFactor= 1./self.scaleFactor
         self.p1.setAspectLocked(True,self.imgScaleFactor)
         self.p2.setAspectLocked(True,self.imgScaleFactor)        
@@ -470,7 +486,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.yview=True
         self.xview=False
         self.zview=False
-        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
+        self.allineateViews()        
         self.imgScaleFactor= 1./self.scaleFactor
         self.p1.setAspectLocked(True,self.imgScaleFactor)
         self.p2.setAspectLocked(True,self.imgScaleFactor)        
@@ -507,17 +523,20 @@ class Window_dicom_tool(QtGui.QMainWindow):
             referencecolorchannel = 0
             
         self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,referencecolorchannel]
+        self.allineateViews()
+        self.updatemain()
+
+
+    def allineateViews(self):
         self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]        
-        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
-        self.updatemain()        
+        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]          
 
     def highlightROI(self, ROI, colorchannel=0):
         regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI
         referenceValue = self.dataZ[:,:,:,colorchannel].max()/regiontohighlight.max()/4.
         #referenceValue = self.dataZ[:,:,:,colorchannel].max()
         self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - regiontohighlight*referenceValue 
-        self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]        
-        self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
+        self.allineateViews()        
         self.updatemain()
 
     def highlightROI1layer(self, ROI, colorchannel=0):

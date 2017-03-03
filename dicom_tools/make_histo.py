@@ -65,7 +65,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                 meaninroi = calculateMeanInROI(fetta, ROInorm[layer],verbose)
                 if verbose:
                     print("make_histo: layer",layer,"meaninroi",meaninroi)
-            for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
+            # for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
+            for val, inROI in zip(fetta.ravel(),fettaROI.ravel()):
                 if inROI>0 :
                     if normalize:
                             # val = val/meaninroi*0.01 #per avere valori dello stesso ordine di grandezza dell'originale

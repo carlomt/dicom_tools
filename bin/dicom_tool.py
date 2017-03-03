@@ -17,6 +17,34 @@ from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 import scipy
 
+
+class AboutWindow(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super(AboutWindow, self).__init__(parent)
+
+        self.closeButton = QtGui.QPushButton(self.tr("&Close"))
+        self.closeButton.setDefault(True)
+        
+        self.buttonBox = QtGui.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
+        # self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        # self.closeButton.connect(self.o)
+        QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.o)
+
+        
+        self.textBrowser = QtGui.QTextBrowser(self)
+        self.textBrowser.append("DICOM tool (v2.0)")
+        self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
+
+        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout.addWidget(self.textBrowser)
+        self.verticalLayout.addWidget(self.buttonBox)
+
+    def o(self):
+        # print("close the window") 
+        self.close()
+        
 # class Window(QtGui.QWidget):
 class Window_dicom_tool(QtGui.QMainWindow): 
 
@@ -24,7 +52,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
-        self.setWindowTitle("DICOM tool")
+        self.setWindowTitle("DICOM tool (v2.0)")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
 
         widgetWindow = QtGui.QWidget(self)
@@ -123,6 +151,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveToPngAction = QtGui.QAction("&Save to PNG", self)
         saveToPngAction.setStatusTip('Save current view to PNG file')
         saveToPngAction.triggered.connect(self.saveToPNGImage)        
+
+        histoOfAllLayerAction = QtGui.QAction("&Histogram of all layer" ,self)
+        histoOfAllLayerAction.setStatusTip('Histogram of all layer')
+        histoOfAllLayerAction.triggered.connect(self.histoOfAllLayer)
+
+        aboutAction = QtGui.QAction("&About this program", self)
+        aboutAction.setStatusTip('About this program')
+        aboutAction.triggered.connect(self.about)
         
         mainMenu = self.menuBar()
 
@@ -149,7 +185,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         imageMenu = mainMenu.addMenu('&Image')
         imageMenu.addAction(saveToTiffAction)
         imageMenu.addAction(saveToPngAction)        
-            
+
+        analysisMenu = mainMenu.addMenu('&Analysis')
+        analysisMenu.addAction(histoOfAllLayerAction)
+        analysisMenu.addAction(aboutAction)
+        
+        helpMenu = mainMenu.addMenu('&Help')
+        helpMenu.addAction(aboutAction)
+        
         # if not args.raw:
         #     thisNormalizer = Normalizer(self.verbose)
         #     thisNormalizer.setRootOutput()
@@ -592,6 +635,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def saveToPNGImage(self):
         self.saveToImage(".png")        
 
+
+    def histoOfAllLayer(self):
+        print("to be done")
+
+    def about(self):
+        dialogTextBrowser = AboutWindow(self)
+        dialogTextBrowser.exec_()
         
 if __name__ == '__main__':
 

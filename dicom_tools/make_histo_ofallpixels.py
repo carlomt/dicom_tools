@@ -21,7 +21,7 @@ def make_histo_ofallpixels(data, suffix="", verbose=False, normalize=False):
         
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
 
-        for val in np.nditer(fetta):
+        for val in fetta.ravel():
             thishisto.Fill(val)
         allhistos.append(thishisto)
 

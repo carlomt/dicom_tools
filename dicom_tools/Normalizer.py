@@ -11,7 +11,7 @@ class Normalizer:
         if self.verbose:
             print("Normalizer: init verbose\n")
 
-    def normLayer(self, layer=-1):
+    def setNormLayer(self, layer=-1):
         self.NormLayer=layer
             
     def setRootOutput(self, prefix=""):

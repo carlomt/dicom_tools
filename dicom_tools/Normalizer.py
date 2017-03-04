@@ -1,5 +1,6 @@
 import ROOT
 import numpy as np
+from dicom_tools.FileReader import FileReader
 
 class Normalizer:
 
@@ -11,8 +12,20 @@ class Normalizer:
         if self.verbose:
             print("Normalizer: init verbose\n")
 
+        self.externalTemplateSetted = False
+        self.externalTemplate = None
+
+    def setExternalTemplate(self, dcmfile):
+        freader = FileReader(dcmfile, False, self.verbose)
+        dataRGB, unusedROI = freader.read(False)
+        self.externalTemplateSetted = True
+        self.externalTemplate = dataRGB[:,:,0]
+        self.NormLayer = -1
+        
     def setNormLayer(self, layer=-1):
         self.NormLayer=layer
+        self.externalTemplateSetted = False
+        self.externalTemplate = None
             
     def setRootOutput(self, prefix=""):
         self.RootOutput = True
@@ -99,13 +112,18 @@ class Normalizer:
         matched=np.zeros(data.shape)
         if len(data.shape)==4:
             layers = len(data[:,:,:,0])
-            if norm_layer <0:
-                norm_layer = int(layers/2+0.5)
-            matched[norm_layer,:,:,0]=matched[norm_layer,:,:,1]=matched[norm_layer,:,:,2] = data[norm_layer,:,:,0]
+            if not self.externalTemplateSetted:
+                if norm_layer <0:
+                    norm_layer = int(layers/2+0.5)
+                matched[norm_layer,:,:,0]=matched[norm_layer,:,:,1]=matched[norm_layer,:,:,2] = data[norm_layer,:,:,0]
+                template = data[norm_layer,:,:,0]
+            else:
+                template = self.externalTemplate
+                
             for self.layer in xrange(0,layers):
                 if self.layer == norm_layer:
                     continue
-                matched[self.layer,:,:,0]=matched[self.layer,:,:,1]=matched[self.layer,:,:,2]= self.hist_match(data[self.layer,:,:,0], data[norm_layer,:,:,0])
+                matched[self.layer,:,:,0]=matched[self.layer,:,:,1]=matched[self.layer,:,:,2]= self.hist_match(data[self.layer,:,:,0], template)
         elif len(data.shape)==3:
             layers = len(data)
             if norm_layer <0:

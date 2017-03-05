@@ -8,11 +8,12 @@ install_req=[
     'numpy>=1.10.0',
     'scipy>=0.17.1',
     'pynrrd>=0.2.1',
-    'scikit-image>=0.12.3'
+    'scikit-image>=0.12.3',
+    'SimpleITK>=0.10.0'
 ]
 
 setup(name='dicom_tools',
-      version='0.41',
+      version='0.5',
       description='',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

@@ -16,6 +16,7 @@ from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 import scipy
+from dicom_tools.CurvatureFlowImageFilter import CurvatureFlowImageFilter
 
 
 class AboutWindow(QtGui.QDialog):
@@ -166,6 +167,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         aboutAction = QtGui.QAction("&About this program", self)
         aboutAction.setStatusTip('About this program')
         aboutAction.triggered.connect(self.about)
+
+        CurvatureFlowImageFilterAction = QtGui.QAction("&Apply Curvature Flow Filter",self)
+        CurvatureFlowImageFilterAction.setStatusTip("Apply Curvature Flow Filter")
+        CurvatureFlowImageFilterAction.triggered.connect(self.CurvatureFlowImageFilter)
         
         mainMenu = self.menuBar()
 
@@ -196,7 +201,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
-        analysisMenu.addAction(aboutAction)
+
+        filtersMenu = mainMenu.addMenu('&Filters')
+        filtersMenu.addAction(CurvatureFlowImageFilterAction)
+        filtersMenu.addAction(aboutAction)
         
         helpMenu = mainMenu.addMenu('&Help')
         helpMenu.addAction(aboutAction)
@@ -659,6 +667,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def about(self):
         dialogTextBrowser = AboutWindow(self)
         dialogTextBrowser.exec_()
+
+    def CurvatureFlowImageFilter(self):
+        filtered = CurvatureFlowImageFilter(self.arr, self.verbose)
+        self.img1b.setImage(filtered)
+        self.p2.autoRange()
+        self.img1b.updateImage()
         
 if __name__ == '__main__':
 

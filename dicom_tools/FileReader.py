@@ -3,6 +3,7 @@ import glob
 import numpy as np
 import dicom
 import nrrd
+import os
 
 # se raw=True torna un tensore con esattamente le dimensioni dei dicom, altrimenti replica le fette per riprodurre l'aspect ratio (ovvero tenere conto del fatto che i voxel sono molto piu' profondi delle dimensioni su X e Y)
 
@@ -22,8 +23,11 @@ class FileReader:
         inpath = self.inpath
         inpathROI = self.inpathROI
         verbose = self.verbose
-        
-        infiles = glob.glob(inpath+"/*.dcm")
+
+        if os.path.isdir(inpath):
+            infiles = glob.glob(inpath+"/*.dcm")
+        else:
+            infiles = inpath
 
         if verbose:
             print("funciont read file V 1.0")

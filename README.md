@@ -1,6 +1,6 @@
 # dicom_tools
 
-PyQt4 and sip have to be installed
+PyQt4, sip and SimpleITK have to be installed
 
 on mac you could install them with:
 
@@ -10,6 +10,7 @@ on mac you could install them with:
 
 `brew install sip`
 
+`brew install simpleitk`
 
 on a debian linux:
 

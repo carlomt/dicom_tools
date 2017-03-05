@@ -4,6 +4,7 @@ import numpy as np
 import dicom
 import nrrd
 import os
+import SimpleITK as sitk
 
 # se raw=True torna un tensore con esattamente le dimensioni dei dicom, altrimenti replica le fette per riprodurre l'aspect ratio (ovvero tenere conto del fatto che i voxel sono molto piu' profondi delle dimensioni su X e Y)
 
@@ -16,18 +17,19 @@ class FileReader:
         self.scaleFactor = None
         if self.verbose:
             print("FileReader: init verbose\n")
+        self.infiles = None
 
-    def read(self,  raw=False):
+            
+    def loadDCMfiles(self):
         if self.verbose:
             print("FileReader: init verbose\n")
         inpath = self.inpath
-        inpathROI = self.inpathROI
         verbose = self.verbose
 
         if os.path.isdir(inpath):
-            infiles = glob.glob(inpath+"/*.dcm")
+            self.infiles = glob.glob(inpath+"/*.dcm")
         else:
-            infiles = inpath
+            self.infiles = inpath
 
         if verbose:
             print("funciont read file V 1.0")
@@ -35,9 +37,16 @@ class FileReader:
             print(len(infiles)," files will be imported")
 
 
+
+    def read(self,  raw=False):
+        verbose = self.verbose
+        inpathROI = self.inpathROI
+        
+        self.loadDCMfiles()
+        
         dicoms = []
 
-        for thisfile in infiles:
+        for thisfile in self.infiles:
             dicoms.append(dicom.read_file(thisfile))
 
         dicoms.sort(key=lambda x: float(x.ImagePositionPatient[2]))
@@ -130,3 +139,20 @@ class FileReader:
         #         print "colonna ",j
         #         for i in xrange(0,data.shape[2]):
         #             dataRGB[k,i,j] = my_interpolating_function([float(k)/5,j,i])
+
+
+    def readUsingGDCM(self, raw=False):
+        reader = sitk.ImageSeriesReader()
+        filenamesDICOM = reader.GetGDCMSeriesFileNames(self.inpath)
+        reader.SetFileNames(filenamesDICOM)
+        imgOriginal = reader.Execute()
+        data = sitk.GetArrayFromImage(imgOriginal)
+        data = data.swapaxes(1,2)
+        data = data[::-1,:,::-1]
+        self.scaleFactor = imgOriginal.GetSpacing()[2]/imgOriginal.GetSpacing()[0]
+        if raw:
+            return data
+        else:
+            dataRGB=np.zeros(data.shape+tuple([3]))
+            dataRGB[:,:,:,0] = dataRGB[:,:,:,1] = dataRGB[:,:,:,2] = data
+            return dataRGB

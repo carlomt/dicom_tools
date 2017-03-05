@@ -690,13 +690,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         mousePoint2 = self.p1ViewBox.mapSceneToView(pos.scenePos())
         print("mousePoint2",mousePoint2)        
         # print(self.img1a.mapFromScene(pos.pos()))
+        print(type(mousePoint.x()))
         thisSeed = (mousePoint.x(),mousePoint.y())
-        print(type(thisSeed))
+        print(type(thisSeed[0]))
         thisSeed = (100,100)
-        print(type(thisSeed))
+        
         thisImage = self.arr[:,:,0]
-        print(type(thisImage))
-        print(thisImage.shape)
+        # print(type(thisImage))
+        # print(thisImage.shape)
         fat = connectedThreshold(thisImage, thisSeed, 1.e+3, 10.e+3)
         self.highlightROI(fat)
             

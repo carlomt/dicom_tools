@@ -16,8 +16,8 @@ from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 import scipy
-from dicom_tools.CurvatureFlowImageFilter import CurvatureFlowImageFilter
-
+from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
+from dicom_tools.connectedThreshold import connectedThreshold
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -283,6 +283,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,self.imgScaleFactor)
         self.p1.addItem(self.img1a)
+        self.p1ViewBox = self.p1.plotItem.vb
+        proxy = pg.SignalProxy(self.p1.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved)
+        self.p1.scene().sigMouseClicked.connect(self.mouseMoved)
         # imv = pg.ImageView(imageItem=img1a)
         layout.addWidget(self.p1,1,0,10,1)
 
@@ -669,11 +672,34 @@ class Window_dicom_tool(QtGui.QMainWindow):
         dialogTextBrowser.exec_()
 
     def CurvatureFlowImageFilter(self):
-        filtered = CurvatureFlowImageFilter(self.arr, self.verbose)
+        filtered = curvatureFlowImageFilter(self.arr, self.verbose)
         self.img1b.setImage(filtered)
         self.p2.autoRange()
         self.img1b.updateImage()
-        
+
+    def mouseMoved(self, pos):
+        # print(type(pos))
+        # print(pos)
+        # # print("lastPos",pos.lastPos())
+        # print("pos",pos.pos())
+        # print("scenePos",pos.scenePos())        
+        # print "Image position:", self.img1a.mapFromScene(pos)
+        # if self.p1.sceneBoundingRect().contains(pos.pos()):
+        mousePoint = self.p1ViewBox.mapSceneToView(pos.pos())
+        print("mousePoint",mousePoint)
+        mousePoint2 = self.p1ViewBox.mapSceneToView(pos.scenePos())
+        print("mousePoint2",mousePoint2)        
+        # print(self.img1a.mapFromScene(pos.pos()))
+        thisSeed = (mousePoint.x(),mousePoint.y())
+        print(type(thisSeed))
+        thisSeed = (100,100)
+        print(type(thisSeed))
+        thisImage = self.arr[:,:,0]
+        print(type(thisImage))
+        print(thisImage.shape)
+        fat = connectedThreshold(thisImage, thisSeed, 1.e+3, 10.e+3)
+        self.highlightROI(fat)
+            
 if __name__ == '__main__':
 
     import sys

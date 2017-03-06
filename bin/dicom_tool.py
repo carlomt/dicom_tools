@@ -698,7 +698,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             seedX = 0
         if seedY <0:
             seedY = 0 
-        thisSeed = (seedY, seedX)
+        thisSeed = (seedX, seedY)
         # print(type(thisSeed[0]))
         # thisSeed = (100,100)
         if self.verbose:        

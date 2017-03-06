@@ -11,7 +11,9 @@ def connectedThreshold(img, seed, lowerThreshold, upperThreshold):
     if type(img) != sitk.SimpleITK.Image:
         imgOriginal = sitk.GetImageFromArray(img)
         convertOutput = True
-    lstSeeds = [ (to_uint32(int(seed[0])), to_uint32(int(seed[1])) )]
+    lstSeeds = [ (to_uint32(int(seed[1])), to_uint32(int(seed[0])) )]
+    #ITK inverte gli assi rispetto a numpy
+    
     # lstSeeds = [(158,150)]
     # lstSeeds = [seed]
      

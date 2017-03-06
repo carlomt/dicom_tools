@@ -706,7 +706,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         thisImage = self.arr[:,:,0]
         # # print(type(thisImage))
         # # print(thisImage.shape)
-        value = thisImage[seedX,seedY]
+        value = thisImage[thisSeed]
         print("value",value)
         thresPer = 0.20
         lowThres = value - value*thresPer

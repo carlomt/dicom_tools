@@ -739,7 +739,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         thisImage = self.dataZ[:,:,:,2]
         self.secondaryImage3D = True
         
-        self.secondaryImage = morphologicalWatershed(thisImage,level=55)
+        self.secondaryImage = morphologicalWatershed(thisImage,level=55,fullyConnected=False)
         self.img1b.setImage(self.secondaryImage[self.layer])
         self.p2.autoRange()
         self.img1b.updateImage()

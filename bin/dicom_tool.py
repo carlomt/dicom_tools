@@ -685,21 +685,30 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # print("scenePos",pos.scenePos())        
         # print "Image position:", self.img1a.mapFromScene(pos)
         # if self.p1.sceneBoundingRect().contains(pos.pos()):
-        mousePoint = self.p1ViewBox.mapSceneToView(pos.pos())
-        print("mousePoint",mousePoint)
-        mousePoint2 = self.p1ViewBox.mapSceneToView(pos.scenePos())
-        print("mousePoint2",mousePoint2)        
-        # print(self.img1a.mapFromScene(pos.pos()))
-        print(type(mousePoint.x()))
-        thisSeed = (mousePoint.x(),mousePoint.y())
-        print(type(thisSeed[0]))
-        thisSeed = (100,100)
-        
+        # mousePoint = self.p1ViewBox.mapSceneToView(pos.pos())
+        # print("mousePoint",mousePoint)
+        mousePoint = self.p1ViewBox.mapSceneToView(pos.scenePos())
+        if self.verbose:
+            print("mousePoint",mousePoint)        
+        # # print(self.img1a.mapFromScene(pos.pos()))
+        # print(type(mousePoint.x()))
+        seedX = int(mousePoint.x()+0.5)
+        seedY = int(mousePoint.y()+0.5)
+        if seedX <0:
+            seedX = 0
+        if seedY <0:
+            seedY = 0 
+        thisSeed = (seedY, seedX)
+        # print(type(thisSeed[0]))
+        # thisSeed = (100,100)
+        if self.verbose:        
+            print(thisSeed)
         thisImage = self.arr[:,:,0]
-        # print(type(thisImage))
-        # print(thisImage.shape)
+        # # print(type(thisImage))
+        # # print(thisImage.shape)
         fat = connectedThreshold(thisImage, thisSeed, 1.e+3, 10.e+3)
-        self.highlightROI(fat)
+        if fat.any():
+            self.highlightROI(fat)
             
 if __name__ == '__main__':
 

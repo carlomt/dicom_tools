@@ -15,7 +15,7 @@ def connectedThreshold(img, seed, lowerThreshold, upperThreshold):
     # lstSeeds = [(158,150)]
     # lstSeeds = [seed]
      
-    print(type(lstSeeds))
+    # print(type(lstSeeds))
     labelWhiteMatter = 1
     imgWhiteMatter = sitk.ConnectedThreshold(image1=imgOriginal, seedList=lstSeeds,  lower=lowerThreshold, upper=upperThreshold, replaceValue=labelWhiteMatter)
     if convertOutput:

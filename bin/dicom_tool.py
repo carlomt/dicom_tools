@@ -678,8 +678,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.img1b.updateImage()
 
     def mouseMoved(self, pos):
-        # print(type(pos))
-        # print(pos)
+        print(type(pos))
+        print(pos)
         # # print("lastPos",pos.lastPos())
         # print("pos",pos.pos())
         # print("scenePos",pos.scenePos())        
@@ -706,7 +706,15 @@ class Window_dicom_tool(QtGui.QMainWindow):
         thisImage = self.arr[:,:,0]
         # # print(type(thisImage))
         # # print(thisImage.shape)
-        fat = connectedThreshold(thisImage, thisSeed, 1.e+3, 10.e+3)
+        value = thisImage[seedX,seedY]
+        print("value",value)
+        thresPer = 0.20
+        lowThres = value - value*thresPer
+        if lowThres<0:
+            lowThres = 0
+        hiThres = value + value*thresPer
+        print("range",lowThres, hiThres)
+        fat = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
         if fat.any():
             self.highlightROI(fat)
             

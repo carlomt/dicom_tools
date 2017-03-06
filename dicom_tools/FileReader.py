@@ -141,11 +141,13 @@ class FileReader:
         #             dataRGB[k,i,j] = my_interpolating_function([float(k)/5,j,i])
 
 
-    def readUsingGDCM(self, raw=False):
+    def readUsingGDCM(self, raw=False, sitkout=False):
         reader = sitk.ImageSeriesReader()
         filenamesDICOM = reader.GetGDCMSeriesFileNames(self.inpath)
         reader.SetFileNames(filenamesDICOM)
         imgOriginal = reader.Execute()
+        if sitkout:
+            return imgOriginal
         data = sitk.GetArrayFromImage(imgOriginal)
         data = data.swapaxes(1,2)
         data = data[::-1,:,::-1]

@@ -18,6 +18,7 @@ from dicom_tools.calculateMeanInROI import calculateMeanInROI
 import scipy
 from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
 from dicom_tools.connectedThreshold import connectedThreshold
+from dicom_tools.morphologicalWatershed import morphologicalWatershed
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -171,6 +172,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         CurvatureFlowImageFilterAction = QtGui.QAction("&Apply Curvature Flow Filter",self)
         CurvatureFlowImageFilterAction.setStatusTip("Apply Curvature Flow Filter")
         CurvatureFlowImageFilterAction.triggered.connect(self.CurvatureFlowImageFilter)
+
+        MorphologicalWatershedAction = QtGui.QAction("&Apply Morphological Watershed",self)
+        MorphologicalWatershedAction.setStatusTip("Apply Morphological Watershed")
+        MorphologicalWatershedAction.triggered.connect(self.MorphologicalWatershed)
         
         mainMenu = self.menuBar()
 
@@ -201,6 +206,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
+        analysisMenu.addAction(MorphologicalWatershedAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -717,6 +723,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         fat = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
         if fat.any():
             self.highlightROI(fat)
+
+    def MorphologicalWatershed(self):
+        thisImage = self.arr[:,:,0]        
+        ws_img = morphologicalWatershed(thisImage)
+        self.img1b.setImage(ws_img)
+        self.p2.autoRange()
+        self.img1b.updateImage()
+        
             
 if __name__ == '__main__':
 

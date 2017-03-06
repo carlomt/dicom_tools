@@ -726,7 +726,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def MorphologicalWatershed(self):
         thisImage = self.arr[:,:,0]        
-        ws_img = morphologicalWatershed(thisImage)
+        ws_img = morphologicalWatershed(thisImage,level=55)
         self.img1b.setImage(ws_img)
         self.p2.autoRange()
         self.img1b.updateImage()

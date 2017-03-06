@@ -5,7 +5,7 @@ import ctypes
 def to_uint32(i):
     return ctypes.c_uint32(i).value
 
-def morphologicalWatershed(img, level=2000):
+def morphologicalWatershed(img, level=10):
     imgOriginal = img
     convertOutput = False
     if type(img) != sitk.SimpleITK.Image:

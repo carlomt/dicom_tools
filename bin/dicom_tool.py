@@ -19,6 +19,7 @@ import scipy
 from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
 from dicom_tools.connectedThreshold import connectedThreshold
 from dicom_tools.morphologicalWatershed import morphologicalWatershed
+from dicom_tools.wardHierarchical import wardHierarchical
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -89,6 +90,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.yview = args.yview
         self.zview = not self.xview and not self.yview
         self.imgScaleFactor = 1
+        self.secondaryImage3D = False
         
         if args.outfile:
             outfname = args.outfile
@@ -176,6 +178,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         MorphologicalWatershedAction = QtGui.QAction("&Apply Morphological Watershed",self)
         MorphologicalWatershedAction.setStatusTip("Apply Morphological Watershed")
         MorphologicalWatershedAction.triggered.connect(self.MorphologicalWatershed)
+
+        WardHierarchicalAction = QtGui.QAction("&Apply Ward Hierarchical Clustering",self)
+        WardHierarchicalAction.setStatusTip("Apply Ward Hierarchical Clustering")
+        WardHierarchicalAction.triggered.connect(self.WardHierarchical)        
         
         mainMenu = self.menuBar()
 
@@ -207,6 +213,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
         analysisMenu.addAction(MorphologicalWatershedAction)
+        analysisMenu.addAction(WardHierarchicalAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -379,7 +386,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,2])))
             self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,2])))
         self.img1a.updateImage()
-
+        if self.secondaryImage3D:
+            self.img1b.setImage(self.secondaryImage[self.layer])
+            self.p2.autoRange()
+            self.img1b.updateImage()
         
     def nextimg(self):
         if self.layer < (len(self.data[:,:,:,0])-1):
@@ -726,10 +736,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def MorphologicalWatershed(self):
         thisImage = self.arr[:,:,0]        
-        ws_img = morphologicalWatershed(thisImage,level=55)
-        self.img1b.setImage(ws_img)
+        thisImage = self.dataZ[:,:,:,2]
+        self.secondaryImage3D = True
+        
+        self.secondaryImage = morphologicalWatershed(thisImage,level=55)
+        self.img1b.setImage(self.secondaryImage[self.layer])
         self.p2.autoRange()
         self.img1b.updateImage()
+
+    def WardHierarchical(self):
+        thisImage = self.arr[:,:,0]
+        wardHierarchical(thisImage)
         
             
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ install_req=[
 
 setup(name='dicom_tools',
       version='0.61',
-      description='',
+      description='Dicom Tool',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',
       author_email='carlo.mancini.terracciano@roma1.infn.it',

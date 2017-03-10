@@ -429,7 +429,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
         # self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
         # self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
-        self.highlightROI1layer(convertedROI)
+        self.highlightROI(convertedROI)
         self.roisSetted = 0
         for thisroi in self.rois:
             if thisroi:
@@ -630,28 +630,30 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]          
 
     def highlightROI(self, ROI, colorchannel=0):
-        regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI
-        regiontohighlightmax = regiontohighlight.max()
-        referenceValue = self.dataZ[:,:,:,colorchannel].max()/ regiontohighlightmax/4.
+        if ROI.ndim == 3:
+            regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI
+            regiontohighlightmax = regiontohighlight.max()
+            referenceValue = self.dataZ[:,:,:,colorchannel].max()/ regiontohighlightmax/4.
+        elif ROI.ndim == 2:
+            regiontohighlight = self.dataZ[self.layer,:,:,colorchannel]*ROI
+            regiontohighlightmax = regiontohighlight.max()
+            referenceValue = self.dataZ[self.layer,:,:,colorchannel].max()/ regiontohighlightmax/4.
+        else:
+            print("ERROR: ROI.ndim",ROI.ndim)
+            return
+        changesign = 1
         print("referenceValue",referenceValue)
         print("regiontohighlightmax",regiontohighlightmax)
-        if regiontohighlightmax < 1500:
-            self.highlightROI1layer(ROI)
+        if regiontohighlightmax < 1300:
+            changesign = -2
         #referenceValue = self.dataZ[:,:,:,colorchannel].max()
+        if ROI.ndim == 3:
+            self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - changesign*regiontohighlight*referenceValue
         else:
-            self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - regiontohighlight*referenceValue 
-            self.allineateViews()        
-            self.updatemain()
+            self.dataZ[self.layer,:,:,colorchannel] = self.dataZ[self.layer,:,:,colorchannel] - changesign*regiontohighlight*referenceValue            
+        self.allineateViews()        
+        self.updatemain()
 
-    def highlightROI1layer(self, ROI, colorchannel=0):
-        regiontohighlight = self.dataZ[self.layer,:,:,colorchannel]*ROI
-        referenceValue = self.dataZ[self.layer,:,:,colorchannel].max()/regiontohighlight.max()/2.
-        #referenceValue = self.dataZ[:,:,:,colorchannel].max()
-        self.dataZ[self.layer,:,:,colorchannel] = self.dataZ[self.layer,:,:,colorchannel] + regiontohighlight*referenceValue 
-        # self.dataswappedX = np.swapaxes(np.swapaxes(self.dataZ,0,1),1,2)[:,::-1,::-1,:]        
-        # self.dataswappedY = np.swapaxes(self.dataZ,0,2)[:,:,::-1,:]        
-        self.updatemain()        
-        
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
         roiFileReader = nrrdFileHandler(self.verbose)

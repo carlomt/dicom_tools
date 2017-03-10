@@ -356,10 +356,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         
     def update(self):
-        thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
-        convertedROI = myroi2roi(self.roi.saveState(), self.arr[:,:,2].shape, self.verbose)
-        toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
-        self.img1b.setImage(thisroi, levels=(0, self.arr.max()))
+        if self.manualROI:
+            thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
+            convertedROI = myroi2roi(self.roi.saveState(), self.arr[:,:,2].shape, self.verbose)
+            toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
+        if self.connectedThreshold:
+            toshowvalues = thisroi = self.arr[:,:,2]*self.bitmapROI[self.layer]
+            
+        self.img1b.setImage(thisroi, levels=(0, thisroi.max()))
         self.label2_shape.setText("shape: "+str(toshowvalues.shape))
         self.label2_size.setText("size: "+str(toshowvalues.size))
         self.label2_min.setText("min: "+str(toshowvalues.min()))
@@ -455,8 +459,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.highlightROI(convertedROI)
         elif self.connectedThreshold:
             self.bitmapROI[self.layer] += self.tmpBitmapROI.astype(dtype=bool)
-            self.tmpBitmapROI
-            self.img1b.setImage(self.arr[:,:,0] * self.bitmapROI[self.layer])
+            image = self.arr[:,:,2] * self.bitmapROI[self.layer] 
+            self.img1b.setImage(image, levels=(0, image.max()))
             self.p2.autoRange()
             self.img1b.updateImage()
             
@@ -470,7 +474,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             for thisroi in self.rois:
                 if thisroi:
                     self.roisSetted -= 1
-            self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))        
+            self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
+        self.bitmapROI[self.layer,::,::] = False
+        self.update()
         
     def myroi_file_save(self):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
@@ -486,7 +492,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         writer = nrrdFileHandler(self.verbose)
         if not str(filename).endswith('.nrrd'):
             filename = filename+".nrrd"
-        ROI = myroi2roi(self.rois, self.data[:,:,:,0].shape, self.verbose)            
+        if self.manualROI:
+            ROI = myroi2roi(self.rois, self.data[:,:,:,0].shape, self.verbose)
+        if self.connectedThreshold:
+            ROI = self.bitmapROI
         writer.write(filename, ROI)
             
     def myroi_file_open(self):
@@ -765,6 +774,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         print("value",value)
 
         if self.connectedThreshold:
+            self.dehighlightROI(1)
             thresPer = 0.20
             lowThres = value - value*thresPer
             if lowThres<0:

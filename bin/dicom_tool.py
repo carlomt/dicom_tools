@@ -182,12 +182,25 @@ class Window_dicom_tool(QtGui.QMainWindow):
         WardHierarchicalAction = QtGui.QAction("&Apply Ward Hierarchical Clustering",self)
         WardHierarchicalAction.setStatusTip("Apply Ward Hierarchical Clustering")
         WardHierarchicalAction.triggered.connect(self.WardHierarchical)        
+
+        connectedThresholdAction = QtGui.QAction("&Use Connected Threshold",self)
+        connectedThresholdAction.setStatusTip("Use Connected Threshold withouth filtering")
+        connectedThresholdAction.triggered.connect(self.ActivateConnectedThreshold)
+
+        connectedThresholdFilteredAction = QtGui.QAction("&Use Connected Threshold Filtered",self)
+        connectedThresholdFilteredAction.setStatusTip("Use Connected Threshold with Curvature Flow Filter")
+        connectedThresholdFilteredAction.triggered.connect(self.ActivateConnectedThresholdFiltered)
+
+        activateManualRoiDesignerAction = QtGui.QAction("&Use Manual ROI definition",self)
+        activateManualRoiDesignerAction.setStatusTip("Use Manual ROI definition")
+        activateManualRoiDesignerAction.triggered.connect(self.ActivateManualRoiDesigner)
         
         mainMenu = self.menuBar()
 
         fileMenu = mainMenu.addMenu('&File')
         fileMenu.addAction(openDicomDirectory)
         fileMenu.addAction(openDicomDirectoryGDCM)
+        fileMenu.addAction(aboutAction)
         
         ROIfileMenu = mainMenu.addMenu('&ROI')
         # fileMenu.addAction(extractAction)
@@ -212,13 +225,19 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
-        analysisMenu.addAction(MorphologicalWatershedAction)
-        analysisMenu.addAction(WardHierarchicalAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
-        filtersMenu.addAction(aboutAction)
-        
+
+
+        segmentationMenu = mainMenu.addMenu('&Segmentation')
+        segmentationMenu.addAction(activateManualRoiDesignerAction)
+        segmentationMenu.addAction(connectedThresholdAction)
+        segmentationMenu.addAction(connectedThresholdFilteredAction)                
+        segmentationMenu.addAction(MorphologicalWatershedAction)
+        segmentationMenu.addAction(WardHierarchicalAction)
+
+            
         helpMenu = mainMenu.addMenu('&Help')
         helpMenu.addAction(aboutAction)
         
@@ -236,8 +255,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         self.img1a = pg.ImageItem()
         self.arr = None
-        self.firsttime = True            
-            
+        self.firsttime = True
+
         self.button_next = QtGui.QPushButton('Next', self)
         self.button_prev = QtGui.QPushButton('Prev', self)
         self.button_next.clicked.connect(self.nextimg)
@@ -254,10 +273,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.button_delroi.clicked.connect(self.delROI)
         layout.addWidget(self.button_delroi,13,1)
         
-        label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
+        self.label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label,0,0)    
-
+        layout.addWidget(self.label,0,0)
+        self.manualROI = True
+        self.connectedThreshold = False
+        self.filterBeforeSegmentation=False
+        
         self.label_layer = QtGui.QLabel("layer: ")
         self.label_shape = QtGui.QLabel("shape: ")
         self.label_size = QtGui.QLabel("size: ")
@@ -412,28 +434,33 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.updatemain()        
 
     def setROI(self):
-        # self.rois[self.layer] = self.savePolyLineState(self.roi)
-        thisroiswassetted=False
-        if self.rois[self.layer]:
-            thisroiswassetted=True
-        self.rois[self.layer] = self.roi.saveState()
-        if thisroiswassetted:
-            self.dehighlightROI()
-        if self.verbose:
-            print(self.rois[self.layer])
-        convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
-        # toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
-        # self.label2_min.setText("min: "+str(toshowvalues.min()))
-        # self.label2_max.setText("max: "+str(toshowvalues.max()))
-        # self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
-        # # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
-        # self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
-        # self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
-        self.highlightROI(convertedROI)
-        self.roisSetted = 0
-        for thisroi in self.rois:
-            if thisroi:
-                self.roisSetted +=1
+        if self.manualROI:
+            # self.rois[self.layer] = self.savePolyLineState(self.roi)
+            thisroiswassetted=False
+            if self.rois[self.layer]:
+                thisroiswassetted=True
+            self.rois[self.layer] = self.roi.saveState()
+            if thisroiswassetted:
+                self.dehighlightROI()
+            if self.verbose:
+                print(self.rois[self.layer])
+            convertedROI = myroi2roi(self.rois[self.layer], self.arr[:,:,2].shape, self.verbose)
+            # toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
+            # self.label2_min.setText("min: "+str(toshowvalues.min()))
+            # self.label2_max.setText("max: "+str(toshowvalues.max()))
+            # self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
+            # # self.label2_mean.setText("mean: "+str( calculateMeanInROI(self.arr[:,:,2],convertedROI, verbose=True) ))
+            # self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
+            # self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))        
+            self.highlightROI(convertedROI)
+        elif self.connectedThreshold:
+            self.bitmapROI[self.layer] += self.tmpBitmapROI.astype(dtype=bool)
+            self.tmpBitmapROI
+            self.img1b.setImage(self.arr[:,:,0] * self.bitmapROI[self.layer])
+            self.p2.autoRange()
+            self.img1b.updateImage()
+            
+        self.roisSetted = np.count_nonzero(self.rois)
         self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
 
     def delROI(self):
@@ -541,6 +568,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.verbose:
             print("data len:",len(self.data[:,:,:,0]))
 
+        self.bitmapROI = np.full( self.dataZ[:,:,:,0].shape,False,dtype=bool)
+                
+
+            
     def select_dicom_folder(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
@@ -732,16 +763,20 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # # print(thisImage.shape)
         value = thisImage[thisSeed]
         print("value",value)
-        thresPer = 0.20
-        lowThres = value - value*thresPer
-        if lowThres<0:
-            lowThres = 0
-        hiThres = value + value*thresPer
-        print("range",lowThres, hiThres)
-        fat = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
-        if fat.any():
-            self.highlightROI(fat,1)
-        print("number of selected pixel:", np.count_nonzero(fat))
+
+        if self.connectedThreshold:
+            thresPer = 0.20
+            lowThres = value - value*thresPer
+            if lowThres<0:
+                lowThres = 0
+            hiThres = value + value*thresPer
+            print("range",lowThres, hiThres)
+            if self.filterBeforeSegmentation:
+                thisImage =  curvatureFlowImageFilter(thisImage,self.verbose)
+            self.tmpBitmapROI = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
+            if self.tmpBitmapROI.any():
+                self.highlightROI(self.tmpBitmapROI ,1)
+            print("number of selected pixel:", np.count_nonzero(self.tmpBitmapROI))
 
     def MorphologicalWatershed(self):
         thisImage = self.arr[:,:,0]        
@@ -756,8 +791,25 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def WardHierarchical(self):
         thisImage = self.arr[:,:,0]
         wardHierarchical(thisImage)
+
+    def ActivateConnectedThreshold(self):
+        self.label.setText("Click on a region to select its neighborhood.")
+        self.manualROI = False
+        self.connectedThreshold = True
+        self.filterBeforeSegmentation=False
         
-            
+    def ActivateManualRoiDesigner(self):
+        self.label.setText("Click on a line segment to add a new handle. Right click on a handle to remove.")
+        self.manualROI = True
+        self.connectedThreshold = False
+        self.filterBeforeSegmentation=False
+        
+    def ActivateConnectedThresholdFiltered(self):
+        self.ActivateConnectedThreshold()
+        self.label.setText("Click on a region to select its neighborhood. Applying Curvature Flow Filter.")        
+        self.filterBeforeSegmentation=True
+
+        
 if __name__ == '__main__':
 
     import sys

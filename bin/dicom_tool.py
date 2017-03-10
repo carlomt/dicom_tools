@@ -732,7 +732,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         print("range",lowThres, hiThres)
         fat = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
         if fat.any():
-            self.highlightROI(fat)
+            self.highlightROI(fat,1)
+        print("number of selected pixel:", np.count_nonzero(fat))
 
     def MorphologicalWatershed(self):
         thisImage = self.arr[:,:,0]        

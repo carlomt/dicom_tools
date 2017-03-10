@@ -631,11 +631,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def highlightROI(self, ROI, colorchannel=0):
         regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI
-        referenceValue = self.dataZ[:,:,:,colorchannel].max()/regiontohighlight.max()/4.
+        regiontohighlightmax = regiontohighlight.max()
+        referenceValue = self.dataZ[:,:,:,colorchannel].max()/ regiontohighlightmax/4.
+        print("referenceValue",referenceValue)
+        print("regiontohighlightmax",regiontohighlightmax)
+        if regiontohighlightmax < 1500:
+            self.highlightROI1layer(ROI)
         #referenceValue = self.dataZ[:,:,:,colorchannel].max()
-        self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - regiontohighlight*referenceValue 
-        self.allineateViews()        
-        self.updatemain()
+        else:
+            self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] - regiontohighlight*referenceValue 
+            self.allineateViews()        
+            self.updatemain()
 
     def highlightROI1layer(self, ROI, colorchannel=0):
         regiontohighlight = self.dataZ[self.layer,:,:,colorchannel]*ROI

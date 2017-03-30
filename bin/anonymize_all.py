@@ -3,7 +3,8 @@ import glob
 import argparse
 from dicom_tools.anonymize import anonymize
 from dicom_tools.ifNeededMkdir import ifNeededMkdir
-import dicom, os
+from dicom_tools.newNameFromMetadata import newNameFromMetadata
+import dicom, os, shutil
 
 usage = """
 Usage:
@@ -12,16 +13,6 @@ anonymize_all.py filelist path/to/outputdirecotry
 Note: Use at your own risk. Does not fully de-identify the DICOM data as per
 the DICOM standard, e.g in Annex E of PS3.15-2011.
 """
-
-def newNameFromMetadata(in_dir):
-    filenames = os.listdir(in_dir)
-    filename = filenames[0]
-    # Load the current dicom file to 'anonymize'
-    dataset = dicom.read_file(filename)
-    
-    oldname = dataset.PatientsName.split('^')
-    new_person_name = oldname[0][0]+oldname[0][1]+oldname[1][0]+oldname[1][1]
-    return new_person_name
 
 if __name__ == "__main__":
     #     import sys
@@ -61,7 +52,7 @@ if __name__ == "__main__":
             print("in the directory: "+pathT2)
             pathROI = lines[2]
             timeflag = int(lines[3])
-            ypT = int(lines[4])
+            ypT = lines[4]
             roinorm = lines[5]
 
             newname = newNameFromMetadata(pathT2)
@@ -70,28 +61,34 @@ if __name__ == "__main__":
                 timestring = "pre"
             elif timeflag==1:
                 timestring = "int"
-            elif fimeflag == 2:
+            elif timeflag == 2:
                 timestring = "post"
             else:
                 print("ERROR","timestring not recognized:",timestring,"line:",linenumber)
             
             newdir = outpath+"/"+newname+"/"+timestring+"/"
-            anonymize(pathT2,newdir+"T2/")
+            anonymize(pathT2,newdir+"T2/",newname)
 
             if len(glob.glob(pathROI+"/*.dicom")) >1 :
-                anonymize(pathROI,newdir+"/ROI/")
+                if verbose:
+                    print("anonynizing",pathROI,"into:",newdir+"/ROI/")
+                anonymize(pathROI,newdir+"/ROI/",newname)
             else:
                 files = glob.glob(pathROI+"/*.nrrd")
                 for ifile, thisfile in enumerate(files):
                     ifNeededMkdir(newdir+"/ROI/")
-                    shutil.copyfile(pathROI+"/"+ifile,newdir+"/ROI/roi"+str(ifile)+".nrrd")
+                    if verbose:
+                        print("copying",thisfile,newdir+"/ROI/roi"+str(ifile)+".nrrd")
+                    shutil.copyfile(thisfile,newdir+"/ROI/roi"+str(ifile)+".nrrd")
 
+            if verbose:
+                print("copying",roinorm,newdir+"roinormmuscle.myroi")
             shutil.copyfile(roinorm,newdir+"roinormmuscle.myroi")
 
             infofile = open(newdir+"info.txt",'a')
-            infofile.write("name: \t",newname)
-            infofile.write("time: \t",timestring)
-            infofile.write("ypT:  \t",ypT)
+            infofile.write("name: \t"+newname)
+            infofile.write("time: \t"+timestring)
+            infofile.write("ypT:  \t"+ypT)
 
 
 

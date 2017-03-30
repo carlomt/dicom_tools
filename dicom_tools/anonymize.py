@@ -33,7 +33,7 @@ import dicom
 from dicom.errors import InvalidDicomError
 
 
-def anonymizefile(filename, output_filename,
+def anonymizefile(filename, output_filename, new_person_name="AUTO",
               new_patient_id="id", remove_curves=True, remove_private_tags=True):
     """Replace data element values to partly anonymize a DICOM file.
     Note: completely anonymizing a DICOM file is very complicated; there
@@ -55,7 +55,9 @@ def anonymizefile(filename, output_filename,
     dataset = dicom.read_file(filename)
 
     oldname = dataset.PatientsName.split('^')
-    new_person_name = oldname[0][0]+oldname[0][1]+oldname[1][0]+oldname[1][1]
+    if new_person_name=="AUTO":
+        new_person_name = oldname[0][0]+oldname[0][1]+oldname[1][0]+oldname[1][1]
+    
     print("new person name:",new_person_name)
     
     # Remove patient name and any other person names
@@ -94,7 +96,7 @@ def anonymizefile(filename, output_filename,
 #     arg1, arg2 = sys.argv[1:]
 
 
-def anonymize(inp, out):
+def anonymize(inp, out, new_person_name="AUTO"):
     if os.path.isdir(inp):
         in_dir = inp
         out_dir = out
@@ -109,7 +111,9 @@ def anonymize(inp, out):
             if not os.path.isdir(os.path.join(in_dir, filename)):
                 print(filename + "...", end='')
                 try:
-                    anonymizefile(os.path.join(in_dir, filename), os.path.join(out_dir, filename))
+                    anonymizefile(os.path.join(in_dir, filename),
+                                  os.path.join(out_dir, filename),
+                                  new_person_name)
                 except InvalidDicomError:
                     print("Not a valid dicom file, may need force=True on read_file\r")
                 else:
@@ -117,5 +121,5 @@ def anonymize(inp, out):
     else:  # first arg not a directory, assume two files given
         in_filename = inp
         out_filename = out
-        anonymizefile(in_filename, out_filename)
+        anonymizefile(in_filename, out_filename, new_person_name)
     print()

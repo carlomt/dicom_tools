@@ -86,9 +86,9 @@ if __name__ == "__main__":
             shutil.copyfile(roinorm,newdir+"roinormmuscle.myroi")
 
             infofile = open(newdir+"info.txt",'a')
-            infofile.write("name: \t"+newname)
-            infofile.write("time: \t"+timestring)
-            infofile.write("ypT:  \t"+ypT)
+            infofile.write("name: \t"+newname+"\n")
+            infofile.write("time: \t"+timestring+"\n")
+            infofile.write("ypT:  \t"+ypT+"\n")
 
 
 

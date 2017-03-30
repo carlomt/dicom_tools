@@ -33,7 +33,7 @@ import dicom
 from dicom.errors import InvalidDicomError
 
 
-def anonymize(filename, output_filename,
+def anonymizefile(filename, output_filename,
               new_patient_id="id", remove_curves=True, remove_private_tags=True):
     """Replace data element values to partly anonymize a DICOM file.
     Note: completely anonymizing a DICOM file is very complicated; there
@@ -86,16 +86,18 @@ def anonymize(filename, output_filename,
     dataset.save_as(output_filename)
 
 # Can run as a script:
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 3:
-        print(usage)
-        sys.exit()
-    arg1, arg2 = sys.argv[1:]
+# if __name__ == "__main__":
+#     import sys
+#     if len(sys.argv) != 3:
+#         print(usage)
+#         sys.exit()
+#     arg1, arg2 = sys.argv[1:]
 
-    if os.path.isdir(arg1):
-        in_dir = arg1
-        out_dir = arg2
+
+def anonymize(inp, out):
+    if os.path.isdir(inp):
+        in_dir = inp
+        out_dir = out
         if os.path.exists(out_dir):
             if not os.path.isdir(out_dir):
                 raise IOError("Input is directory; output name exists but is not a directory")
@@ -107,13 +109,13 @@ if __name__ == "__main__":
             if not os.path.isdir(os.path.join(in_dir, filename)):
                 print(filename + "...", end='')
                 try:
-                    anonymize(os.path.join(in_dir, filename), os.path.join(out_dir, filename))
+                    anonymizefile(os.path.join(in_dir, filename), os.path.join(out_dir, filename))
                 except InvalidDicomError:
                     print("Not a valid dicom file, may need force=True on read_file\r")
                 else:
                     print("done\r")
     else:  # first arg not a directory, assume two files given
-        in_filename = arg1
-        out_filename = arg2
-        anonymize(in_filename, out_filename)
+        in_filename = inp
+        out_filename = out
+        anonymizefile(in_filename, out_filename)
     print()

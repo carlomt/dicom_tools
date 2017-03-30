@@ -3,7 +3,7 @@ import glob
 import argparse
 from dicom_tools.anonymize import anonymize
 from dicom_tools.ifNeededMkdir import ifNeededMkdir
-import dicom
+import dicom, os
 
 usage = """
 Usage:
@@ -35,6 +35,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                         action="store_true")
 
+    args = parser.parse_args()
     inputfile = args.inputfile
     outpath = args.outpath
     verbose = args.verbose

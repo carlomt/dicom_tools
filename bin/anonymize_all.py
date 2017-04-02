@@ -4,6 +4,7 @@ import argparse
 from dicom_tools.anonymize import anonymize
 from dicom_tools.ifNeededMkdir import ifNeededMkdir
 from dicom_tools.newNameFromMetadata import newNameFromMetadata
+from dicom_tools.splitWithEscapes import splitWithEscapes
 import dicom, os, shutil
 
 usage = """
@@ -37,25 +38,30 @@ if __name__ == "__main__":
         for linenumber, line in enumerate(fin):
             if line[0] == '#':
                 continue
-            lines = line.split()
+            lines =splitWithEscapes(line,' ','\\',verbose)
             if len(lines) == 0:
                 continue
             if lines[0][0] == '#':
                 continue
-            if len(lines) !=6:
-                print("ERROR line "+str(linenumber)+ " length is not 6, check it!")
+            if len(lines) ==6:
+                patientID = lines[0]
+                pathROI = lines[2]
+                timeflag = int(lines[3])
+                ypT = lines[4]
+                pathT2 = lines[1]
+                roinorm = lines[5]                
+            elif len(lines) ==5:
+                roinorm = False
+                patientID = lines[0]
+                pathROI = lines[3]
+                timeflag = int(lines[1])
+                ypT = lines[4]
+                pathT2 = lines[2]
+            else:
+                print("WARNING: line "+str(linenumber)+ " length is not 6 nor 5, check it!")
                 for wordnum, word in enumerate(lines):
                     print(wordnum, word)
-            patientID = lines[0]
-            print("working on patient: "+patientID)
-            pathT2 = lines[1]
-            print("in the directory: "+pathT2)
-            pathROI = lines[2]
-            timeflag = int(lines[3])
-            ypT = lines[4]
-            roinorm = lines[5]
-
-            newname = newNameFromMetadata(pathT2)
+                    
             timestring=""
             if timeflag == 0:
                 timestring = "pre"
@@ -64,15 +70,24 @@ if __name__ == "__main__":
             elif timeflag == 2:
                 timestring = "post"
             else:
-                print("ERROR","timestring not recognized:",timestring,"line:",linenumber)
+                print("ERROR","timestring not recognized:",timestring,"line:",linenumber)                    
+            if pathT2 == "None":
+                print("Patient",patientID,"missing T2",timestring)
+                continue
+            
+            print("working on patient: "+patientID)            
+            print("in the directory: "+pathT2)
+
+            newname = newNameFromMetadata(pathT2, verbose)
+
             
             newdir = outpath+"/"+newname+"/"+timestring+"/"
-            anonymize(pathT2,newdir+"T2/",newname)
+            anonymize(pathT2,newdir+"T2/",newname,verbose)
 
             if len(glob.glob(pathROI+"/*.dicom")) >1 :
                 if verbose:
                     print("anonynizing",pathROI,"into:",newdir+"/ROI/")
-                anonymize(pathROI,newdir+"/ROI/",newname)
+                anonymize(pathROI,newdir+"/ROI/",newname,verbose)
             else:
                 files = glob.glob(pathROI+"/*.nrrd")
                 for ifile, thisfile in enumerate(files):
@@ -81,11 +96,12 @@ if __name__ == "__main__":
                         print("copying",thisfile,newdir+"/ROI/roi"+str(ifile)+".nrrd")
                     shutil.copyfile(thisfile,newdir+"/ROI/roi"+str(ifile)+".nrrd")
 
-            if verbose:
-                print("copying",roinorm,newdir+"roinormmuscle.myroi")
-            shutil.copyfile(roinorm,newdir+"roinormmuscle.myroi")
+            if roinorm:
+                if verbose:
+                    print("copying",roinorm,newdir+"roinormmuscle.myroi")
+                shutil.copyfile(roinorm,newdir+"roinormmuscle.myroi")
 
-            infofile = open(newdir+"info.txt",'a')
+            infofile = open(newdir+"info.txt",'w')
             infofile.write("name: \t"+newname+"\n")
             infofile.write("time: \t"+timestring+"\n")
             infofile.write("ypT:  \t"+ypT+"\n")

@@ -1,8 +1,11 @@
 import os
 import dicom
 
-def newNameFromMetadata(in_dir):
+def newNameFromMetadata(in_dir, verbose=False):
     filenames = os.listdir(in_dir)
+    if verbose:
+        print("newNameFromMetadata: input directory", in_dir)
+        print("newNameFromMetadata: files in the direcotry", filenames)        
     filename = filenames[0]
     # Load the current dicom file to 'anonymize'
     dataset = dicom.read_file(in_dir+"/"+filename)

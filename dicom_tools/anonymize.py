@@ -96,7 +96,7 @@ def anonymizefile(filename, output_filename, new_person_name="AUTO",
 #     arg1, arg2 = sys.argv[1:]
 
 
-def anonymize(inp, out, new_person_name="AUTO"):
+def anonymize(inp, out, new_person_name="AUTO",verbose=False):
     if os.path.isdir(inp):
         in_dir = inp
         out_dir = out
@@ -111,6 +111,10 @@ def anonymize(inp, out, new_person_name="AUTO"):
             if not os.path.isdir(os.path.join(in_dir, filename)):
                 print(filename + "...", end='')
                 try:
+                    if verbose:
+                        print("anonymize",os.path.join(in_dir, filename),
+                                  os.path.join(out_dir, filename),
+                                  new_person_name)
                     anonymizefile(os.path.join(in_dir, filename),
                                   os.path.join(out_dir, filename),
                                   new_person_name)

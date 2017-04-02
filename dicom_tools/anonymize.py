@@ -108,6 +108,7 @@ def anonymize(inp, out, new_person_name="AUTO",verbose=False):
 
         filenames = os.listdir(in_dir)
         for filename in filenames:
+            if filename=="DICOMDIR": continue
             if not os.path.isdir(os.path.join(in_dir, filename)):
                 print(filename + "...", end='')
                 try:

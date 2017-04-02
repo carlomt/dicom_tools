@@ -15,6 +15,8 @@ def splitWithEscapes(theString,splittingChar=' ',escapeChar='\\',verbose=False):
     for word in words:
         if word=='':
             words.remove(word)
+        if word=='\n':
+            words.remove(word)            
     if verbose:
         print("splitWithEscapes",words)
     return words

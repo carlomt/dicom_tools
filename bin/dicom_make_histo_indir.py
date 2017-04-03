@@ -109,7 +109,11 @@ for patientdir in patientdirs:
         
         #         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
-        data, ROI = freader.read(True)
+        try:
+            data, ROI = freader.read(raw=True)
+        except NotImplementedError:
+            data = freader.readUsingGDCM(raw=True)
+            ROI = freader.readROI(raw=True)
         
         roinorm=False
         

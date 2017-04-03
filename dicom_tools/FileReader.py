@@ -18,7 +18,11 @@ class FileReader:
         if self.verbose:
             print("FileReader: init verbose\n")
         self.infiles = []
-
+        self.data = []
+        self.dataRGB = []
+        self.rawROI = []
+        self.ROI = []
+        
             
     def loadDCMfiles(self):
         if self.verbose:
@@ -82,60 +86,33 @@ class FileReader:
         self.scaleFactor=dicoms[0].SliceThickness/dicoms[0].PixelSpacing[0]
         if verbose:
             print("scaleFactor",self.scaleFactor)
-    
-        data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
-        dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
+
+        self.data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
+            
+        self.dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
         if verbose:
-            print("dataRGB.shape",dataRGB.shape)
-        rawROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
-        ROI=np.full(tuple([len(dicoms)])+dicoms[0].pixel_array.shape,False,dtype=bool)
+            print("dataRGB.shape",self.dataRGB.shape)
 
         if inpathROI:
-            if verbose:
-                print("ROI requested, path: ",inpathROI)
-            infilesROInrrd = glob.glob(inpathROI+"/*.nrrd")
-            if verbose:
-                print(len(infilesROInrrd),"nrrd files found in ROI path: ")
-            if len(infilesROInrrd) ==1 :
-                if verbose:
-                    print("nrrd ROI file: ",infilesROInrrd)
-                nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
-                # print nrrdROItmp.shape
-                nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
-                for i, fetta in enumerate(reversed(nrrdROI)) :
-                    rawROI[i] = fetta
-                    ROI[i] = fetta
-            elif len(infilesROInrrd) >1:
-                print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
-            else:
-                infilesROI = glob.glob(inpathROI+"/*.dcm")
-                if verbose:
-                    print(len(infilesROI)," files will be imported for the ROI")
-                if len(infilesROI) != len(infiles):
-                    print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
-                    print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
-                dicomsROI=[]
-                for infileROI in infilesROI:
-                    dicomsROI.append(dicom.read_file(infileROI))
+            self.readROI(raw)
+        else:
+            self.rawROI=np.full(self.data.shape,False,dtype=bool)
+            self.ROI=np.full(self.data.shape,False,dtype=bool)
 
-                for i, thisROI in enumerate(reversed(dicomsROI)):
-                    pix_arr = thisROI.pixel_array
-                    ROI[i] = pix_arr.T
-                    rawROI[i] = pix_arr.T
-        # 
+            # 
         
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
-            dataRGB[i,:,:,2] = dataRGB[i,:,:,0] = data[i] = pix_arr.T
-            dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
+            self.dataRGB[i,:,:,2] = self.dataRGB[i,:,:,0] = self.data[i] = pix_arr.T
+            self.dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T, self.ROI[i])
 
         if raw:
             if verbose:
                 print("returning raw data")
-            return data[:,:,::-1], rawROI[:,:,::-1]
+            return self.data[:,:,::-1], self.rawROI[:,:,::-1]
     
 
-        return dataRGB[:,:,::-1,:], ROI[:,:,::-1]
+        return self.dataRGB[:,:,::-1,:], self.ROI[:,:,::-1]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
         # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])
@@ -161,13 +138,58 @@ class FileReader:
         imgOriginal = reader.Execute()
         if sitkout:
             return imgOriginal
-        data = sitk.GetArrayFromImage(imgOriginal)
-        data = data.swapaxes(1,2)
-        data = data[::-1,:,::-1]
+        self.data = sitk.GetArrayFromImage(imgOriginal)
+        self.data = self.data.swapaxes(1,2)
+        self.data = self.data[::-1,:,::-1]
         self.scaleFactor = imgOriginal.GetSpacing()[2]/imgOriginal.GetSpacing()[0]
         if raw:
-            return data
+            return self.data
         else:
-            dataRGB=np.zeros(data.shape+tuple([3]))
-            dataRGB[:,:,:,0] = dataRGB[:,:,:,1] = dataRGB[:,:,:,2] = data
-            return dataRGB
+            self.dataRGB=np.zeros(self.data.shape+tuple([3]))
+            self.dataRGB[:,:,:,0] = self.dataRGB[:,:,:,1] = self.dataRGB[:,:,:,2] = self.data
+            return self.dataRGB
+
+
+    def readROI(self, raw=False):
+        verbose = self.verbose
+        inpathROI = self.inpathROI
+
+        self.rawROI=np.full(self.data.shape,False,dtype=bool)
+        self.ROI=np.full(self.data.shape,False,dtype=bool)
+
+        if verbose:
+            print("ROI requested, path: ",inpathROI)
+        infilesROInrrd = glob.glob(inpathROI+"/*.nrrd")
+        if verbose:
+            print(len(infilesROInrrd),"nrrd files found in ROI path: ")
+        if len(infilesROInrrd) ==1 :
+            if verbose:
+                print("nrrd ROI file: ",infilesROInrrd)
+            nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
+            # print nrrdROItmp.shape
+            nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
+            for i, fetta in enumerate(reversed(nrrdROI)) :
+                self.rawROI[i] = fetta
+                self.ROI[i] = fetta
+        elif len(infilesROInrrd) >1:
+            print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
+        else:
+            infilesROI = glob.glob(inpathROI+"/*.dcm")
+            if verbose:
+                print(len(infilesROI)," files will be imported for the ROI")
+            if len(infilesROI) != len(infiles):
+                print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
+                print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
+            dicomsROI=[]
+            for infileROI in infilesROI:
+                dicomsROI.append(dicom.read_file(infileROI))
+
+            for i, thisROI in enumerate(reversed(dicomsROI)):
+                pix_arr = thisROI.pixel_array
+                self.ROI[i] = pix_arr.T
+                self.rawROI[i] = pix_arr.T
+        if raw:
+            if verbose:
+                print("returning raw roi")
+            return self.rawROI[:,:,::-1]
+        return self.ROI[:,:,::-1]

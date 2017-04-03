@@ -4,6 +4,8 @@ import numpy as np
 import dicom
 import nrrd
 import os
+#from dicom_tools.roiFileHandler import roiFileHandler
+from dicom_tools.nrrdFileHandler import nrrdFileHandler
 import SimpleITK as sitk
 
 # se raw=True torna un tensore con esattamente le dimensioni dei dicom, altrimenti replica le fette per riprodurre l'aspect ratio (ovvero tenere conto del fatto che i voxel sono molto piu' profondi delle dimensioni su X e Y)
@@ -18,6 +20,7 @@ class FileReader:
         if self.verbose:
             print("FileReader: init verbose\n")
         self.infiles = []
+        self.infilesROI = []        
         self.data = []
         self.dataRGB = []
         self.rawROI = []
@@ -153,7 +156,8 @@ class FileReader:
     def readROI(self, raw=False):
         verbose = self.verbose
         inpathROI = self.inpathROI
-
+        inpath = self.inpath
+        
         self.rawROI=np.full(self.data.shape,False,dtype=bool)
         self.ROI=np.full(self.data.shape,False,dtype=bool)
 
@@ -165,23 +169,28 @@ class FileReader:
         if len(infilesROInrrd) ==1 :
             if verbose:
                 print("nrrd ROI file: ",infilesROInrrd)
-            nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
-            # print nrrdROItmp.shape
-            nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
-            for i, fetta in enumerate(reversed(nrrdROI)) :
-                self.rawROI[i] = fetta
-                self.ROI[i] = fetta
+            # nrrdROItmp, nrrdROIoptions = nrrd.read(infilesROInrrd[0])
+            # # print nrrdROItmp.shape
+            # nrrdROI = nrrdROItmp.swapaxes(0,1).swapaxes(0,2)
+            # for i, fetta in enumerate(reversed(nrrdROI)) :
+            #     self.rawROI[i] = fetta
+            #     self.ROI[i] = fetta
+            roiFileReader = nrrdFileHandler(self.verbose)
+            return roiFileReader.read(infilesROInrrd[0])
+                
         elif len(infilesROInrrd) >1:
             print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
+            roiFileReader = nrrdFileHandler(self.verbose)
+            return roiFileReader.read(infilesROInrrd[0])
         else:
-            infilesROI = glob.glob(inpathROI+"/*.dcm")
+            self.infilesROI = glob.glob(inpathROI+"/*.dcm")
             if verbose:
-                print(len(infilesROI)," files will be imported for the ROI")
-            if len(infilesROI) != len(infiles):
-                print("ERROR: in the directory ",inpath," there are ",len(infiles)," dicom files")
-                print("while in the ROI directory ",inpathROI," there are ",len(infilesROI)," dicom files")
+                print(len(self.infilesROI)," files will be imported for the ROI")
+            if len(self.infilesROI) != len(self.infiles):
+                print("ERROR: in the directory ",inpath," there are ",len(self.infiles)," dicom files")
+                print("while in the ROI directory ",inpathROI," there are ",len(self.infilesROI)," dicom files")
             dicomsROI=[]
-            for infileROI in infilesROI:
+            for infileROI in self.infilesROI:
                 dicomsROI.append(dicom.read_file(infileROI))
 
             for i, thisROI in enumerate(reversed(dicomsROI)):

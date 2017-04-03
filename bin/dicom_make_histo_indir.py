@@ -11,7 +11,6 @@ from dicom_tools.make_histo import make_histo
 from dicom_tools.FileReader import FileReader
 import ROOT
 from array import array
-from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.info_file_parser import info_file_parser
 from dicom_tools.timeflagconverter import timeflagconverter_string2int
@@ -100,7 +99,7 @@ for patientdir in patientdirs:
         if os.path.isdir(pathT2):
             print("T2 dir found.")
         pathROI = analasisysdir + "ROI/"
-        if os.path.isdir(pathT2):
+        if os.path.isdir(pathROI):
             print("ROI dir found.")
 
         infos = info_file_parser(analasisysdir + "info.txt")

@@ -17,7 +17,7 @@ class FileReader:
         self.scaleFactor = None
         if self.verbose:
             print("FileReader: init verbose\n")
-        self.infiles = None
+        self.infiles = []
 
             
     def loadDCMfiles(self):
@@ -28,13 +28,26 @@ class FileReader:
 
         if os.path.isdir(inpath):
             self.infiles = glob.glob(inpath+"/*.dcm")
+            if len(self.infiles)==0:
+                print("FileReader WARNING: there are no .dcm files in dir",inpath,"trying to open files without extension")
+                allfiles = glob.glob(inpath+"/*")
+                if verbose:
+                    print("len(allfiles):",len(allfiles))
+                for thisfile in allfiles:
+                    fname = thisfile.split('/')[-1]
+                    if verbose:
+                        print(fname)
+                    if not '.' in fname:
+                        self.infiles.append(thisfile)
+                if verbose:
+                    print("len(self.infiles):",len(self.infiles))                        
         else:
             self.infiles = inpath
 
         if verbose:
-            print("funciont read file V 1.0")
+            print("funciont read file V 1.1")
             print("input directory:\n",inpath)
-            print(len(infiles)," files will be imported")
+            print(len(self.infiles)," files will be imported")
 
 
 

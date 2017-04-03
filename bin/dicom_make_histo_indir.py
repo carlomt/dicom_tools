@@ -23,6 +23,7 @@ parser.add_argument("inputdirecotry", help="path of the input direcotry")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
+parser.add_argument("-jo", "--justone", help="limit the analisys to one subdirecotry")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
 
@@ -36,6 +37,7 @@ inputdir = args.inputdirecotry
 if args.verbose:
     print("Verbose\n")
 
+    
 outfile = ROOT.TFile(outfname,"RECREATE")
 patientID= bytearray(64)
 timeflag = array('i', [0])
@@ -75,8 +77,14 @@ tree.Branch("kurtosisPF",kurtosisPF,"kurtosisPF[nFette]/F")
 
 patientdirs= glob.glob(inputdir+"*/")
 
+if args.justone:
+    print("Looking for dir",args.justone)
+
 for patientdir in patientdirs:
+
     print(patientdir)
+    if args.justone:
+        if not args.justone in patientdir: continue
     
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:

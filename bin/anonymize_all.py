@@ -5,6 +5,7 @@ from dicom_tools.anonymize import anonymize
 from dicom_tools.ifNeededMkdir import ifNeededMkdir
 from dicom_tools.newNameFromMetadata import newNameFromMetadata
 from dicom_tools.splitWithEscapes import splitWithEscapes
+from dicom_tools.timeflagconverter import timeflagconverter_int2string
 import dicom, os, shutil
 
 usage = """
@@ -62,15 +63,8 @@ if __name__ == "__main__":
                 for wordnum, word in enumerate(lines):
                     print(wordnum, word)
                     
-            timestring=""
-            if timeflag == 0:
-                timestring = "pre"
-            elif timeflag==1:
-                timestring = "int"
-            elif timeflag == 2:
-                timestring = "post"
-            else:
-                print("ERROR","timestring not recognized:",timestring,"line:",linenumber)                    
+            timestring=timeflagconverter_int2string(timeflag)
+
             if pathT2 == "None":
                 print("Patient",patientID,"missing T2",timestring)
                 continue

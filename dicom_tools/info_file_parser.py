@@ -6,6 +6,7 @@ def info_file_parser(filename, verbose=False):
     for iline, line in enumerate(infile):
         if line[0]=='#': continue
         lines = line.split()
+        if len(lines)<2 : continue
         if lines[0][0]=='#': continue
         infotype = lines[0]
         infotype=infotype.replace(':','')

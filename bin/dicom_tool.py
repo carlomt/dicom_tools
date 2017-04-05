@@ -21,10 +21,13 @@ from dicom_tools.connectedThreshold import connectedThreshold
 from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
 from skimage.filters.rank import entropy as skim_entropy
+from skimage.filters.rank import gradient as skim_gradient
 from skimage.morphology import disk as skim_disk
+from skimage.morphology import square as skim_square
 from skimage import img_as_ubyte
 from skimage.transform import rescale
 from skimage import exposure
+from scipy.ndimage.morphology import binary_fill_holes
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -176,6 +179,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         entropyAction = QtGui.QAction("&Entropy",self)
         entropyAction.setStatusTip('Entropy')
         entropyAction.triggered.connect(self.entropy)
+
+        gradientAction = QtGui.QAction("&Gradient",self)
+        gradientAction.setStatusTip('Gradient')
+        gradientAction.triggered.connect(self.gradient)
         
         aboutAction = QtGui.QAction("&About this program", self)
         aboutAction.setStatusTip('About this program')
@@ -236,6 +243,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
         analysisMenu.addAction(entropyAction)
+        analysisMenu.addAction(gradientAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -838,21 +846,61 @@ class Window_dicom_tool(QtGui.QMainWindow):
         imagemax = np.max(image)
         # image = img_as_ubyte(image)
         # image = rescale(image,{-1,1})
-        image = exposure.rescale_intensity(image, in_range='uint8')
-        entropyImg = skim_entropy(image,skim_disk(2))
+        image = exposure.rescale_intensity(image, in_range='uint16')
+        
+        if len(self.ROI)!=0:            
+            entropyImg = skim_entropy(image,skim_square(5), mask=self.ROI[self.layer])
+        else:
+            entropyImg = skim_entropy(image,skim_square(5))
+        # entropyImg = self.getLogOfImg(entropyImg+1.)
         minval = np.min( entropyImg[np.nonzero(entropyImg)] )
-        self.img1b.setImage(entropyImg, levels=( minval, np.max(entropyImg)))
+        self.img1b.setImage(entropyImg*1., levels=( minval, np.max(entropyImg)))
         self.p2.autoRange()
         self.img1b.updateImage()
-        self.label2_shape.setText("shape: "+str(entropyImg.shape))
-        self.label2_size.setText("size: "+str(entropyImg.size))
-        self.label2_min.setText("min: "+str(minval))
-        self.label2_max.setText("max: "+str( np.max(entropyImg)))
-        self.label2_mean.setText("mean: "+str(entropyImg.mean()))
-        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(entropyImg) ))
-        self.label2_sum.setText("sum: "+str( ndimage.sum(entropyImg) ))
+        self.setlabel2values(entropyImg)
 
+    def gradient(self):
+        image = self.arr[:,:,2]
+        if len(self.ROI)!=0:
+            image = image*self.ROI[self.layer]
+        imagemin = np.min(image[np.nonzero(image)])
+        imagemax = np.max(image)
+        # image = img_as_ubyte(image)
+        # image = rescale(image,{-1,1})
+        image = exposure.rescale_intensity(image, in_range='uint16')
+        if len(self.ROI)!=0:  
+            gradientImg = skim_gradient(image,skim_square(5), mask=self.ROI[self.layer])
+        else:
+            gradientImg = skim_gradient(image,skim_square(5))
+            # gradientImg = self.getLogOfImg(gradientImg+1.)
+        minval = np.min( gradientImg[np.nonzero(gradientImg)] )
+        self.img1b.setImage(gradientImg*1., levels=( minval, np.max(gradientImg)))
+        self.p2.autoRange()
+        self.img1b.updateImage()
+        self.setlabel2values(gradientImg)
         
+    def setlabel2values(self, img):
+        minval = np.min( img[np.nonzero(img)] )
+        self.label2_shape.setText("shape: "+str(img.shape))
+        self.label2_size.setText("size: "+str(img.size))
+        self.label2_min.setText("min: "+str(minval))
+        self.label2_max.setText("max: "+str( np.max(img)))
+        self.label2_mean.setText("mean: "+str(img.mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(img) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(img) ))
+
+    def getLogColorMap(self, img):
+        v = pg.image(np.exp(img))
+        pos = np.exp(np.linspace(-5, 0, 10))
+        color = np.empty((10,4), dtype=np.ubyte)
+        color[:,:3] = np.linspace(0, 255, 10).reshape(10, 1)
+        color[:,3] = 255
+        cm = pg.ColorMap(pos, color)
+        return cm
+
+    def getLogOfImg(self, img):
+        return np.log(1.*img[np.nonzero(img)])
+    
 if __name__ == '__main__':
 
     import sys

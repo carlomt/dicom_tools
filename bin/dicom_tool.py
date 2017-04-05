@@ -20,6 +20,8 @@ from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
 from dicom_tools.connectedThreshold import connectedThreshold
 from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
+from skimage.filters.rank import entropy as skim_entropy
+from skimage.morphology import disk as skim_disk
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -91,6 +93,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.zview = not self.xview and not self.yview
         self.imgScaleFactor = 1
         self.secondaryImage3D = False
+        self.ROI=[]
         
         if args.outfile:
             outfname = args.outfile
@@ -167,6 +170,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         histoOfAllLayerAction.setStatusTip('Histogram of all layer')
         histoOfAllLayerAction.triggered.connect(self.histoOfAllLayer)
 
+        entropyAction = QtGui.QAction("&Entropy",self)
+        entropyAction.setStatusTip('Entropy')
+        entropyAction.triggered.connect(self.entropy)
+        
         aboutAction = QtGui.QAction("&About this program", self)
         aboutAction.setStatusTip('About this program')
         aboutAction.triggered.connect(self.about)
@@ -225,6 +232,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
+        analysisMenu.addAction(entropyAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -697,15 +705,15 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
         roiFileReader = nrrdFileHandler(self.verbose)
-        ROI = roiFileReader.read(filename)
-        self.highlightROI(ROI)
+        self.ROI = roiFileReader.read(filename)
+        self.highlightROI(self.ROI)
 
     def highlightMyROI(self, colorchannel=0):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        
         reader = roiFileHandler(self.verbose)
         myroi, roisSetted = reader.read(filename)
-        ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
-        self.highlightROI(ROI)
+        self.ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
+        self.highlightROI(self.ROI)
 
     def saveToImage(self, extension):
         filename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File'))
@@ -818,6 +826,24 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.ActivateConnectedThreshold()
         self.label.setText("Click on a region to select its neighborhood. Applying Curvature Flow Filter.")        
         self.filterBeforeSegmentation=True
+
+    def entropy(self):
+        image = np.ndarray.astype(self.arr[:,:,2],dtype=np.uint8)
+        if len(self.ROI)!=0:
+            image = image*self.ROI[self.layer]
+
+        entropyImg = skim_entropy(image,skim_disk(5))
+        minval = np.min( entropyImg[np.nonzero(entropyImg)] )
+        self.img1b.setImage(entropyImg, levels=( minval, np.max(entropyImg)))
+        self.p2.autoRange()
+        self.img1b.updateImage()
+        self.label2_shape.setText("shape: "+str(entropyImg.shape))
+        self.label2_size.setText("size: "+str(entropyImg.size))
+        self.label2_min.setText("min: "+str(minval))
+        self.label2_max.setText("max: "+str( np.max(entropyImg)))
+        self.label2_mean.setText("mean: "+str(entropyImg.mean()))
+        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(entropyImg) ))
+        self.label2_sum.setText("sum: "+str( ndimage.sum(entropyImg) ))
 
         
 if __name__ == '__main__':

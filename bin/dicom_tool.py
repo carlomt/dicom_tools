@@ -22,6 +22,9 @@ from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
 from skimage.filters.rank import entropy as skim_entropy
 from skimage.morphology import disk as skim_disk
+from skimage import img_as_ubyte
+from skimage.transform import rescale
+from skimage import exposure
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -828,11 +831,15 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.filterBeforeSegmentation=True
 
     def entropy(self):
-        image = np.ndarray.astype(self.arr[:,:,2],dtype=np.uint8)
+        image = self.arr[:,:,2]
         if len(self.ROI)!=0:
             image = image*self.ROI[self.layer]
-
-        entropyImg = skim_entropy(image,skim_disk(5))
+        imagemin = np.min(image[np.nonzero(image)])
+        imagemax = np.max(image)
+        # image = img_as_ubyte(image)
+        # image = rescale(image,{-1,1})
+        image = exposure.rescale_intensity(image, in_range='uint8')
+        entropyImg = skim_entropy(image,skim_disk(2))
         minval = np.min( entropyImg[np.nonzero(entropyImg)] )
         self.img1b.setImage(entropyImg, levels=( minval, np.max(entropyImg)))
         self.p2.autoRange()

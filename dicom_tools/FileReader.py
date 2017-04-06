@@ -23,7 +23,6 @@ class FileReader:
         self.infilesROI = []        
         self.data = []
         self.dataRGB = []
-        self.rawROI = []
         self.ROI = []
         
             
@@ -97,9 +96,8 @@ class FileReader:
             print("dataRGB.shape",self.dataRGB.shape)
 
         if inpathROI:
-            self.readROI(raw)
+            self.readROI()
         else:
-            self.rawROI=np.full(self.data.shape,False,dtype=bool)
             self.ROI=np.full(self.data.shape,False,dtype=bool)
 
             # 
@@ -112,7 +110,7 @@ class FileReader:
         if raw:
             if verbose:
                 print("returning raw data")
-            return self.data[:,:,::-1], self.rawROI[:,:,::-1]
+            return self.data[:,:,::-1], self.ROI[:,:,::-1]
     
 
         return self.dataRGB[:,:,::-1,:], self.ROI[:,:,::-1]
@@ -153,12 +151,11 @@ class FileReader:
             return self.dataRGB
 
 
-    def readROI(self, raw=False):
+    def readROI(self):
         verbose = self.verbose
         inpathROI = self.inpathROI
         inpath = self.inpath
         
-        self.rawROI=np.full(self.data.shape,False,dtype=bool)
         self.ROI=np.full(self.data.shape,False,dtype=bool)
 
         if verbose:
@@ -176,9 +173,10 @@ class FileReader:
             #     self.rawROI[i] = fetta
             #     self.ROI[i] = fetta
             roiFileReader = nrrdFileHandler(self.verbose)
+            self.ROI = roiFileReader.read(infilesROInrrd[0])
             if verbose:
                 print("FileRader.readROI non zero elements",np.count_nonzero(self.ROI))
-            return roiFileReader.read(infilesROInrrd[0])
+            return self.ROI
                 
         elif len(infilesROInrrd) >1:
             print ("ERROR: in the directory ",inpathROI," there is more than 1 nrrd file",infilesROInrrd)
@@ -198,9 +196,5 @@ class FileReader:
             for i, thisROI in enumerate(reversed(dicomsROI)):
                 pix_arr = thisROI.pixel_array
                 self.ROI[i] = pix_arr.T
-                self.rawROI[i] = pix_arr.T
-        if raw:
-            if verbose:
-                print("returning raw roi")
-            return self.rawROI[:,:,::-1]
+
         return self.ROI[:,:,::-1]

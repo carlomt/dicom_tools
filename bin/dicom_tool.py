@@ -20,6 +20,7 @@ from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
 from dicom_tools.connectedThreshold import connectedThreshold
 from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
+from dicom_tools.colorize import colorize
 from skimage.filters.rank import entropy as skim_entropy
 from skimage.filters.rank import gradient as skim_gradient
 from skimage.morphology import disk as skim_disk
@@ -843,7 +844,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             entropyImg = skim_entropy(image,skim_square(5))
         # entropyImg = self.getLogOfImg(entropyImg+1.)
         minval = np.min( entropyImg[np.nonzero(entropyImg)] )
-        self.img1b.setImage(entropyImg*1., levels=( minval, np.max(entropyImg)))
+        # self.img1b.setImage(entropyImg*1., levels=( minval, np.max(entropyImg)))
+        colimg= colorize(entropyImg*1.)
+        self.img1b.setImage(colimg)#, levels=( minval, np.max(entropyImg)))        
         self.p2.autoRange()
         self.img1b.updateImage()
         self.setlabel2values(entropyImg)

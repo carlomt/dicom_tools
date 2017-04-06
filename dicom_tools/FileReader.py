@@ -176,6 +176,8 @@ class FileReader:
             #     self.rawROI[i] = fetta
             #     self.ROI[i] = fetta
             roiFileReader = nrrdFileHandler(self.verbose)
+            if verbose:
+                print("FileRader.readROI non zero elements",np.count_nonzero(self.ROI))
             return roiFileReader.read(infilesROInrrd[0])
                 
         elif len(infilesROInrrd) >1:

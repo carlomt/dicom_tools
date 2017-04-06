@@ -383,19 +383,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             toshowvalues = thisroi = self.arr[:,:,2]*self.bitmapROI[self.layer]
             
         self.img1b.setImage(thisroi, levels=(0, thisroi.max()))
-        self.label2_shape.setText("shape: "+str(toshowvalues.shape))
-        self.label2_size.setText("size: "+str(toshowvalues.size))
-        self.label2_min.setText("min: "+str(toshowvalues.min()))
-        self.label2_max.setText("max: "+str(toshowvalues.max()))
-        self.label2_mean.setText("mean: "+str(toshowvalues.mean()))
-        self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(toshowvalues) ))
-        self.label2_sum.setText("sum: "+str( ndimage.sum(toshowvalues) ))
-        # print("entropy: ",entropy(thisroi, disk(5))
-        # print("maximum: ",maximum(thisroi, disk(5))
-        # print("\n"
-        # print(disk(5)
-        # print("\n")
-        self.p2.autoRange()
+        self.setlabel2values(toshowvalues)
+        # self.p2.autoRange()
 
     def updatemain(self):
 
@@ -433,7 +422,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.img1a.updateImage()
         if self.secondaryImage3D:
             self.img1b.setImage(self.secondaryImage[self.layer])
-            self.p2.autoRange()
+            # self.p2.autoRange()
             self.img1b.updateImage()
         
     def nextimg(self):

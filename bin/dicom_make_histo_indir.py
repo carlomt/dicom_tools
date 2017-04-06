@@ -92,7 +92,10 @@ for patientdir in patientdirs:
         pathT2 = analasisysdir + "T2/"
         
         nFette[0] = 0
-        patID = patientdir.replace('/','')
+        if patientdir[-1]=='/':
+            patID = patientdir.split('/')[-2].replace('.','')
+        else:
+            patID = patientdir.split('/')[-1].replace('.','')
         patientID[:63] = patID
         print("working on patient: "+patientID)
         print("in the directory: "+pathT2)

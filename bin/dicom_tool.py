@@ -80,7 +80,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
         parser.add_argument("-l", "--layer", help="select layer",
                             type=int)
-        parser.add_argument("-f", "--filterROI", help="filter the image with a ROI (folder path, nrrd file supported)")
+        parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
+        parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
         parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
         parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
         group = parser.add_mutually_exclusive_group()
@@ -136,6 +137,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveROIonNRRD.setStatusTip('Save ROI on File (nrrd format)')
         saveROIonNRRD.triggered.connect(self.nrrdroi_file_save)
 
+        highlightDCMROIaction = QtGui.QAction("&Highlight DICOM ROI", self)
+        highlightDCMROIaction.setStatusTip("&Highlight ROI (dcm folder)")
+        highlightDCMROIaction.triggered.connect(self.highlightDCMROI)
+        
         highlightnrrdROIaction = QtGui.QAction("&Highlight nrrd ROI", self)
         highlightnrrdROIaction.setStatusTip("&Highlight ROI (nrrd file)")
         highlightnrrdROIaction.triggered.connect(self.highlightnrrdROI)
@@ -233,6 +238,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         ROIfileMenu.addAction(openMyROIFile)
         ROIfileMenu.addAction(saveMyROIFile)
         ROIfileMenu.addAction(saveROIonNRRD)
+        ROIfileMenu.addAction(highlightDCMROIaction)
         ROIfileMenu.addAction(highlightnrrdROIaction)
         ROIfileMenu.addAction(highlightMyROIaction)        
         
@@ -385,7 +391,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if args.inputpath:
             self.read_dicom_in_folder(args.inputpath)
 
-        
+        if args.roipath:
+            self.read_roi_dicom_in_folder(args.roipath)
+
+        if args.roifile:
+            self.read_nrrd_roi(arg.roifile)
+
+            
     def update(self):
         if self.manualROI:
             thisroi = self.roi.getArrayRegion(self.arr, self.img1a).astype(float)
@@ -613,8 +625,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         self.bitmapROI = np.full( self.dataZ[:,:,:,0].shape,False,dtype=bool)
                 
-
-            
+    def read_roi_dicom_in_folder(self, path):
+        freader = FileReader(path, False, self.verbose)
+        self.ROI = freader.readROI()
+        self.highlightROI(self.ROI)
+        
     def select_dicom_folder(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
@@ -730,9 +745,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
+        self.read_nrrd_roi(filename)
+        
+    def read_nrrd_roi(self, filename):
         roiFileReader = nrrdFileHandler(self.verbose)
         self.ROI = roiFileReader.read(filename)
         self.highlightROI(self.ROI)
+
+    def highlightDCMROI(self):
+        path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
+        if self.verbose:
+            print path
+        self.read_roi_dicom_in_folder(str(path))    
 
     def highlightMyROI(self, colorchannel=0):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        

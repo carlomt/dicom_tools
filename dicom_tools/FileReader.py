@@ -102,18 +102,17 @@ class FileReader:
 
             # 
         
+        if raw:
+            if verbose:
+                print("returning raw data")
+            return self.data[:,:,::-1], self.ROI[:,:,:]
+
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
             self.dataRGB[i,:,:,2] = self.dataRGB[i,:,:,0] = self.data[i] = pix_arr.T
             self.dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T, self.ROI[i])
 
-        if raw:
-            if verbose:
-                print("returning raw data")
-            return self.data[:,:,::-1], self.ROI[:,:,::-1]
-    
-
-        return self.dataRGB[:,:,::-1,:], self.ROI[:,:,::-1]
+        return self.dataRGB[:,:,::-1,:], self.ROI[:,:,:]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
         # dataRGB[i,:,:,2] = pix_arr.T - np.multiply(pix_arr.T,ROI[i])

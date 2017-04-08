@@ -2,6 +2,7 @@ import numpy as np
 import ROOT
 
 def histFromArray(array, nbin=100, name="h", verbose=False):
+    if len(array[np.nonzero(array)]) == 0: return
     minval = np.min(array[np.nonzero(array)])
     maxval = np.max(array)
     # if not nbin:

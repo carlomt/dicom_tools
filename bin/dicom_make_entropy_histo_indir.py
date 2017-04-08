@@ -124,7 +124,7 @@ for patientdir in patientdirs:
             data, ROI = freader.read(raw=True)
         except NotImplementedError:
             data = freader.readUsingGDCM(raw=True)
-            ROI = freader.readROI(raw=True)
+            ROI = freader.readROI()
         
         roinorm=False
         

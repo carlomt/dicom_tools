@@ -24,12 +24,17 @@ def make_histo_entropy(data, ROI, suffix="", verbose=False):
     # nbin = 10000
     # binmin=entropy3D.min() *0.8
     # binmax=entropy3D.max() *1.2
-    his = histFromArray(layer, name="hEntropy"+suffix)
+    if verbose:
+        print("getEntropy creating histogram","hEntropy"+suffix)
+    his = histFromArray(data, name="hEntropy"+suffix)        
     allhistos = []
     
     for layer in entropy3D:
+        if verbose:
+            print("getEntropy creating histogram","hEntropy"+str(layer)+suffix)        
         thishisto = histFromArray(layer, name="hEntropy"+str(layer)+suffix)
-        allhistos.append(thishisto)
+        if thishisto is not None:
+            allhistos.append(thishisto)
 
 
-    return his, allhisto
+    return his, allhistos

@@ -16,7 +16,7 @@ def getEntropy(image, ROI=None, square_size=5, verbose=False):
 
 
 def make_histo_entropy(data, ROI, suffix="", verbose=False):
-    entropy3D = np.zeros( tuple([len(self.data)])+self.data[0,:,:].shape)
+    entropy3D = np.zeros( tuple([len(data)])+data[0,:,:].shape)
     for layer in xrange(0,len(data)):
         entropy3D[layer] = getEntropy(data[layer], ROI[layer])
     

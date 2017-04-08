@@ -395,7 +395,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.read_roi_dicom_in_folder(args.roipath)
 
         if args.roifile:
-            self.read_nrrd_roi(arg.roifile)
+            self.read_nrrd_roi(args.roifile)
 
             
     def update(self):

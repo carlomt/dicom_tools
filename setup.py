@@ -11,11 +11,12 @@ install_req=[
     'scikit-image>=0.12.3',
     'scikit-learn>=0.18',
     'nose>=1.3.7',
-    'SimpleITK>=0.10.0'
+    'SimpleITK>=0.10.0',
+    'tabulate>=0.7.7'
 ]
 
 setup(name='dicom_tools',
-      version='0.61',
+      version='0.7',
       description='Dicom Tool',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

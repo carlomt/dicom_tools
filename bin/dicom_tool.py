@@ -73,24 +73,6 @@ class Window_dicom_tool(QtGui.QMainWindow):
         outfname="roi.txt"
         self.inpath="."        
         
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-v", "--verbose", help="increase output verbosity",
-                            action="store_true")
-        parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
-        parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
-        parser.add_argument("-l", "--layer", help="select layer",
-                            type=int)
-        parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
-        parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
-        parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
-        parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument("-y", "--yview", help="swap axes",
-                           action="store_true")
-        group.add_argument("-x", "--xview", help="swap axes",
-                           action="store_true")
-        
-        args = parser.parse_args()
         self.layer=0
         self.layerZ=0
         self.layerX=0
@@ -951,7 +933,29 @@ class Window_dicom_tool(QtGui.QMainWindow):
 if __name__ == '__main__':
 
     import sys
-    app = QtGui.QApplication(sys.argv)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                        action="store_true")
+    parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
+    parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
+    parser.add_argument("-l", "--layer", help="select layer",
+                        type=int)
+    parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
+    parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
+    parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
+    parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-y", "--yview", help="swap axes",
+                       action="store_true")
+    group.add_argument("-x", "--xview", help="swap axes",
+                       action="store_true")
+    
+    args = parser.parse_args()
+
+
+    
+    app = QtGui.QApplication(args)
     window = Window_dicom_tool()
     window.show()
     sys.exit(app.exec_())

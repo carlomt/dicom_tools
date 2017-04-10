@@ -10,7 +10,9 @@ def histFromArray(array, nbin=100, name="h", verbose=False):
     #     nbin = len(nph)
 
     # nbin = int(nbin)
-    print(type(nbin))
+    if verbose:
+        print("histFromArray creating histogram",name,"with",nbin,"bin")
+        
     h = ROOT.TH1F(name,name,nbin,minval*.9,maxval*1.1)
     for val in array.ravel():
         h.Fill(val)

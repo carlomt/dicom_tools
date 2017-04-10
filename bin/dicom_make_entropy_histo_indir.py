@@ -58,8 +58,8 @@ meanPF     = array('f', nmax*[0])
 stdDevPF   = array('f', nmax*[0])
 skewnessPF = array('f', nmax*[0])
 kurtosisPF = array('f', nmax*[0])
-entropy_meanPF = array('f', [0])
-entropy_varPF = array('f', [0])
+entropy_meanPF = array('f', nmax*[0])
+entropy_varPF = array('f', nmax*[0])
 
 tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch("patientID",patientID,"patientID/C")
@@ -152,9 +152,10 @@ for patientdir in patientdirs:
             continue
             
         patientsuffix = patID + infos["time"]
-        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
-        entropy_his, allentropy_his = make_histo_entropy(data,ROI,patientsuffix)
-    
+        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,
+                                                   args.verbose,roinorm,args.norm)
+        entropy_his, allentropy_his = make_histo_entropy(data,ROI,patientsuffix,
+                                                         args.verbose)
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
         stdDev[0]   = his.GetStdDev()

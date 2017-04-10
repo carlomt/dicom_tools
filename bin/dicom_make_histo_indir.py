@@ -134,7 +134,11 @@ for patientdir in patientdirs:
                 print("norm file read")
         if args.verbose:                
             print("data mean:",data.mean(),"min:",data.min(),"max:",data.max(),"shape:",data.shape)
-            print("ROI mean:",ROI.mean(),"min:",ROI.min(),"max:",ROI.max(),"shape:",ROI.shape)                
+            print("ROI mean:",ROI.mean(),"min:",ROI.min(),"max:",ROI.max(),"shape:",ROI.shape)
+
+        if len(ROI) is not len(data):
+            print("skipping this analysis len(data)",len(data),"len(ROI)",len(ROI))
+            continue
         
         patientsuffix = patID + infos["time"]
         his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)

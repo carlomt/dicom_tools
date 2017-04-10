@@ -76,6 +76,7 @@ class FileReader:
         # Load spacing values (in mm)
         self.ConstPixelSpacing = (float(dicoms[0].PixelSpacing[0]), float(dicoms[0].PixelSpacing[1]), float(dicoms[0].SliceThickness))
         if verbose:
+            print("n dicom files:",len(dicoms))
             print("Voxel dimensions: ", self.ConstPixelSpacing)
 
 
@@ -93,6 +94,7 @@ class FileReader:
             
         self.dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
         if verbose:
+            print("data.shape",self.data.shape)            
             print("dataRGB.shape",self.dataRGB.shape)
 
         if inpathROI:
@@ -102,16 +104,18 @@ class FileReader:
 
             # 
         
-        if raw:
-            if verbose:
-                print("returning raw data")
-            return self.data[:,:,::-1], self.ROI[:,:,:]
 
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array
             self.dataRGB[i,:,:,2] = self.dataRGB[i,:,:,0] = self.data[i] = pix_arr.T
             self.dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T, self.ROI[i])
 
+        if raw:
+            if verbose:
+                print("returning raw data")
+        return self.data[:,:,::-1], self.ROI[:,:,:]
+
+            
         return self.dataRGB[:,:,::-1,:], self.ROI[:,:,:]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2

@@ -122,7 +122,9 @@ with open(inputfile,'r') as fin:
     
             if args.verbose:
                 print("norm file read")
-        
+        if args.verbose:                
+            print("data mean:",data.mean(),"min:",data.min(),"max:",data.max(),"shape:",data.shape)
+            print("ROI mean:",ROI.mean(),"min:",ROI.min(),"max:",ROI.max(),"shape:",ROI.shape)                        
         patientsuffix=lines[0]+str(timeflag[0])
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])

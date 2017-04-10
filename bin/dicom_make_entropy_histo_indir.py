@@ -125,6 +125,8 @@ for patientdir in patientdirs:
         except NotImplementedError:
             data = freader.readUsingGDCM(raw=True)
             ROI = freader.readROI()
+        except ValueError:
+            continue
         
         roinorm=False
         

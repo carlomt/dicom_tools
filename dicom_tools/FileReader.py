@@ -103,7 +103,10 @@ class FileReader:
             self.ROI=np.full(self.data.shape,False,dtype=bool)
 
             # 
-        
+        if len(self.ROI) is not len(self.data):
+            print("FileReader ERROR: ROI and data have different length")
+            raise ValueError('ROI and data have different length',len(self.data),len(self.ROI),
+                             self.inpath, self.inpathROI)
 
         for i, thisdicom in enumerate(reversed(dicoms)):
             pix_arr  = thisdicom.pixel_array

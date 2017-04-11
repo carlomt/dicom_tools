@@ -604,7 +604,6 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.verbose:
             print("shape:", self.dataZ.shape)
             print("shape of a color channel:", self.dataZ[:,:,:,0].shape)
-            print("layer: ",self.layer)
 
         self.imgScaleFactor= 1.
         self.data =  self.dataZ

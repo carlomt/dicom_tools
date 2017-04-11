@@ -116,7 +116,7 @@ class FileReader:
         if raw:
             if verbose:
                 print("returning raw data")
-        return self.data[:,:,::-1], self.ROI[:,:,:]
+            return self.data[:,:,::-1], self.ROI[:,:,:]
 
             
         return self.dataRGB[:,:,::-1,:], self.ROI[:,:,:]

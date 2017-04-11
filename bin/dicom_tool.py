@@ -46,7 +46,7 @@ class AboutWindow(QtGui.QDialog):
 
         
         self.textBrowser = QtGui.QTextBrowser(self)
-        self.textBrowser.append("DICOM tool (v2.0)")
+        self.textBrowser.append("DICOM tool (v3.0)")
         self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
 
         self.verticalLayout = QtGui.QVBoxLayout(self)
@@ -64,7 +64,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
-        self.setWindowTitle("DICOM tool (v2.0)")
+        self.setWindowTitle("DICOM tool (v3.0)")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
 
         widgetWindow = QtGui.QWidget(self)
@@ -597,6 +597,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             dataRGB = freader.readUsingGDCM(False)
         else:
             dataRGB, unusedROI = freader.read(False)
+        self.setWindowTitle("DICOM tool - "+freader.PatientName)
         self.xview=False
         self.yview=False
         self.zview=True        

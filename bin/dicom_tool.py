@@ -293,7 +293,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.arr = None
         self.firsttime = True
         self.colorizeSecondaryImage = False
-
+        self.colorizeSecondaryImageWithROI = False
+        
         self.button_next = QtGui.QPushButton('Next', self)
         self.button_prev = QtGui.QPushButton('Prev', self)
         self.button_next.clicked.connect(self.nextimg)
@@ -448,8 +449,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             # self.p2.autoRange()
             self.setlabel2values(self.secondaryImage[self.layer])
             secImg = self.secondaryImage[self.layer]
-            if self.colorizeSecondaryImage:
-                secImg = colorize(secImg)
+            if self.colorizeSecondaryImage and self.colorizeSecondaryImageWithROI:
+                secImg = colorize(secImg,self.ROI[self.layer],self.verbose)
 
             self.img1b.setImage(secImg)
             self.img1b.updateImage()
@@ -907,6 +908,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layer=oldlayer
         self.secondaryImage3D = True
         self.colorizeSecondaryImage = True
+        self.colorizeSecondaryImageWithROI = True
         self.jump_to(self.layer)
 
 

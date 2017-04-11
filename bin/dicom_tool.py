@@ -597,7 +597,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             dataRGB = freader.readUsingGDCM(False)
         else:
             dataRGB, unusedROI = freader.read(False)
-        self.setWindowTitle("DICOM tool - "+freader.PatientName)
+        if freader.PatientName is not None:
+            self.setWindowTitle("DICOM tool - "+freader.PatientName)
         self.xview=False
         self.yview=False
         self.zview=True        

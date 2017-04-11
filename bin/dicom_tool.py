@@ -953,11 +953,9 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    if not args.help:
-
-        import dicom_tools.pyqtgraph as pg
-        
-        app = QtGui.QApplication(args)
-        window = Window_dicom_tool()
-        window.show()
-        sys.exit(app.exec_())
+    import dicom_tools.pyqtgraph as pg
+    
+    app = QtGui.QApplication(args)
+    window = Window_dicom_tool()
+    window.show()
+    sys.exit(app.exec_())

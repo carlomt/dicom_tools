@@ -1,8 +1,36 @@
 #!/usr/bin/python
+import glob
+import argparse
+import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
+import dicom_tools.pyqtgraph as pg
+import dicom
+from dicom_tools.FileReader import FileReader
+from scipy import ndimage
+import os
+import nrrd
+from dicom_tools.roiFileHandler import roiFileHandler
+from dicom_tools.nrrdFileHandler import nrrdFileHandler
+from dicom_tools.highlight_color import highlight_color
+from dicom_tools.Normalizer import Normalizer
+from dicom_tools.myroi2roi import myroi2roi
+from dicom_tools.calculateMeanInROI import calculateMeanInROI
+import scipy
+from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
+from dicom_tools.connectedThreshold import connectedThreshold
+from dicom_tools.morphologicalWatershed import morphologicalWatershed
+from dicom_tools.wardHierarchical import wardHierarchical
+from dicom_tools.colorize import colorize
+from dicom_tools.getEntropy import getEntropy
+from skimage.filters.rank import gradient as skim_gradient
+#from skimage import img_as_ubyte
+
+#from scipy.ndimage.morphology import binary_fill_holes
+#import ROOT
+from dicom_tools.histFromArray import histFromArray
+
 
 class AboutWindow(QtGui.QDialog):
-    
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
 
@@ -31,34 +59,7 @@ class AboutWindow(QtGui.QDialog):
         
 # class Window(QtGui.QWidget):
 class Window_dicom_tool(QtGui.QMainWindow): 
-    
-    import glob
-    import numpy as np
-    import dicom
-    from dicom_tools.FileReader import FileReader
-    from scipy import ndimage
-    import os
-    import nrrd
-    from dicom_tools.roiFileHandler import roiFileHandler
-    from dicom_tools.nrrdFileHandler import nrrdFileHandler
-    from dicom_tools.highlight_color import highlight_color
-    from dicom_tools.Normalizer import Normalizer
-    from dicom_tools.myroi2roi import myroi2roi
-    from dicom_tools.calculateMeanInROI import calculateMeanInROI
-    import scipy
-    from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
-    from dicom_tools.connectedThreshold import connectedThreshold
-    from dicom_tools.morphologicalWatershed import morphologicalWatershed
-    from dicom_tools.wardHierarchical import wardHierarchical
-    from dicom_tools.colorize import colorize
-    from dicom_tools.getEntropy import getEntropy
-    from skimage.filters.rank import gradient as skim_gradient
-    #from skimage import img_as_ubyte
-    
-    #from scipy.ndimage.morphology import binary_fill_holes
-    #import ROOT
-    from dicom_tools.histFromArray import histFromArray
-    
+
     def __init__(self):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
@@ -72,6 +73,24 @@ class Window_dicom_tool(QtGui.QMainWindow):
         outfname="roi.txt"
         self.inpath="."        
         
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                            action="store_true")
+        parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
+        parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
+        parser.add_argument("-l", "--layer", help="select layer",
+                            type=int)
+        parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
+        parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
+        parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
+        parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument("-y", "--yview", help="swap axes",
+                           action="store_true")
+        group.add_argument("-x", "--xview", help="swap axes",
+                           action="store_true")
+        
+        args = parser.parse_args()
         self.layer=0
         self.layerZ=0
         self.layerX=0
@@ -932,30 +951,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 if __name__ == '__main__':
 
     import sys
-    import argparse
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose", help="increase output verbosity",
-                        action="store_true")
-    parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
-    parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
-    parser.add_argument("-l", "--layer", help="select layer",
-                        type=int)
-    parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
-    parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
-    parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
-    parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-y", "--yview", help="swap axes",
-                       action="store_true")
-    group.add_argument("-x", "--xview", help="swap axes",
-                       action="store_true")
-    
-    args = parser.parse_args()
-
-    import dicom_tools.pyqtgraph as pg
-    
-    app = QtGui.QApplication(args)
+    app = QtGui.QApplication(sys.argv)
     window = Window_dicom_tool()
     window.show()
     sys.exit(app.exec_())

@@ -24,7 +24,7 @@ class FileReader:
         self.data = []
         self.dataRGB = []
         self.ROI = []
-        
+        self.PatientName = None
             
     def loadDCMfiles(self):
         if self.verbose:
@@ -112,7 +112,8 @@ class FileReader:
             pix_arr  = thisdicom.pixel_array
             self.dataRGB[i,:,:,2] = self.dataRGB[i,:,:,0] = self.data[i] = pix_arr.T
             self.dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T, self.ROI[i])
-
+        self.PatientName = dicoms[0].PatientName
+        
         if raw:
             if verbose:
                 print("returning raw data")

@@ -964,6 +964,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def show8bit(self):
         image = self.arr[:,:,2]
+        if len(self.ROI)!=0:
+            if not np.any(self.ROI[self.layer]): return
+            image = image*self.ROI[self.layer]
         # rImage = rescale8bit(image)
         rImage = exposure.rescale_intensity(image,in_range='uint8')
         self.setlabel2values(rImage)        
@@ -973,12 +976,20 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def show16bit(self):
         image = self.arr[:,:,2]
+        if len(self.ROI)!=0:
+            if not np.any(self.ROI[self.layer]): return
+            image = image*self.ROI[self.layer]
         # rImage = rescale16bit(image)
         rImage = exposure.rescale_intensity(image,in_range='uint16')
         self.setlabel2values(rImage)
         self.img1b.setImage(rImage)
         self.p2.autoRange()        
-        self.img1b.updateImage()        
+        self.img1b.updateImage()
+
+    # def showROI8bit(self):
+    #     i
+    #     oldlayer = self.layer
+    #     self.secondaryImage = np . 
     
 if __name__ == '__main__':
 

@@ -24,6 +24,8 @@ from dicom_tools.colorize import colorize
 from dicom_tools.getEntropy import getEntropy
 from skimage.filters.rank import gradient as skim_gradient
 #from skimage import img_as_ubyte
+from dicom_tools.rescale import rescale8bit, rescale16bit
+from skimage import exposure
 
 #from scipy.ndimage.morphology import binary_fill_holes
 #import ROOT
@@ -180,7 +182,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveToTiffAction.triggered.connect(self.saveToTIFFImage)
         saveToPngAction = QtGui.QAction("&Save to PNG", self)
         saveToPngAction.setStatusTip('Save current view to PNG file')
-        saveToPngAction.triggered.connect(self.saveToPNGImage)        
+        saveToPngAction.triggered.connect(self.saveToPNGImage)
+
+        show8bitAction = QtGui.QAction("&View in 8 bit", self)
+        show8bitAction.setStatusTip("View in 8 bit")
+        show8bitAction.triggered.connect(self.show8bit)
+        show16bitAction = QtGui.QAction("&View in 16 bit", self)
+        show16bitAction.setStatusTip("View in 16 bit")
+        show16bitAction.triggered.connect(self.show16bit)
 
         histoOfAllLayerAction = QtGui.QAction("&Histogram of all layer" ,self)
         histoOfAllLayerAction.setStatusTip('Histogram of all layer')
@@ -254,7 +263,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         imageMenu = mainMenu.addMenu('&Image')
         imageMenu.addAction(colorMainImgAction)
         imageMenu.addAction(saveToTiffAction)
-        imageMenu.addAction(saveToPngAction)        
+        imageMenu.addAction(saveToPngAction)
+        imageMenu.addAction(show8bitAction)
+        imageMenu.addAction(show16bitAction)        
 
         analysisMenu = mainMenu.addMenu('&Analysis')
         analysisMenu.addAction(histoOfAllLayerAction)
@@ -950,6 +961,24 @@ class Window_dicom_tool(QtGui.QMainWindow):
         col = colorize(self.arr[:,:,2])
         self.img1a.setImage(col)
         self.img1a.updateImage()
+
+    def show8bit(self):
+        image = self.arr[:,:,2]
+        # rImage = rescale8bit(image)
+        rImage = exposure.rescale_intensity(image,in_range='uint8')
+        self.setlabel2values(rImage)        
+        self.img1b.setImage(rImage)
+        self.p2.autoRange()        
+        self.img1b.updateImage()
+
+    def show16bit(self):
+        image = self.arr[:,:,2]
+        # rImage = rescale16bit(image)
+        rImage = exposure.rescale_intensity(image,in_range='uint16')
+        self.setlabel2values(rImage)
+        self.img1b.setImage(rImage)
+        self.p2.autoRange()        
+        self.img1b.updateImage()        
     
 if __name__ == '__main__':
 

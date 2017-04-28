@@ -1,5 +1,7 @@
 import ROOT
 import numpy as np
+from skimage.feature import greycomatrix, greycoprops #CV
+from skimage import exposure #CV
 # from tabulate import tabulate
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 
@@ -49,14 +51,73 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     hStdDev = ROOT.TH1F("hStdDev"+suffix,"StdDev",nFette,-0.5,nFette+0.5)
     hSkewness = ROOT.TH1F("hSkewness"+suffix,"Skewness",nFette,-0.5,nFette+0.5)
     hKurtosis = ROOT.TH1F("hKurtosis"+suffix,"Kurtosis",nFette,-0.5,nFette+0.5)
+    #CV II order histo
+    # Horizontal
+    hdissH = ROOT.TH1F("hdissH"+suffix,"Horizontal dissimilarity",nFette,-0.5,nFette+0.5)
+    hcorrH = ROOT.TH1F("hcorrH"+suffix,"Horizontal correlation",nFette,-0.5,nFette+0.5)
+    henerH = ROOT.TH1F("henerH"+suffix,"Horizontal energy",nFette,-0.5,nFette+0.5)
+    hcontH = ROOT.TH1F("hcontH"+suffix,"Horizontal contrast",nFette,-0.5,nFette+0.5)
+    hhomoH = ROOT.TH1F("hhomoH"+suffix,"Horizontal homogeneity",nFette,-0.5,nFette+0.5)
+    # Vertical
+    hdissV = ROOT.TH1F("hdissV"+suffix,"Vertical dissimilarity",nFette,-0.5,nFette+0.5)
+    hcorrV = ROOT.TH1F("hcorrV"+suffix,"Vertical correlation",nFette,-0.5,nFette+0.5)
+    henerV = ROOT.TH1F("henerV"+suffix,"Vertical energy",nFette,-0.5,nFette+0.5)
+    hcontV = ROOT.TH1F("hcontV"+suffix,"Vertical contrast",nFette,-0.5,nFette+0.5)
+    hhomoV = ROOT.TH1F("hhomoV"+suffix,"Vertical homogeneity",nFette,-0.5,nFette+0.5)
+    # + 45
+    hdissPQ = ROOT.TH1F("hdissPQ"+suffix,"+45 degree dissimilarity",nFette,-0.5,nFette+0.5)
+    hcorrPQ = ROOT.TH1F("hcorrPQ"+suffix,"+45 degree correlation",nFette,-0.5,nFette+0.5)
+    henerPQ = ROOT.TH1F("henerPQ"+suffix,"+45 degree energy",nFette,-0.5,nFette+0.5)
+    hcontPQ = ROOT.TH1F("hcontPQ"+suffix,"+45 degree contrast",nFette,-0.5,nFette+0.5)
+    hhomoPQ = ROOT.TH1F("hhomoPQ"+suffix,"+45 degree homogeneity",nFette,-0.5,nFette+0.5)
+    # -45
+    hdissMQ = ROOT.TH1F("hdissMQ"+suffix,"-45 degree dissimilarity",nFette,-0.5,nFette+0.5)
+    hcorrMQ = ROOT.TH1F("hcorrMQ"+suffix,"-45 degree correlation",nFette,-0.5,nFette+0.5)
+    henerMQ = ROOT.TH1F("henerMQ"+suffix,"-45 degree energy",nFette,-0.5,nFette+0.5)
+    hcontMQ = ROOT.TH1F("hcontMQ"+suffix,"-45 degree contrast",nFette,-0.5,nFette+0.5)
+    hhomoMQ = ROOT.TH1F("hhomoMQ"+suffix,"-45 degree homogeneity",nFette,-0.5,nFette+0.5)
+    
     allhistos = []
     histogiafatti = []
+    histogclm = [] #CV
     # nfetta=0
     
     # for fetta,fettaROI in zip(data,mask) :
     for layer in xrange(0,nFette):
         fetta = data[layer]
         fettaROI = mask[layer]
+        #CV gclm
+        fetta8bit = exposure.rescale_intensity(fetta, out_range=(0,255))
+        glcmdata = fettaROI*fetta8bit
+        glcm1 = greycomatrix(glcmdata, [1], [0], 256, symmetric=True, normed=True)
+        glcm2 = greycomatrix(glcmdata, [1], [np.pi/2], 256, symmetric=True, normed=True)
+        glcm3 = greycomatrix(glcmdata, [1], [np.radians(45)], 256, symmetric=True, normed=True)
+        glcm4 = greycomatrix(glcmdata, [1], [np.radians(-45)], 256, symmetric=True, normed=True)
+        #0
+        hdissH.SetBinContent(layer,greycoprops(glcm1, 'dissimilarity')[0, 0])
+        hcorrH.SetBinContent(layer,greycoprops(glcm1, 'correlation')[0, 0])
+        henerH.SetBinContent(layer,greycoprops(glcm1, 'energy')[0, 0])
+        hcontH.SetBinContent(layer,greycoprops(glcm1,'contrast')[0, 0])
+        hhomoH.SetBinContent(layer,greycoprops(glcm1,'homogeneity')[0, 0])
+        #90
+        hdissV.SetBinContent(layer,greycoprops(glcm2, 'dissimilarity')[0, 0])
+        hcorrV.SetBinContent(layer,greycoprops(glcm2, 'correlation')[0, 0])
+        henerV.SetBinContent(layer,greycoprops(glcm2, 'energy')[0, 0])
+        hcontV.SetBinContent(layer,greycoprops(glcm2,'contrast')[0, 0])
+        hhomoV.SetBinContent(layer,greycoprops(glcm2,'homogeneity')[0, 0])
+        #45
+        hdissPQ.SetBinContent(layer,greycoprops(glcm3, 'dissimilarity')[0, 0])
+        hcorrPQ.SetBinContent(layer,greycoprops(glcm3, 'correlation')[0, 0])
+        henerPQ.SetBinContent(layer,greycoprops(glcm3, 'energy')[0, 0])
+        hcontPQ.SetBinContent(layer,greycoprops(glcm3,'contrast')[0, 0])
+        hhomoPQ.SetBinContent(layer,greycoprops(glcm3,'homogeneity')[0, 0])
+        #-45
+        hdissMQ.SetBinContent(layer,greycoprops(glcm4, 'dissimilarity')[0, 0])
+        hcorrMQ.SetBinContent(layer,greycoprops(glcm4, 'correlation')[0, 0])
+        henerMQ.SetBinContent(layer,greycoprops(glcm4, 'energy')[0, 0])
+        hcontMQ.SetBinContent(layer,greycoprops(glcm4,'contrast')[0, 0])
+        hhomoMQ.SetBinContent(layer,greycoprops(glcm4,'homogeneity')[0, 0])
+                                                
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
         meaninroi = 1
@@ -112,4 +173,28 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     histogiafatti.append(hStdDev)
     histogiafatti.append(hSkewness)
     histogiafatti.append(hKurtosis)
-    return his, allhistos, histogiafatti
+
+    #CV
+    histogclm.append(hdissH)
+    histogclm.append(hcorrH)
+    histogclm.append(henerH)
+    histogclm.append(hcontH)
+    histogclm.append(hhomoH)
+    histogclm.append(hdissV)
+    histogclm.append(hcorrV)
+    histogclm.append(henerV)
+    histogclm.append(hcontV)
+    histogclm.append(hhomoV)
+    histogclm.append(hdissPQ)
+    histogclm.append(hcorrPQ)
+    histogclm.append(henerPQ)
+    histogclm.append(hcontPQ)
+    histogclm.append(hhomoPQ)
+    histogclm.append(hdissMQ)
+    histogclm.append(hcorrMQ)
+    histogclm.append(henerMQ)
+    histogclm.append(hcontMQ)
+    histogclm.append(hhomoMQ)
+                       
+    
+    return his, allhistos, histogiafatti, histogclm

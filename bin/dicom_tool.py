@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 import glob
 import argparse
 import numpy as np
@@ -23,9 +24,8 @@ from dicom_tools.wardHierarchical import wardHierarchical
 from dicom_tools.colorize import colorize
 from dicom_tools.getEntropy import getEntropy
 from skimage.filters.rank import gradient as skim_gradient
-#from skimage import img_as_ubyte
+
 from dicom_tools.rescale import rescale8bit, rescale16bit
-from skimage import exposure
 
 #from scipy.ndimage.morphology import binary_fill_holes
 #import ROOT
@@ -431,7 +431,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def updatemain(self):
 
         if self.verbose:
-            print "updating",self.layer
+            print("updating",self.layer)
         if self.xview:
             # dataswappedX = np.swapaxes(self.data,0,1)
             self.arr=self.dataswappedX[self.layer]
@@ -445,7 +445,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.firsttime = False
         else:
             if self.verbose:
-                print self.rois
+                print(self.rois)
             if self.rois[self.layer]:
                 # self.p1.removeItem(self.roi)
                 # self.restorePolyLineState(self.roi, self.rois[self.layer])
@@ -653,13 +653,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def select_dicom_folder(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
-            print path
+            print(path)
         self.read_dicom_in_folder(str(path))
 
     def select_dicom_folderGDCM(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
-            print path
+            print(path)
         self.read_dicom_in_folder(str(path),useGDCM=True)        
 
     def switchToXView(self):
@@ -775,7 +775,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def highlightDCMROI(self):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
-            print path
+            print(path)
         self.read_roi_dicom_in_folder(str(path))    
 
     def highlightMyROI(self, colorchannel=0):
@@ -825,7 +825,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # # print("lastPos",pos.lastPos())
         # print("pos",pos.pos())
         # print("scenePos",pos.scenePos())        
-        # print "Image position:", self.img1a.mapFromScene(pos)
+        # print("Image position:", self.img1a.mapFromScene(pos))
         # if self.p1.sceneBoundingRect().contains(pos.pos()):
         # mousePoint = self.p1ViewBox.mapSceneToView(pos.pos())
         # print("mousePoint",mousePoint)
@@ -984,14 +984,22 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def show8bit(self):
         image = self.arr[:,:,2]
+        # print(type(image),type(image[0][0]))
         if len(self.ROI)!=0:
             if not np.any(self.ROI[self.layer]): return
             image = image*self.ROI[self.layer]
         # rImage = rescale8bit(image)
-        rImage = exposure.rescale_intensity(image,in_range='uint8')
+        # image = exposure.rescale_intensity(image,in_range='uint16')
+        # print(type(image),type(image[0][0]))        
+        # image = image.astype(np.uint16)
+        # image = image/image.max()
+        # rImage = img_as_ubyte(image)        
+        # print(type(rImage),type(rImage[0][0]))
+        rImage = rescale8bit(image)
+        rImage = rImage.astype(np.float64)
         self.secondaryImage2D = rImage
         self.setlabel2values(rImage)        
-        self.img1b.setImage(rImage, levels=(0,np.max(rImage)))
+        self.img1b.setImage(rImage)#, levels=(0,1))
         self.p2.autoRange()        
         self.img1b.updateImage()
 
@@ -1001,10 +1009,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
             if not np.any(self.ROI[self.layer]): return
             image = image*self.ROI[self.layer]
         # rImage = rescale16bit(image)
-        rImage = exposure.rescale_intensity(image,in_range='uint16')
+        # rImage = exposure.rescale_intensity(image,in_range='uint16')
+        # image = exposure.rescale_intensity(image,in_range='uint16')
+
+        # rImage = img_as_uint(image)
+        # print(type(rImage),type(rImage[0][0]))
+        rImage = rescale16bit(image)        
+        rImage = rImage.astype(np.float64)        
         self.secondaryImage2D = rImage        
         self.setlabel2values(rImage)
-        self.img1b.setImage(rImage, levels=(0,np.max(rImage)))
+        self.img1b.setImage(rImage)#, levels=(0,1))
         self.p2.autoRange()        
         self.img1b.updateImage()
 

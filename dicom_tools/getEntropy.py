@@ -3,11 +3,17 @@ from skimage.filters.rank import entropy as skim_entropy
 from skimage.morphology import disk as skim_disk
 from skimage.morphology import square as skim_square
 from skimage import exposure
+from skimage import img_as_uint, img_as_ubyte
 import ROOT
 from dicom_tools.histFromArray import histFromArray
+from dicom_tools.rescale import rescale16bit, rescale8bit
 
 def getEntropy(image, ROI=None, square_size=5, verbose=False):
-    image = exposure.rescale_intensity(image, in_range='uint16')
+    # image = img_as_ubyte(exposure.rescale_intensity(image, in_range='uint8'))
+    image = rescale8bit(image)
+    # image = exposure.rescale_intensity(image, in_range='uint8')
+    # image = image.astype(np.uint8)
+    
     if ROI is None:
         entropyImg = skim_entropy(image,skim_square(square_size))
     else:

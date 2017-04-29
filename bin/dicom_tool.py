@@ -370,6 +370,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p1ViewBox = self.p1.plotItem.vb
         proxy = pg.SignalProxy(self.p1.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved)
         self.p1.scene().sigMouseClicked.connect(self.mouseMoved)
+
         # imv = pg.ImageView(imageItem=img1a)
         layout.addWidget(self.p1,1,0,10,1)
 
@@ -396,8 +397,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2.setAspectLocked(True,self.imgScaleFactor)
         self.p2.addItem(self.img1b)
         self.p1.addItem(self.roi)
+        self.p2ViewBox = self.p2.plotItem.vb
+
         self.roi.sigRegionChanged.connect(self.update)
         layout.addWidget(self.p2,12,0,10,1)
+
+        proxy = pg.SignalProxy(self.p2.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved2)
+        self.p2.scene().sigMouseClicked.connect(self.mouseMoved2)
 
 
         if args.inputpath:
@@ -417,7 +423,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
         if self.connectedThreshold:
             toshowvalues = thisroi = self.arr[:,:,2]*self.bitmapROI[self.layer]
-            
+        self.secondaryImage2D = thisroi    
         self.img1b.setImage(thisroi, levels=(0, thisroi.max()))
         self.setlabel2values(toshowvalues)
         # self.p2.autoRange()
@@ -619,6 +625,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             print("shape:", self.dataZ.shape)
             print("shape of a color channel:", self.dataZ[:,:,:,0].shape)
 
+        self.secondaryImage2D = np.zeros( self.dataZ[0].shape )
         self.imgScaleFactor= 1.
         self.data =  self.dataZ
         self.p1.setAspectLocked(True,self.imgScaleFactor)
@@ -859,6 +866,19 @@ class Window_dicom_tool(QtGui.QMainWindow):
                 self.highlightROI(self.tmpBitmapROI ,1)
             print("number of selected pixel:", np.count_nonzero(self.tmpBitmapROI))
 
+    def mouseMoved2(self, pos):
+        print(pos)
+        mousePoint = self.p2ViewBox.mapSceneToView(pos.scenePos())
+        seedX = int(mousePoint.x()+0.5)
+        seedY = int(mousePoint.y()+0.5)
+        thisSeed = (seedX, seedY)
+        if self.secondaryImage3D:
+            secImg = self.secondaryImage[self.layer]
+        elif np.any(self.secondaryImage2D):
+            secImg = self.secondaryImage2D
+        value =  self.secondaryImage2D[thisSeed]
+        print("value",value)
+            
     def MorphologicalWatershed(self):
         thisImage = self.arr[:,:,0]        
         thisImage = self.dataZ[:,:,:,2]
@@ -969,8 +989,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             image = image*self.ROI[self.layer]
         # rImage = rescale8bit(image)
         rImage = exposure.rescale_intensity(image,in_range='uint8')
+        self.secondaryImage2D = rImage
         self.setlabel2values(rImage)        
-        self.img1b.setImage(rImage)
+        self.img1b.setImage(rImage, levels=(0,np.max(rImage)))
         self.p2.autoRange()        
         self.img1b.updateImage()
 
@@ -981,8 +1002,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             image = image*self.ROI[self.layer]
         # rImage = rescale16bit(image)
         rImage = exposure.rescale_intensity(image,in_range='uint16')
+        self.secondaryImage2D = rImage        
         self.setlabel2values(rImage)
-        self.img1b.setImage(rImage)
+        self.img1b.setImage(rImage, levels=(0,np.max(rImage)))
         self.p2.autoRange()        
         self.img1b.updateImage()
 

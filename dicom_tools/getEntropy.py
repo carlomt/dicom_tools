@@ -10,8 +10,8 @@ from dicom_tools.rescale import rescale16bit, rescale8bit
 
 def getEntropy(image, ROI=None, square_size=5, verbose=False):
     # image = img_as_ubyte(exposure.rescale_intensity(image, in_range='uint8'))
-    image = rescale8bit(image)
-    # image = exposure.rescale_intensity(image, in_range='uint8')
+    # image = rescale8bit(image)
+    image = exposure.rescale_intensity(image, in_range='uint16')
     # image = image.astype(np.uint8)
     
     if ROI is None:

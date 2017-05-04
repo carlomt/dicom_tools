@@ -2,6 +2,7 @@ import ROOT
 import numpy as np
 from skimage.feature import greycomatrix, greycoprops #CV
 from skimage import exposure #CV
+from dicom_tools.rescale import rescale8bit #CV
 # from tabulate import tabulate
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 
@@ -87,7 +88,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         fetta = data[layer]
         fettaROI = mask[layer]
         #CV gclm
-        fetta8bit = exposure.rescale_intensity(fetta, out_range=(0,255))
+        fetta8bit = rescale8bit(fetta)
         glcmdata = fettaROI*fetta8bit
         glcm1 = greycomatrix(glcmdata, [1], [0], 256, symmetric=True, normed=True)
         glcm2 = greycomatrix(glcmdata, [1], [np.pi/2], 256, symmetric=True, normed=True)

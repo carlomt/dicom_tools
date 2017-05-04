@@ -87,9 +87,16 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     for layer in xrange(0,nFette):
         fetta = data[layer]
         fettaROI = mask[layer]
+        fettaROI = fettaROI.astype(np.uint8)
         #CV gclm
         fetta8bit = rescale8bit(fetta)
         glcmdata = fettaROI*fetta8bit
+        #glcmdata = fetta8bit[fettaROI]
+        # if verbose:
+        #     print("fetta.min():",fetta.min(),"type:",type(fetta[0][0]))
+        #     print("fettaROI.min():",fettaROI.min(),"type:",type(fettaROI[0][0]))
+        #     print("fetta8bit.min():",fetta8bit.min(),"type:",type(fetta8bit[0][0]))
+        #     print("glcmdata.min():",glcmdata.min(),"type:",type(glcmdata[0][0]))            
         glcm1 = greycomatrix(glcmdata, [1], [0], 256, symmetric=True, normed=True)
         glcm2 = greycomatrix(glcmdata, [1], [np.pi/2], 256, symmetric=True, normed=True)
         glcm3 = greycomatrix(glcmdata, [1], [np.radians(45)], 256, symmetric=True, normed=True)

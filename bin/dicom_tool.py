@@ -26,6 +26,7 @@ from dicom_tools.getEntropy import getEntropy
 from skimage.filters.rank import gradient as skim_gradient
 
 from dicom_tools.rescale import rescale8bit, rescale16bit
+from skimage.morphology import square as skim_square
 
 #from scipy.ndimage.morphology import binary_fill_holes
 #import ROOT
@@ -820,7 +821,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.img1b.updateImage()
 
     def mouseMoved(self, pos):
-        print(type(pos))
+        # print(type(pos))
         print(pos)
         # # print("lastPos",pos.lastPos())
         # print("pos",pos.pos())
@@ -953,7 +954,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         imagemax = np.max(image)
         # image = img_as_ubyte(image)
         # image = rescale(image,{-1,1})
-        image = exposure.rescale_intensity(image, in_range='uint16')
+        # image = exposure.rescale_intensity(image, in_range='uint16')
+        image = rescale8bit(image)
+        
         if len(self.ROI)!=0:  
             gradientImg = skim_gradient(image,skim_square(5), mask=self.ROI[self.layer])
         else:

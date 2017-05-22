@@ -14,6 +14,7 @@ from array import array
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.info_file_parser import info_file_parser
 from dicom_tools.timeflagconverter import timeflagconverter_string2int
+from dicom_tools.getEntropy import getEntropy
 
 outfname="out.root"
 
@@ -47,6 +48,21 @@ stdDev   = array('f', [0])
 skewness = array('f', [0])
 kurtosis = array('f', [0])
 
+minEntropySide = 3
+maxEntropySide = 13
+thisEntropySide = {}
+meanEntropy   = {}
+stdDevEntropy = {}
+maxEntropy    = {}
+minEntropy    = {}
+for i in xrange(minEntropySide, maxEntropySide, 2):
+    thisEntropySide[i]   = array('f', [0])
+    meanEntropy[i]       = array('f', [0])
+    stdDevEntropy[i]     = array('f', [0])
+    maxEntropy[i]        = array('f', [0])
+    minEntropy[i]       = array('f', [0])
+    
+
 nmax = 100
 nFette   = array('i', [0])
 
@@ -65,6 +81,13 @@ tree.Branch("mean",mean,"mean/F")
 tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
+
+for i in xrange(minEntropySide, maxEntropySide, 2):
+    tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
+    tree.Branch("meanEntropy"     +str(i), meanEntropy[i],      "meanEntropy/F"     +str(i) )
+    tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy/F"   +str(i) )
+    tree.Branch("maxEntropy"      +str(i), maxEntropy[i],       "maxEntropy/F"      +str(i) )
+    tree.Branch("minEntropy"      +str(i), minEntropy[i],       "minEntropy/F"      +str(i) )
 
 tree.Branch("nFette",nFette,"nFette/I")
 
@@ -167,6 +190,18 @@ for patientdir in patientdirs:
                 thishisto.Write()
         if args.verbose:
             print(patientID, nFette[0])
+
+        for layer in xrange(0, len(data)):
+            for i in xrange(minEntropySide, maxEntropySide, 2):
+            entropyImg = getEntropy(data[layer], ROI[layer], i)
+            nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+            thisEntropySide[i]  = i
+            meanEntropy[i]      = np.mean(nonZeroEntropy)
+            stdDevEntropy[i]    = mp.std(nonZeroEntropy)
+            maxEntropy[i]       = np.max(nonZeroEntropy)
+            minEntropy[i]       = np.min(nonZeroEntropy)
+            
+            
         tree.Fill()
                 
 tree.Write()            

@@ -14,7 +14,13 @@ on mac you could install them with:
 
 on a debian linux:
 
-`apt-get install python-pip python-qt4  python-sip`
+`apt-get install python-pip python-qt4  python-sip  python-scipy`
+
+it could be necessary to upgrade pip before to install the package, as it could not find some dependencies:
+
+`pip install --upgrade pip`
+
+`apt-get install build-essential`
 
 
 install the package with:

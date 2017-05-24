@@ -14,7 +14,7 @@ on mac you could install them with:
 
 on a debian linux:
 
-`apt-get install python-pip python-qt4  python-sip  python-scipy`
+`apt-get install python-pip python-qt4  python-sip  python-scipy python-matplotlib`
 
 it could be necessary to upgrade pip before to install the package, as it could not find some dependencies:
 

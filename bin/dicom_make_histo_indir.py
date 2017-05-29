@@ -51,6 +51,7 @@ kurtosis = array('f', [0])
 minEntropySide = 3
 maxEntropySide = 13
 thisEntropySide = {}
+thisEntropyName = ["uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci","undici","dodici","tredici"]
 meanEntropy   = {}
 stdDevEntropy = {}
 maxEntropy    = {}
@@ -83,11 +84,21 @@ tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
 
 for i in xrange(minEntropySide, maxEntropySide, 2):
-    tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
-    tree.Branch("meanEntropy"     +str(i), meanEntropy[i],      "meanEntropy/F"     +str(i) )
-    tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy/F"   +str(i) )
-    tree.Branch("maxEntropy"      +str(i), maxEntropy[i],       "maxEntropy/F"      +str(i) )
-    tree.Branch("minEntropy"      +str(i), minEntropy[i],       "minEntropy/F"      +str(i) )
+    # tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
+    # tree.Branch("meanEntropy"     +str(i), meanEntropy[i],      "meanEntropy/F"     +str(i) )
+    # tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy/F"   +str(i) )
+    # tree.Branch("maxEntropy"      +str(i), maxEntropy[i],       "maxEntropy/F"      +str(i) )
+    # tree.Branch("minEntropy"      +str(i), minEntropy[i],       "minEntropy/F"      +str(i) )
+    tree.Branch("thisEntropySide" +"_"+thisEntropyName[i], thisEntropySide[i],
+                "thisEntropySide/F" +"_"+thisEntropyName[i] )
+    tree.Branch("meanEntropy"     +"_"+thisEntropyName[i], meanEntropy[i],
+                "meanEntropy/F"     +"_"+thisEntropyName[i] )
+    tree.Branch("stdDevEntropy"   +"_"+thisEntropyName[i], stdDevEntropy[i],
+                "stdDevEntropy/F"   +"_"+thisEntropyName[i] )
+    tree.Branch("maxEntropy"      +"_"+thisEntropyName[i], maxEntropy[i],
+                "maxEntropy/F"      +"_"+thisEntropyName[i] )
+    tree.Branch("minEntropy"      +"_"+thisEntropyName[i], minEntropy[i],
+                "minEntropy/F"      +"_"+thisEntropyName[i] )    
 
 tree.Branch("nFette",nFette,"nFette/I")
 

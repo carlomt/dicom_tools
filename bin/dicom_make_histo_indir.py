@@ -51,7 +51,7 @@ kurtosis = array('f', [0])
 minEntropySide = 3
 maxEntropySide = 13
 thisEntropySide = {}
-thisEntropyName = ["uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci","undici","dodici","tredici"]
+thisEntropyName = ["zero","uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci","undici","dodici","tredici"]
 meanEntropy   = {}
 stdDevEntropy = {}
 maxEntropy    = {}
@@ -59,7 +59,7 @@ minEntropy    = {}
 
 if args.verbose:
     print("now should create entropy vars from", minEntropySide, " to ", maxEntropySide)
-for i in xrange(minEntropySide, maxEntropySide, 2):
+for i in xrange(minEntropySide, maxEntropySide+1, 2):
     if args.verbose:
         print("creating var for entropy with side",i)
     thisEntropySide[i]   = array('f', [0])
@@ -112,7 +112,7 @@ tree.Branch("kurtosis",kurtosis,"kurtosis/F")
 
 if args.verbose:
     print("now should create entropy branches from", minEntropySide, " to ", maxEntropySide)
-for i in xrange(minEntropySide, maxEntropySide, 2):
+for i in xrange(minEntropySide, maxEntropySide+1, 2):
     if args.verbose:
         print("creating branch for entropy with side",i)
     # tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
@@ -130,6 +130,15 @@ for i in xrange(minEntropySide, maxEntropySide, 2):
                 "maxEntropy/F"      +"_"+thisEntropyName[i] )
     tree.Branch("minEntropy"      +"_"+thisEntropyName[i], minEntropy[i],
                 "minEntropy/F"      +"_"+thisEntropyName[i] )    
+
+tree.Branch("nFette",nFette,"nFette/I")
+
+tree.Branch("nVoxelPF",nVoxelPF,"nVoxelPF[nFette]/I")
+tree.Branch("meanPF",meanPF,"meanPF[nFette]/F")
+tree.Branch("stdDevPF",stdDevPF,"stdDevPF[nFette]/F")
+tree.Branch("skewnessPF",skewnessPF,"skewnessPF[nFette]/F")
+tree.Branch("kurtosisPF",kurtosisPF,"kurtosisPF[nFette]/F")
+
 #CV
 tree.Branch("dissHPF",dissHPF,"dissHPF[nFette]/F")
 tree.Branch("corrHPF",corrHPF,"corrHPF[nFette]/F")
@@ -151,14 +160,6 @@ tree.Branch("corrMQPF",corrMQPF,"corrMQPF[nFette]/F")
 tree.Branch("enerMQPF",enerMQPF,"enerMQPF[nFette]/F")
 tree.Branch("contMQPF",contMQPF,"contMQPF[nFette]/F")
 tree.Branch("homoMQPF",homoMQPF,"homoMQPF[nFette]/F")
-
-tree.Branch("nFette",nFette,"nFette/I")
-
-tree.Branch("nVoxelPF",nVoxelPF,"nVoxelPF[nFette]/I")
-tree.Branch("meanPF",meanPF,"meanPF[nFette]/F")
-tree.Branch("stdDevPF",stdDevPF,"stdDevPF[nFette]/F")
-tree.Branch("skewnessPF",skewnessPF,"skewnessPF[nFette]/F")
-tree.Branch("kurtosisPF",kurtosisPF,"kurtosisPF[nFette]/F")
 
 patientdirs= glob.glob(inputdir+"*/")
 
@@ -293,7 +294,7 @@ for patientdir in patientdirs:
                 if 'homoMQ' in thishisto.GetName(): homoMQPF[n-firstL] = thishisto.GetBinContent(n)
             
         for layer in xrange(0, len(data)):
-            for i in xrange(minEntropySide, maxEntropySide, 2):
+            for i in xrange(minEntropySide, maxEntropySide+1, 2):
                 entropyImg = getEntropy(data[layer], ROI[layer], i)
                 nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
                 thisEntropySide[i]  = i                
@@ -310,9 +311,12 @@ for patientdir in patientdirs:
                     
                     
             
-            
+        if args.verbose:
+            print("Filling the TTree")
         tree.Fill()
-                
+
+if args.verbose:
+    print("Writing the TTree")                
 tree.Write()            
 # outfile.Write()
 outfile.Close()

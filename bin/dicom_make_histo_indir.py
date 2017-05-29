@@ -73,6 +73,28 @@ stdDevPF   = array('f', nmax*[0])
 skewnessPF = array('f', nmax*[0])
 kurtosisPF = array('f', nmax*[0])
 
+#CV
+dissHPF = array('f', nmax*[0])
+corrHPF = array('f', nmax*[0])
+enerHPF = array('f', nmax*[0])
+contHPF = array('f', nmax*[0])
+homoHPF = array('f', nmax*[0])
+dissVPF = array('f', nmax*[0])
+corrVPF = array('f', nmax*[0])
+enerVPF = array('f', nmax*[0])
+contVPF = array('f', nmax*[0])
+homoVPF = array('f', nmax*[0])
+dissPQPF = array('f', nmax*[0])
+corrPQPF = array('f', nmax*[0])
+enerPQPF = array('f', nmax*[0])
+contPQPF = array('f', nmax*[0])
+homoPQPF = array('f', nmax*[0])
+dissMQPF = array('f', nmax*[0])
+corrMQPF = array('f', nmax*[0])
+enerMQPF = array('f', nmax*[0])
+contMQPF = array('f', nmax*[0])
+homoMQPF = array('f', nmax*[0])
+
 tree = ROOT.TTree("analisi_T2","analisi_T2")
 tree.Branch("patientID",patientID,"patientID/C")
 tree.Branch("timeflag",timeflag,"timeflag/I")
@@ -82,6 +104,28 @@ tree.Branch("mean",mean,"mean/F")
 tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
+
+#CV
+tree.Branch("dissHPF",dissHPF,"dissHPF[nFette]/F")
+tree.Branch("corrHPF",corrHPF,"corrHPF[nFette]/F")
+tree.Branch("enerHPF",enerHPF,"enerHPF[nFette]/F")
+tree.Branch("contHPF",contHPF,"contHPF[nFette]/F")
+tree.Branch("homoHPF",homoHPF,"homoHPF[nFette]/F")
+tree.Branch("dissVPF",dissVPF,"dissVPF[nFette]/F")
+tree.Branch("corrVPF",corrVPF,"corrVPF[nFette]/F")
+tree.Branch("enerVPF",enerVPF,"enerVPF[nFette]/F")
+tree.Branch("contVPF",contVPF,"contVPF[nFette]/F")
+tree.Branch("homoVPF",homoVPF,"homoVPF[nFette]/F")
+tree.Branch("dissPQPF",dissPQPF,"dissPQPF[nFette]/F")
+tree.Branch("corrPQPF",corrPQPF,"corrPQPF[nFette]/F")
+tree.Branch("enerPQPF",enerPQPF,"enerPQPF[nFette]/F")
+tree.Branch("contPQPF",contPQPF,"contPQPF[nFette]/F")
+tree.Branch("homoPQPF",homoPQPF,"homoPQPF[nFette]/F")
+tree.Branch("dissMQPF",dissMQPF,"dissMQPF[nFette]/F")
+tree.Branch("corrMQPF",corrMQPF,"corrMQPF[nFette]/F")
+tree.Branch("enerMQPF",enerMQPF,"enerMQPF[nFette]/F")
+tree.Branch("contMQPF",contMQPF,"contMQPF[nFette]/F")
+tree.Branch("homoMQPF",homoMQPF,"homoMQPF[nFette]/F")
 
 for i in xrange(minEntropySide, maxEntropySide, 2):
     # tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
@@ -187,8 +231,15 @@ for patientdir in patientdirs:
         if args.verbose:
             print(patientID, timeflag[0], nVoxel[0], ypT[0], mean[0], stdDev[0], skewness[0], kurtosis[0])
         his.Write()
+        nlayer=0 #CV
+        firstL=0 #CV
+        count=0 #CV 
         for thishisto in allhistos:
+            nlayer=nlayer+1
             if thishisto.GetEntries() >0:
+                if count==0:
+                   firstL=nlayer-1
+                   count=1
                 nVoxelPF[nFette[0]]   = int(thishisto.GetEntries())
                 meanPF[nFette[0]]     = thishisto.GetMean()
                 stdDevPF[nFette[0]]   = thishisto.GetStdDev()  
@@ -202,6 +253,37 @@ for patientdir in patientdirs:
         if args.verbose:
             print(patientID, nFette[0])
 
+        #CV gclm parameters
+        for k in range(0,len(histogclm)):
+            thishisto = histogclm[k]
+            thishisto.Write()
+            for n in range(0,nlayer):
+                if n<(firstL) or n>(firstL+nFette[0]-1):
+                    continue
+                if 'dissH' in thishisto.GetName(): dissHPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'corrH' in thishisto.GetName(): corrHPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'enerH' in thishisto.GetName(): enerHPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'contH' in thishisto.GetName(): contHPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'homoH' in thishisto.GetName(): homoHPF[n-firstL] = thishisto.GetBinContent(n)
+
+                if 'dissV' in thishisto.GetName(): dissVPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'corrV' in thishisto.GetName(): corrVPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'enerV' in thishisto.GetName(): enerVPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'contV' in thishisto.GetName(): contVPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'homoV' in thishisto.GetName(): homoVPF[n-firstL] = thishisto.GetBinContent(n)
+
+                if 'dissPQ' in thishisto.GetName(): dissPQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'corrPQ' in thishisto.GetName(): corrPQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'enerPQ' in thishisto.GetName(): enerPQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'contPQ' in thishisto.GetName(): contPQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'homoPQ' in thishisto.GetName(): homoPQPF[n-firstL] = thishisto.GetBinContent(n)
+
+                if 'dissMQ' in thishisto.GetName(): dissMQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'corrMQ' in thishisto.GetName(): corrMQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'enerMQ' in thishisto.GetName(): enerMQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'contMQ' in thishisto.GetName(): contMQPF[n-firstL] = thishisto.GetBinContent(n)
+                if 'homoMQ' in thishisto.GetName(): homoMQPF[n-firstL] = thishisto.GetBinContent(n)
+            
         for layer in xrange(0, len(data)):
             for i in xrange(minEntropySide, maxEntropySide, 2):
             entropyImg = getEntropy(data[layer], ROI[layer], i)

@@ -35,7 +35,7 @@ if args.outfile:
 inputdir = args.inputdirecotry
 
 if args.verbose:
-    print("Verbose\n")
+    print("Verbose dicom_make_histo_indir.py \n")
 
     
 outfile = ROOT.TFile(outfname,"RECREATE")
@@ -55,7 +55,12 @@ meanEntropy   = {}
 stdDevEntropy = {}
 maxEntropy    = {}
 minEntropy    = {}
+
+if args.verbose:
+    print("now should create entropy vars from", minEntropySide, " to ", maxEntropySide)
 for i in xrange(minEntropySide, maxEntropySide, 2):
+    if args.verbose:
+        print("creating var for entropy with side",i)
     thisEntropySide[i]   = array('f', [0])
     meanEntropy[i]       = array('f', [0])
     stdDevEntropy[i]     = array('f', [0])
@@ -82,7 +87,11 @@ tree.Branch("stdDev",stdDev,"stdDev/F")
 tree.Branch("skewness",skewness,"skewness/F")
 tree.Branch("kurtosis",kurtosis,"kurtosis/F")
 
+if args.verbose:
+    print("now should create entropy branches from", minEntropySide, " to ", maxEntropySide)
 for i in xrange(minEntropySide, maxEntropySide, 2):
+    if args.verbose:
+        print("creating branch for entropy with side",i)
     tree.Branch("thisEntropySide" +str(i), thisEntropySide[i],  "thisEntropySide/F" +str(i) )
     tree.Branch("meanEntropy"     +str(i), meanEntropy[i],      "meanEntropy/F"     +str(i) )
     tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy/F"   +str(i) )
@@ -166,7 +175,7 @@ for patientdir in patientdirs:
             continue
         
         patientsuffix = patID + infos["time"]
-        his, allhistos, histogiafatti = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
+        his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
@@ -193,13 +202,21 @@ for patientdir in patientdirs:
 
         for layer in xrange(0, len(data)):
             for i in xrange(minEntropySide, maxEntropySide, 2):
-            entropyImg = getEntropy(data[layer], ROI[layer], i)
-            nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-            thisEntropySide[i]  = i
-            meanEntropy[i]      = np.mean(nonZeroEntropy)
-            stdDevEntropy[i]    = mp.std(nonZeroEntropy)
-            maxEntropy[i]       = np.max(nonZeroEntropy)
-            minEntropy[i]       = np.min(nonZeroEntropy)
+                entropyImg = getEntropy(data[layer], ROI[layer], i)
+                nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+                thisEntropySide[i]  = i                
+                if nonZeroEntropy.any():
+                    meanEntropy[i]      = np.mean(nonZeroEntropy)
+                    stdDevEntropy[i]    = np.std(nonZeroEntropy)
+                    maxEntropy[i]       = np.max(nonZeroEntropy)
+                    minEntropy[i]       = np.min(nonZeroEntropy)
+                else:
+                    meanEntropy[i]      = -1
+                    stdDevEntropy[i]    = -1
+                    maxEntropy[i]       = -1
+                    minEntropy[i]       = -1
+                    
+                    
             
             
         tree.Fill()

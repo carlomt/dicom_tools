@@ -120,16 +120,16 @@ for i in xrange(minEntropySide, maxEntropySide+1, 2):
     # tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy/F"   +str(i) )
     # tree.Branch("maxEntropy"      +str(i), maxEntropy[i],       "maxEntropy/F"      +str(i) )
     # tree.Branch("minEntropy"      +str(i), minEntropy[i],       "minEntropy/F"      +str(i) )
-    tree.Branch("thisEntropySide" +"_"+thisEntropyName[i], thisEntropySide[i],
-                "thisEntropySide/F" +"_"+thisEntropyName[i] )
-    tree.Branch("meanEntropy"     +"_"+thisEntropyName[i], meanEntropy[i],
-                "meanEntropy/F"     +"_"+thisEntropyName[i] )
-    tree.Branch("stdDevEntropy"   +"_"+thisEntropyName[i], stdDevEntropy[i],
-                "stdDevEntropy/F"   +"_"+thisEntropyName[i] )
-    tree.Branch("maxEntropy"      +"_"+thisEntropyName[i], maxEntropy[i],
-                "maxEntropy/F"      +"_"+thisEntropyName[i] )
-    tree.Branch("minEntropy"      +"_"+thisEntropyName[i], minEntropy[i],
-                "minEntropy/F"      +"_"+thisEntropyName[i] )    
+    tree.Branch("thisEntropySide" +thisEntropyName[i].title(), thisEntropySide[i],
+                "thisEntropySide" +thisEntropyName[i].title() +"/F" )
+    tree.Branch("meanEntropy"     +thisEntropyName[i].title(), meanEntropy[i],
+                "meanEntropy"     +thisEntropyName[i].title() +"/F" )
+    tree.Branch("stdDevEntropy"   +thisEntropyName[i].title(), stdDevEntropy[i],
+                "stdDevEntropy"   +thisEntropyName[i].title() +"/F" )
+    tree.Branch("maxEntropy"      +thisEntropyName[i].title(), maxEntropy[i],
+                "maxEntropy"      +thisEntropyName[i].title() +"/F" )
+    tree.Branch("minEntropy"      +thisEntropyName[i].title(), minEntropy[i],
+                "minEntropy"      +thisEntropyName[i].title() +"/F" )
 
 tree.Branch("nFette",nFette,"nFette/I")
 

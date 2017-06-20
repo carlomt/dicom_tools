@@ -178,6 +178,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # adjusteExposureMainImgAction = QtGui.QAction("&Adjuste Exposure", self)
         # adjusteExposureMainImgAction.setStatusTip('Adjuste exposure')
         # adjusteExposureMainImgAction.triggered.connect(self.adjusteExposureMainImg)
+
+        superimposeSecOnMainAction = QtGui.QAction("&Superimpose secondary image on primary",self)
+        superimposeSecOnMainAction.setStatusTip('Superimpose secondary image on primary')
+        superimposeSecOnMainAction.triggered.connect(self.superimposeSecondaryToPrimary)
         
         colorMainImgAction = QtGui.QAction("&Use colors for main image", self)
         colorMainImgAction.setStatusTip('Use colors for main image')
@@ -268,6 +272,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         imageMenu = mainMenu.addMenu('&Image')
         # imageMenu.addAction(adjusteExposureMainImgAction)
+        imageMenu.addAction(superimposeSecOnMainAction)
         imageMenu.addAction(colorMainImgAction)
         imageMenu.addAction(saveToTiffAction)
         imageMenu.addAction(saveToPngAction)
@@ -497,7 +502,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.setlabel2values(self.secondaryImage[self.layer])
             secImg = self.secondaryImage[self.layer]
             if self.colorizeSecondaryImage and self.colorizeSecondaryImageWithROI:
-                secImg = colorize(secImg,self.ROI[self.layer],self.verbose)
+                secImg = colorize(secImg,'jet',self.ROI[self.layer],self.verbose)
 
             self.img1b.setImage(secImg)
             self.img1b.updateImage()
@@ -875,7 +880,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # thisSeed = (100,100)
         if self.verbose:        
             print(thisSeed)
-        thisImage = self.arr[:,:,0]
+        thisImage = self.arr#[:,:,0]
+        # thisImage = self.img1a.getImage()
         # # print(type(thisImage))
         # # print(thisImage.shape)
         value = thisImage[thisSeed]
@@ -950,10 +956,6 @@ class Window_dicom_tool(QtGui.QMainWindow):
         else:
             entropyImg = getEntropyCircleMask(self.arr[:,:,2],ROI=None,circle_radius=7)
         colimg= colorize(entropyImg*1.)
-        # print("entropy shape",entropyImg.shape)
-        # print("self.dataZ.shape",self.dataZ.shape)
-        # self.dataZ[self.layer,np.nonzero(colimg)] = colimg
-        # updatemain()
         
         self.img1b.setImage(colimg)
         self.p2.autoRange()
@@ -1018,6 +1020,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def colorMainImg(self):
         col = colorize(self.arr[:,:,2])
+        self.arr = col
         self.img1a.setImage(col)
         self.img1a.updateImage()
 
@@ -1074,6 +1077,21 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.verbose:
             print("new max exposure:",self.MainImgExposureMax)
         self.updatemain()
+
+    def superimposeSecondaryToPrimary(self):
+        self.dataZ = colorize(self.dataZ[:,:,:,0], 'gray')
+        
+        if self.secondaryImage3D:
+            secImg = colorize(self.secondaryImage, 'jet')
+            if self.verbose:
+                print("secImg shape",secImg.shape)
+                print("self.dataZ.shape",self.dataZ.shape)
+
+            # for i in xrange(0,3):
+            # self.dataZ[np.nonzero(secImg)] = secImg[np.nonzero(secImg)]
+            self.dataZ[secImg>0] = secImg[secImg>0]        
+        self.updatemain()
+
         
 if __name__ == '__main__':
 

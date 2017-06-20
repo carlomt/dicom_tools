@@ -1,9 +1,9 @@
 from matplotlib import  pylab as plt
 import numpy as np
 
-def colorize(img, mask=None, verbose=False):
+def colorize(img, color_map='jet', mask=None, verbose=False):
 
-    my_cm = plt.cm.get_cmap('jet')
+    my_cm = plt.cm.get_cmap(color_map)
     normed_data = (img - np.min(img)) / (np.max(img) - np.min(img))
     rgb_img = my_cm(normed_data)
     if verbose:

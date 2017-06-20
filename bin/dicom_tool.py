@@ -23,6 +23,7 @@ from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
 from dicom_tools.colorize import colorize
 from dicom_tools.getEntropy import getEntropy
+from dicom_tools.getEntropy import getEntropyCircleMask
 from skimage.filters.rank import gradient as skim_gradient
 
 from dicom_tools.rescale import rescale8bit, rescale16bit
@@ -174,6 +175,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         switchToYViewAction.setStatusTip('Switch to Y view')
         switchToYViewAction.triggered.connect(self.switchToYView)
 
+        # adjusteExposureMainImgAction = QtGui.QAction("&Adjuste Exposure", self)
+        # adjusteExposureMainImgAction.setStatusTip('Adjuste exposure')
+        # adjusteExposureMainImgAction.triggered.connect(self.adjusteExposureMainImg)
+        
         colorMainImgAction = QtGui.QAction("&Use colors for main image", self)
         colorMainImgAction.setStatusTip('Use colors for main image')
         colorMainImgAction.triggered.connect(self.colorMainImg)
@@ -262,6 +267,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         viewMenu.addAction(switchToYViewAction)
 
         imageMenu = mainMenu.addMenu('&Image')
+        # imageMenu.addAction(adjusteExposureMainImgAction)
         imageMenu.addAction(colorMainImgAction)
         imageMenu.addAction(saveToTiffAction)
         imageMenu.addAction(saveToPngAction)
@@ -300,12 +306,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if args.colorRange:
             self.dataZ = highlight_color(dataRGB,args.colorRange,args.verbose)
         
-
+        self.RightButtonsCol = 2
+        self.LeftButtonsCol = 0
+        self.CentralAreaCol = 1
+        
         self.img1a = pg.ImageItem()
         self.arr = None
         self.firsttime = True
         self.colorizeSecondaryImage = False
         self.colorizeSecondaryImageWithROI = False
+        self.MainImgExposureMax = -1
         
         self.button_next = QtGui.QPushButton('Next', self)
         self.button_prev = QtGui.QPushButton('Prev', self)
@@ -314,18 +324,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # layout = QtGui.QVBoxLayout(self)
         # layout = QtGui.QGridLayout(self)
         layout = QtGui.QGridLayout(widgetWindow)
-        layout.addWidget(self.button_next,1,1)
-        layout.addWidget(self.button_prev,2,1)
+        layout.addWidget(self.button_next,1,self.RightButtonsCol)
+        layout.addWidget(self.button_prev,2,self.RightButtonsCol)
         self.button_setroi = QtGui.QPushButton('Set ROI', self)
         self.button_setroi.clicked.connect(self.setROI)
-        layout.addWidget(self.button_setroi,12,1)
+        layout.addWidget(self.button_setroi,12,self.RightButtonsCol)
         self.button_delroi = QtGui.QPushButton('Del ROI', self)
         self.button_delroi.clicked.connect(self.delROI)
-        layout.addWidget(self.button_delroi,13,1)
+        layout.addWidget(self.button_delroi,13,self.RightButtonsCol)
         
         self.label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.label,0,0)
+        layout.addWidget(self.label,0,self.CentralAreaCol)
         self.manualROI = True
         self.connectedThreshold = False
         self.filterBeforeSegmentation=False
@@ -338,14 +348,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label_mean = QtGui.QLabel("mean: ")
         self.label_sd = QtGui.QLabel("sd: ")
         self.label_sum = QtGui.QLabel("sum: ")
-        layout.addWidget(self.label_layer,3,1)
-        layout.addWidget(self.label_shape,4,1)
-        layout.addWidget(self.label_size,5,1)
-        layout.addWidget(self.label_min,6,1)
-        layout.addWidget(self.label_max,7,1)
-        layout.addWidget(self.label_mean,8,1)
-        layout.addWidget(self.label_sd,9,1)
-        layout.addWidget(self.label_sum,10,1)
+        layout.addWidget(self.label_layer,3,self.RightButtonsCol)
+        layout.addWidget(self.label_shape,4,self.RightButtonsCol)
+        layout.addWidget(self.label_size,5,self.RightButtonsCol)
+        layout.addWidget(self.label_min,6,self.RightButtonsCol)
+        layout.addWidget(self.label_max,7,self.RightButtonsCol)
+        layout.addWidget(self.label_mean,8,self.RightButtonsCol)
+        layout.addWidget(self.label_sd,9,self.RightButtonsCol)
+        layout.addWidget(self.label_sum,10,self.RightButtonsCol)
 
         self.roisSetted = 0
         self.label2_roisSetted = QtGui.QLabel("ROI setted: 0")
@@ -356,14 +366,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label2_mean = QtGui.QLabel()
         self.label2_sd = QtGui.QLabel()
         self.label2_sum = QtGui.QLabel()
-        layout.addWidget(self.label2_roisSetted,14,1)
-        layout.addWidget(self.label2_shape,15,1)
-        layout.addWidget(self.label2_size,16,1)
-        layout.addWidget(self.label2_min,17,1)
-        layout.addWidget(self.label2_max,18,1)
-        layout.addWidget(self.label2_mean,19,1)
-        layout.addWidget(self.label2_sd,20,1)
-        layout.addWidget(self.label2_sum,21,1)
+        layout.addWidget(self.label2_roisSetted,14,self.RightButtonsCol)
+        layout.addWidget(self.label2_shape,15,self.RightButtonsCol)
+        layout.addWidget(self.label2_size,16,self.RightButtonsCol)
+        layout.addWidget(self.label2_min,17,self.RightButtonsCol)
+        layout.addWidget(self.label2_max,18,self.RightButtonsCol)
+        layout.addWidget(self.label2_mean,19,self.RightButtonsCol)
+        layout.addWidget(self.label2_sd,20,self.RightButtonsCol)
+        layout.addWidget(self.label2_sum,21,self.RightButtonsCol)
                                       
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,self.imgScaleFactor)
@@ -373,8 +383,20 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p1.scene().sigMouseClicked.connect(self.mouseMoved)
 
         # imv = pg.ImageView(imageItem=img1a)
-        layout.addWidget(self.p1,1,0,10,1)
+        layout.addWidget(self.p1,1, self.CentralAreaCol,10,1)
 
+        self.ExposureSliderLabel = QtGui.QLabel("Exposure")
+        layout.addWidget(self.ExposureSliderLabel,1,self.LeftButtonsCol)
+            
+        self.ExposureSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.ExposureSlider.setFixedWidth(100);
+        self.ExposureSlider.setMinimum(1)
+        self.ExposureSlider.setMaximum(10000)
+        self.ExposureSlider.setValue(10000-3143)
+        self.ExposureSlider.setSingleStep(1)
+        self.ExposureSlider.valueChanged.connect(self.changeMainExposure)
+        layout.addWidget(self.ExposureSlider,2,self.LeftButtonsCol)
+        
         # self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.slider = QtGui.QScrollBar(QtCore.Qt.Horizontal)
         self.slider.setMinimum(1)
@@ -387,7 +409,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         # self.slider.sliderMoved.connect(self.slider_jump_to)
         self.slider.valueChanged.connect(self.slider_jump_to)
-        layout.addWidget(self.slider,11,0)
+        layout.addWidget(self.slider,11,self.CentralAreaCol)
 
         self.img1b = pg.ImageItem()
         self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
@@ -401,7 +423,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2ViewBox = self.p2.plotItem.vb
 
         self.roi.sigRegionChanged.connect(self.update)
-        layout.addWidget(self.p2,12,0,10,1)
+        layout.addWidget(self.p2,12, self.CentralAreaCol,10,1)
 
         proxy = pg.SignalProxy(self.p2.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved2)
         self.p2.scene().sigMouseClicked.connect(self.mouseMoved2)
@@ -441,7 +463,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.arr=self.dataswappedY[self.layer]
         else:
             self.arr=self.dataZ[self.layer]
-        self.img1a.setImage(self.arr)
+        if self.MainImgExposureMax > 0:
+            self.img1a.setImage(self.arr, levels=(0, self.MainImgExposureMax))
+        else:
+            self.img1a.setImage(self.arr)
+            if self.verbose:
+                print("levels:", self.img1a.getLevels())
         if self.firsttime:
             self.firsttime = False
         else:
@@ -917,8 +944,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             if not np.any(self.ROI[self.layer]): return
             image = image*self.ROI[self.layer]
             entropyImg = getEntropy(self.arr[:,:,2], ROI=self.ROI[self.layer])
+            entropyImg = getEntropyCircleMask(self.arr[:,:,2], ROI=self.ROI[self.layer],circle_radius=7)            
         else:
-            entropyImg = getEntropy(self.arr[:,:,2])
+            entropyImg = getEntropyCircleMask(self.arr[:,:,2],ROI=None,circle_radius=7)
         colimg= colorize(entropyImg*1.)
         self.img1b.setImage(colimg)
         self.p2.autoRange()
@@ -1028,8 +1056,17 @@ class Window_dicom_tool(QtGui.QMainWindow):
     # def showROI8bit(self):
     #     i
     #     oldlayer = self.layer
-    #     self.secondaryImage = np . 
-    
+    #     self.secondaryImage = np .
+
+    # def adjusteExposureMainImg(self):
+    #     self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+
+    def changeMainExposure(self):
+        self.MainImgExposureMax = 10000 - self.ExposureSlider.value()
+        if self.verbose:
+            print("new max exposure:",self.MainImgExposureMax)
+        self.updatemain()
+        
 if __name__ == '__main__':
 
     import sys

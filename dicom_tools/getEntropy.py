@@ -21,6 +21,14 @@ def getEntropy(image, ROI=None, square_size=5, verbose=False):
         entropyImg = skim_entropy(image,skim_square(square_size), mask=ROI)
     return entropyImg
 
+def getEntropyCircleMask(image, ROI=None, circle_radius=5, verbose=False):
+    image = rescale8bit(image)
+    if ROI is None:
+        entropyImg = skim_entropy(image,skim_disk(circle_radius))
+    else:
+        entropyImg = skim_entropy(image,skim_disk(circle_radius), mask=ROI)
+    return entropyImg
+
 
 def make_histo_entropy(data, ROI, suffix="", verbose=False):
     entropy3D = np.zeros( tuple([len(data)])+data[0,:,:].shape)

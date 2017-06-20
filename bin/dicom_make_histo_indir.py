@@ -15,6 +15,7 @@ from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.info_file_parser import info_file_parser
 from dicom_tools.timeflagconverter import timeflagconverter_string2int
 from dicom_tools.getEntropy import getEntropy
+from dicom_tools.getEntropy import getEntropyCircleMask
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
 outfname="out.root"
@@ -25,6 +26,7 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 parser.add_argument("-jo", "--justone", help="limit the analisys to one subdirecotry")
+parser.add_argument("-ex", "--exclude", help="exclude one subdirecotry from the analisys")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
 
@@ -50,7 +52,7 @@ skewness = array('f', [0])
 kurtosis = array('f', [0])
 
 minEntropySide = 3
-maxEntropySide = 13
+maxEntropySide = 21
 
 thisEntropySide   = {}
 meanEntropy       = {}
@@ -233,12 +235,17 @@ patientdirs= glob.glob(inputdir+"*/")
 
 if args.justone:
     print("Looking for dir",args.justone)
+if args.exclude:
+    print("Excluding dir",args.exclude)
 
 for patientdir in patientdirs:
 
     print(patientdir)
     if args.justone:
         if not args.justone in patientdir: continue
+
+    if args.exclude:
+        if args.exclude in patientdir: continue
     
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:
@@ -410,7 +417,8 @@ for patientdir in patientdirs:
             print("working on entropies from",minEntropySide,"to",maxEntropySide)
         for i in xrange(minEntropySide, maxEntropySide+1, 2):
             # entropyImg = getEntropy(data[layer], ROI[layer], i)
-            entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], i)            
+            # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], i)
+            entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
             nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
             # thisEntropySide[i]  = i                
             if nonZeroEntropy.any():

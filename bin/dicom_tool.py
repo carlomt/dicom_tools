@@ -393,6 +393,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.ExposureSlider.setMinimum(1)
         self.ExposureSlider.setMaximum(10000)
         self.ExposureSlider.setValue(10000-3143)
+        self.ExposureSlider.setTickPosition(2)
+        self.ExposureSlider.setTickInterval(1000)
         self.ExposureSlider.setSingleStep(1)
         self.ExposureSlider.valueChanged.connect(self.changeMainExposure)
         layout.addWidget(self.ExposureSlider,2,self.LeftButtonsCol)
@@ -948,6 +950,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         else:
             entropyImg = getEntropyCircleMask(self.arr[:,:,2],ROI=None,circle_radius=7)
         colimg= colorize(entropyImg*1.)
+        # print("entropy shape",entropyImg.shape)
+        # print("self.dataZ.shape",self.dataZ.shape)
+        # self.dataZ[self.layer,np.nonzero(colimg)] = colimg
+        # updatemain()
+        
         self.img1b.setImage(colimg)
         self.p2.autoRange()
         self.img1b.updateImage()
@@ -961,7 +968,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def entropyInAllROI(self):
         oldlayer = self.layer
-        self.highlightnrrdROI()
+        if len(self.ROI)<1:
+            self.highlightnrrdROI()
         # self.secondaryImage = np.zeros( tuple([len(self.data)])+self.data[0,:,:,0].shape+tuple([4]) )
         self.secondaryImage = np.zeros( tuple([len(self.data)])+self.data[0,:,:,0].shape)
         for i in range(0,len(self.data[:,:,:,0])):

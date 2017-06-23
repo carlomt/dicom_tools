@@ -87,7 +87,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     for layer in xrange(0,nFette):
         fetta = data[layer]
         fettaROI = mask[layer]
-        fettaROI = fettaROI.astype(np.uint8)
+        # fettaROI = fettaROI.astype(np.uint8)
         #CV gclm
         fetta8bit = rescale8bit(fetta)
         glcmdata = fettaROI*fetta8bit

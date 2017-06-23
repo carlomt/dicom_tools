@@ -14,9 +14,10 @@ from array import array
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.info_file_parser import info_file_parser
 from dicom_tools.timeflagconverter import timeflagconverter_string2int
-from dicom_tools.getEntropy import getEntropy
-from dicom_tools.getEntropy import getEntropyCircleMask
+# from dicom_tools.getEntropy import getEntropy
+# from dicom_tools.getEntropy import getEntropyCircleMask
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
+from dicom_tools.make_histo_entropy import make_histo_entropy
 
 outfname="out.root"
 
@@ -59,6 +60,15 @@ meanEntropy       = {}
 stdDevEntropy     = {}
 maxEntropy        = {}
 minEntropy        = {}
+skewnessEntropy = {}
+kurtosisEntropy = {}
+thisEntropySideFM   = {}
+meanEntropyFM       = {}
+stdDevEntropyFM     = {}
+maxEntropyFM        = {}
+minEntropyFM        = {}
+skewnessEntropyFM = {}
+kurtosisEntropyFM = {}
 
 for i in xrange(minEntropySide, maxEntropySide+1, 2):
     thisEntropySide[i]   = array('i', [0])
@@ -66,42 +76,15 @@ for i in xrange(minEntropySide, maxEntropySide+1, 2):
     stdDevEntropy[i]     = array('f', [0])
     maxEntropy[i]        = array('f', [0])
     minEntropy[i]        = array('f', [0])
-
-# thisEntropySide3   = array('i', [0])
-# meanEntropy3       = array('f', [0])
-# stdDevEntropy3     = array('f', [0])
-# maxEntropy3        = array('f', [0])
-# minEntropy3        = array('f', [0])
-
-# thisEntropySide5   = array('i', [0])
-# meanEntropy5       = array('f', [0])
-# stdDevEntropy5     = array('f', [0])
-# maxEntropy5        = array('f', [0])
-# minEntropy5        = array('f', [0])
-
-# thisEntropySide7   = array('i', [0])
-# meanEntropy7       = array('f', [0])
-# stdDevEntropy7     = array('f', [0])
-# maxEntropy7        = array('f', [0])
-# minEntropy7        = array('f', [0])
-
-# thisEntropySide9   = array('i', [0])
-# meanEntropy9       = array('f', [0])
-# stdDevEntropy9     = array('f', [0])
-# maxEntropy9        = array('f', [0])
-# minEntropy9        = array('f', [0])
-
-# thisEntropySide11   = array('i', [0])
-# meanEntropy11       = array('f', [0])
-# stdDevEntropy11     = array('f', [0])
-# maxEntropy11        = array('f', [0])
-# minEntropy11        = array('f', [0])
-
-# thisEntropySide13   = array('i', [0])
-# meanEntropy13       = array('f', [0])
-# stdDevEntropy13     = array('f', [0])
-# maxEntropy13        = array('f', [0])
-# minEntropy13        = array('f', [0])
+    skewnessEntropy[i]        = array('f', [0])
+    kurtosisEntropy[i]        = array('f', [0])
+    thisEntropySideFM[i]   = array('i', [0])
+    meanEntropyFM[i]       = array('f', [0])
+    stdDevEntropyFM[i]     = array('f', [0])
+    maxEntropyFM[i]        = array('f', [0])
+    minEntropyFM[i]        = array('f', [0])
+    skewnessEntropyFM[i]        = array('f', [0])
+    kurtosisEntropyFM[i]        = array('f', [0])    
 
 nmax = 100
 nFette   = array('i', [0])
@@ -152,53 +135,11 @@ for i in xrange(minEntropySide, maxEntropySide+1, 2):
     tree.Branch("stdDevEntropy"   +str(i), stdDevEntropy[i],    "stdDevEntropy"   +str(i)+"/F" )
     tree.Branch("maxEntropy"      +str(i), maxEntropy[i],       "maxEntropy"      +str(i)+"/F" )
     tree.Branch("minEntropy"      +str(i), minEntropy[i],       "minEntropy"      +str(i)+"/F" )
-#     tree.Branch("thisEntropySide" +thisEntropyName[i].title(), thisEntropySide[i],
-#                 "thisEntropySide" +thisEntropyName[i].title() +"/I" )
-#     tree.Branch("meanEntropy"     +thisEntropyName[i].title(), meanEntropy[i],
-#                 "meanEntropy"     +thisEntropyName[i].title() +"/F" )
-#     tree.Branch("stdDevEntropy"   +thisEntropyName[i].title(), stdDevEntropy[i],
-#                 "stdDevEntropy"   +thisEntropyName[i].title() +"/F" )
-#     tree.Branch("maxEntropy"      +thisEntropyName[i].title(), maxEntropy[i],
-#                 "maxEntropy"      +thisEntropyName[i].title() +"/F" )
-#     tree.Branch("minEntropy"      +thisEntropyName[i].title(), minEntropy[i],
-#                 "minEntropy"      +thisEntropyName[i].title() +"/F" )
-
-# tree.Branch("thisEntropySide3", thisEntropySide3,  "thisEntropySide3/I")
-# tree.Branch("meanEntropy3",     meanEntropy3,      "meanEntropy3/F")
-# tree.Branch("stdDevEntropy3",   stdDevEntropy3,    "stdDevEntropy3/F")
-# tree.Branch("maxEntropy3",      maxEntropy3,       "maxEntropy3/F")
-# tree.Branch("minEntropy3",      minEntropy3,       "minEntropy3/F")
-
-# tree.Branch("thisEntropySide5", thisEntropySide5,  "thisEntropySide5/I")
-# tree.Branch("meanEntropy5",     meanEntropy5,      "meanEntropy5/F")
-# tree.Branch("stdDevEntropy5",   stdDevEntropy5,    "stdDevEntropy5/F")
-# tree.Branch("maxEntropy5",      maxEntropy5,       "maxEntropy5/F")
-# tree.Branch("minEntropy5",      minEntropy5,       "minEntropy5/F")
-
-# tree.Branch("thisEntropySide7", thisEntropySide7,  "thisEntropySide7/I")
-# tree.Branch("meanEntropy7",     meanEntropy7,      "meanEntropy7/F")
-# tree.Branch("stdDevEntropy7",   stdDevEntropy7,    "stdDevEntropy7/F")
-# tree.Branch("maxEntropy7",      maxEntropy7,       "maxEntropy7/F")
-# tree.Branch("minEntropy7",      minEntropy7,       "minEntropy7/F")
-
-# tree.Branch("thisEntropySide9", thisEntropySide9,  "thisEntropySide9/I")
-# tree.Branch("meanEntropy9",     meanEntropy9,      "meanEntropy9/F")
-# tree.Branch("stdDevEntropy9",   stdDevEntropy9,    "stdDevEntropy9/F")
-# tree.Branch("maxEntropy9",      maxEntropy9,       "maxEntropy9/F")
-# tree.Branch("minEntropy9",      minEntropy9,       "minEntropy9/F")
-
-# tree.Branch("thisEntropySide11", thisEntropySide11,  "thisEntropySide11/I")
-# tree.Branch("meanEntropy11",     meanEntropy11,      "meanEntropy11/F")
-# tree.Branch("stdDevEntropy11",   stdDevEntropy11,    "stdDevEntropy11/F")
-# tree.Branch("maxEntropy11",      maxEntropy11,       "maxEntropy11/F")
-# tree.Branch("minEntropy11",      minEntropy11,       "minEntropy11/F")
-
-# tree.Branch("thisEntropySide13", thisEntropySide13,  "thisEntropySide13/I")
-# tree.Branch("meanEntropy13",     meanEntropy13,      "meanEntropy13/F")
-# tree.Branch("stdDevEntropy13",   stdDevEntropy13,    "stdDevEntropy13/F")
-# tree.Branch("maxEntropy13",      maxEntropy13,       "maxEntropy13/F")
-# tree.Branch("minEntropy13",      minEntropy13,       "minEntropy13/F")
-
+    tree.Branch("thisEntropySideFM" +str(i), thisEntropySideFM[i],  "thisEntropySideFM" +str(i)+"/I" )
+    tree.Branch("meanEntropyFM"     +str(i), meanEntropyFM[i],      "meanEntropyFM"     +str(i)+"/F" )
+    tree.Branch("stdDevEntropyFM"   +str(i), stdDevEntropyFM[i],    "stdDevEntropyFM"   +str(i)+"/F" )
+    tree.Branch("maxEntropyFM"      +str(i), maxEntropyFM[i],       "maxEntropyFM"      +str(i)+"/F" )
+    tree.Branch("minEntropyFM"      +str(i), minEntropyFM[i],       "minEntropyFM"      +str(i)+"/F" )    
     
 
 tree.Branch("nFette",nFette,"nFette/I")
@@ -337,6 +278,72 @@ for patientdir in patientdirs:
         if args.verbose:
             print(patientID, nFette[0])
 
+        layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)            
+        for i in xrange(minEntropySide, maxEntropySide+1, 2):            
+            hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, None, args.verbose, roinorm, args.norm)
+            thisEntropySide[i][0]  = i
+            meanEntropy[i][0]      = hisEntropy.GetMean()
+            stdDevEntropy[i][0]    = hisEntropy.GetStdDev()
+            maxEntropy[i][0]       = hisEntropy.GetMaximum()
+            minEntropy[i][0]       = hisEntropy.GetMinimum()
+            skewnessEntropy[i][0]       = hisEntropy.GetSkewness()
+            kurtosisEntropy[i][0]       = hisEntropy.GetKurtosis()
+
+            hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, layerMaxROI, args.verbose, roinorm, args.norm)
+            thisEntropySideFM[i][0]  = i
+            meanEntropyFM[i][0]      = hisEntropy.GetMean()
+            stdDevEntropyFM[i][0]    = hisEntropy.GetStdDev()
+            maxEntropyFM[i][0]       = hisEntropy.GetMaximum()
+            minEntropyFM[i][0]       = hisEntropy.GetMinimum()
+            skewnessEntropyFM[i][0]       = hisEntropy.GetSkewness()
+            kurtosisEntropyFM[i][0]       = hisEntropy.GetKurtosis()            
+            
+            
+        # for layer in xrange(0, len(data)):
+        #     if args.verbose:
+        #         print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
+        #     for i in xrange(minEntropySide, maxEntropySide+1, 2):
+        #         entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
+        #         nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+        #         thisEntropySide[i]  = i                
+        #         if nonZeroEntropy.any():
+        #             meanEntropy[i][0]      = np.mean(nonZeroEntropy)
+        #             stdDevEntropy[i][0]    = np.std(nonZeroEntropy)
+        #             maxEntropy[i][0]       = np.max(nonZeroEntropy)
+        #             minEntropy[i][0]       = np.min(nonZeroEntropy)
+        #             if args.verbose:
+        #                 print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
+        #                 print("data stored:",meanEntropy[i][0],stdDevEntropy[i][0],maxEntropy[i][0],minEntropy[i][0])
+        #         else:
+        #             meanEntropyFM[i][0]      = -1
+        #             stdDevEntropyFM[i][0]    = -1
+        #             maxEntropyFM[i][0]       = -1
+        #             minEntropyFM[i][0]       = -1
+
+
+        # layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)
+        # if args.verbose:
+        #     print("working on entropies from",minEntropySide,"to",maxEntropySide)
+        # for i in xrange(minEntropySide, maxEntropySide+1, 2):
+        #     entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
+        #     nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+        #     thisEntropySide[i]  = i                
+        #     if nonZeroEntropy.any():
+        #         meanEntropyFM[i][0]      = np.mean(nonZeroEntropy)
+        #         stdDevEntropyFM[i][0]    = np.std(nonZeroEntropy)
+        #         maxEntropyFM[i][0]       = np.max(nonZeroEntropy)
+        #         minEntropyFM[i][0]       = np.min(nonZeroEntropy)
+        #         if args.verbose:
+        #             print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
+        #             print("data stored:",meanEntropyFM[i][0],stdDevEntropyFM[i][0],maxEntropyFM[i][0],minEntropyFM[i][0])
+        #     else:
+        #         meanEntropyFM[i][0]      = -1
+        #         stdDevEntropyFM[i][0]    = -1
+        #         maxEntropyFM[i][0]       = -1
+        #         minEntropyFM[i][0]       = -1
+                
+            
+
         #CV gclm parameters
         for k in range(0,len(histogclm)):
             thishisto = histogclm[k]
@@ -368,73 +375,6 @@ for patientdir in patientdirs:
                 if 'contMQ' in thishisto.GetName(): contMQPF[n-firstL] = thishisto.GetBinContent(n)
                 if 'homoMQ' in thishisto.GetName(): homoMQPF[n-firstL] = thishisto.GetBinContent(n)
             
-        # for layer in xrange(0, len(data)):
-        layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 3)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy3      = np.mean(nonZeroEntropy)
-        # stdDevEntropy3    = np.std(nonZeroEntropy)
-        # maxEntropy3       = np.max(nonZeroEntropy)
-        # minEntropy3       = np.min(nonZeroEntropy)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 5)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy5      = np.mean(nonZeroEntropy)
-        # stdDevEntropy5    = np.std(nonZeroEntropy)
-        # maxEntropy5       = np.max(nonZeroEntropy)
-        # minEntropy5       = np.min(nonZeroEntropy)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 7)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy7      = np.mean(nonZeroEntropy)
-        # stdDevEntropy7    = np.std(nonZeroEntropy)
-        # maxEntropy7       = np.max(nonZeroEntropy)
-        # minEntropy7       = np.min(nonZeroEntropy)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 9)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy9      = np.mean(nonZeroEntropy)
-        # stdDevEntropy9    = np.std(nonZeroEntropy)
-        # maxEntropy9       = np.max(nonZeroEntropy)
-        # minEntropy9       = np.min(nonZeroEntropy)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 11)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy11      = np.mean(nonZeroEntropy)
-        # stdDevEntropy11    = np.std(nonZeroEntropy)
-        # maxEntropy11       = np.max(nonZeroEntropy)
-        # minEntropy11       = np.min(nonZeroEntropy)
-
-        # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], 13)            
-        # nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        # meanEntropy13      = np.mean(nonZeroEntropy)
-        # stdDevEntropy13    = np.std(nonZeroEntropy)
-        # maxEntropy13       = np.max(nonZeroEntropy)
-        # minEntropy13       = np.min(nonZeroEntropy)        
-        
-        if args.verbose:
-            print("working on entropies from",minEntropySide,"to",maxEntropySide)
-        for i in xrange(minEntropySide, maxEntropySide+1, 2):
-            # entropyImg = getEntropy(data[layer], ROI[layer], i)
-            # entropyImg = getEntropy(data[layerMaxROI], ROI[layerMaxROI], i)
-            entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
-            nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-            # thisEntropySide[i]  = i                
-            if nonZeroEntropy.any():
-                meanEntropy[i][0]      = np.mean(nonZeroEntropy)
-                stdDevEntropy[i][0]    = np.std(nonZeroEntropy)
-                maxEntropy[i][0]       = np.max(nonZeroEntropy)
-                minEntropy[i][0]       = np.min(nonZeroEntropy)
-                if args.verbose:
-                    print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
-                    print("data stored:",meanEntropy[i][0],stdDevEntropy[i][0],maxEntropy[i][0],minEntropy[i][0])
-            else:
-                meanEntropy[i][0]      = -1
-                stdDevEntropy[i][0]    = -1
-                maxEntropy[i][0]       = -1
-                minEntropy[i][0]       = -1
-                    
                     
             
         if args.verbose:

@@ -32,7 +32,7 @@ from skimage.morphology import square as skim_square
 #from scipy.ndimage.morphology import binary_fill_holes
 #import ROOT
 from dicom_tools.histFromArray import histFromArray
-
+from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -213,6 +213,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         gradientAction.setStatusTip('Gradient')
         gradientAction.triggered.connect(self.gradient)
 
+        goToLayerWithLargerROIAction = QtGui.QAction("&Go to the layer with larger ROI",self)
+        goToLayerWithLargerROIAction.setStatusTip('Go to the layer with larger ROI')
+        goToLayerWithLargerROIAction.triggered.connect(self.goToLayerWithLargerROI)
+
         entropyInAllROIAction = QtGui.QAction("&Entropy in a 3D ROI (nrrd)",self)
         entropyInAllROIAction.setStatusTip('Entropy in a 3D ROI (nrrd)"')
         entropyInAllROIAction.triggered.connect(self.entropyInAllROI)
@@ -284,6 +288,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         analysisMenu.addAction(entropyAction)        
         analysisMenu.addAction(entropyInAllROIAction)
         analysisMenu.addAction(gradientAction)
+        analysisMenu.addAction(goToLayerWithLargerROIAction)
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -1097,6 +1102,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         primImg[secImg>0] = secImg[secImg>0]
 
         self.setImgToMain(primImg)
+
+    def goToLayerWithLargerROI(self):
+        self.layer = getLayerWithLargerROI(self.ROI)
+        self.updatemain()
         
 if __name__ == '__main__':
 

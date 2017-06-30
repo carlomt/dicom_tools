@@ -317,11 +317,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
         self.img1a = pg.ImageItem()
         self.arr = None
+        self.secondaryImage2D=None        
         self.firsttime = True
         self.colorizeSecondaryImage = False
         self.colorizeSecondaryImageWithROI = False
         self.MainImgExposureMax = -1
-        
+
         self.button_next = QtGui.QPushButton('Next', self)
         self.button_prev = QtGui.QPushButton('Prev', self)
         self.button_next.clicked.connect(self.nextimg)
@@ -458,8 +459,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.setlabel2values(toshowvalues)
         # self.p2.autoRange()
 
+    def setImgToMain(self, img):
+        self.arr = img
+        self.img1a.setImage(img)
+        self.img1a.updateImage() 
+        
     def updatemain(self):
-
+        
         if self.verbose:
             print("updating",self.layer)
         if self.xview:
@@ -500,11 +506,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.secondaryImage3D:
             # self.p2.autoRange()
             self.setlabel2values(self.secondaryImage[self.layer])
-            secImg = self.secondaryImage[self.layer]
+            self.secondaryImage2D = self.secondaryImage[self.layer]
             if self.colorizeSecondaryImage and self.colorizeSecondaryImageWithROI:
-                secImg = colorize(secImg,'jet',self.ROI[self.layer],self.verbose)
+                self.secondaryImage2D = colorize(self.secondaryImage2D,'jet',self.ROI[self.layer],self.verbose)
 
-            self.img1b.setImage(secImg)
+            self.img1b.setImage(self.secondaryImage2D)
             self.img1b.updateImage()
         
     def nextimg(self):
@@ -909,9 +915,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         seedY = int(mousePoint.y()+0.5)
         thisSeed = (seedX, seedY)
         if self.secondaryImage3D:
-            secImg = self.secondaryImage[self.layer]
+            self.secondaryImage2D = self.secondaryImage[self.layer]
         elif np.any(self.secondaryImage2D):
-            secImg = self.secondaryImage2D
+            self.secondaryImage2D = self.secondaryImage2D
         value =  self.secondaryImage2D[thisSeed]
         print("value",value)
             
@@ -1079,19 +1085,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.updatemain()
 
     def superimposeSecondaryToPrimary(self):
-        self.dataZ = colorize(self.dataZ[:,:,:,0], 'gray')
+        secImg = self.secondaryImage[self.layer]
+        primImg = self.arr[:,:,0]
+        secImg = colorize(secImg,'jet')
+        primImg = colorize(primImg, 'gray')
         
-        if self.secondaryImage3D:
-            secImg = colorize(self.secondaryImage, 'jet')
-            if self.verbose:
-                print("secImg shape",secImg.shape)
-                print("self.dataZ.shape",self.dataZ.shape)
+        if self.verbose:
+            print("secImg shape",secImg.shape)
+            print("primImg shape",primImg.shape)
 
-            # for i in xrange(0,3):
-            # self.dataZ[np.nonzero(secImg)] = secImg[np.nonzero(secImg)]
-            self.dataZ[secImg>0] = secImg[secImg>0]        
-        self.updatemain()
+        primImg[secImg>0] = secImg[secImg>0]
 
+        self.setImgToMain(primImg)
         
 if __name__ == '__main__':
 

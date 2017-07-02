@@ -34,6 +34,8 @@ from skimage.morphology import square as skim_square
 from dicom_tools.histFromArray import histFromArray
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
+import matplotlib.pyplot as plt
+
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
@@ -854,6 +856,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def histoOfAllLayer(self):
         print("to be done")
+        # h = np.histogram(self.arr,bins='fd')
+        plt.hist(self.arr.ravel(), bins='fd')
+        plt.title("Histogram of all the current layer")
+        plt.show()
 
     def about(self):
         dialogTextBrowser = AboutWindow(self)

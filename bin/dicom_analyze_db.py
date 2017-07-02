@@ -7,17 +7,19 @@ import numpy as np
 import dicom
 from dicom_tools.FileReader import FileReader
 from dicom_tools.info_file_parser import info_file_parser
+from dicom_tools.myroi2roi import myroi2roi
+from dicom_tools.timeflagconverter import timeflagconverter_string2int
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from scipy.stats import skew, kurtosis
 from dicom_tools.getEntropy import getEntropyCircleMask
 
-outfname="out.root"
+outfname="out.txt"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("inputdirecotry", help="path of the input direcotry")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
-parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
+parser.add_argument("-o", "--outfile", help="define output file name (default out.txt)")
 parser.add_argument("-jo", "--justone", help="limit the analisys to one subdirecotry")
 parser.add_argument("-ex", "--exclude", help="exclude one subdirecotry from the analisys")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
@@ -30,7 +32,7 @@ if args.outfile:
 out_file = open(outfname,"w")
 
 inputdir = args.inputdirecotry
-out_file.write("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt")
+print("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt",file=out_file)
 
 if args.verbose:
     print("Verbose dicom_make_histo_indir.py \n")
@@ -113,13 +115,13 @@ for patientdir in patientdirs:
             continue
 
 
-        nzdata = np.nonzero(data*ROI)
+        nzdata = data[ROI>0]
         nVoxel = len(nzdata.ravel())
         mean = nzdata.mean()
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        out_file.write(patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt)
+        print(patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt, file=out_file)
 
 
 

@@ -63,22 +63,30 @@ class DynamicArray(object):
         self.size = size
         self._data = np.resize(self._data, self.size)
 
-    def savetxt(self, filename):
+    def savetxt(self, filename, delimiter=' ', header='',comments='#'):
         types = self.getTypes()
         sformat = ""
         for this_type in types:
             sformat+= convertTypes(this_type)+" "
-        np.savetxt(filename, self._data[:self.length], sformat)
+        np.savetxt(filename, self._data[:self.length], sformat, delimiter=delimiter, header=header, comments=comments)
 
     def savetxtROOT(self, filename):
-        types = self.getTypes()
-        sformat = ""
+        # types = self.getTypes()
+        # sformat = ""
         branchDescriptor = ""
         for var in self._data.dtype.names:
             this_type = type(self._data[var][0])
-            sformat+= convertTypes(this_type)+" "
+            # sformat+= convertTypes(this_type)+" "
             branchDescriptor += var+"/"+convertTypesROOT(this_type)+":"
-        np.savetxt(filename, self._data[:self.length], sformat, header=branchDescriptor[:-1], comments='')        
+        # np.savetxt(filename, self._data[:self.length], sformat, header=branchDescriptor[:-1], comments='')
+        self.savetxt(filename, header=branchDescriptor[:-1], comments='')        
+
+    def savecsv(self, filename, delimiter=', '):
+        varnames = ""
+        for var in self._data.dtype.names:
+            varnames += var+delimiter
+        self.savetxt(filename, header=varnames, delimiter=delimiter, comments='')
+        
 
     def getTypes(self):
         res = []

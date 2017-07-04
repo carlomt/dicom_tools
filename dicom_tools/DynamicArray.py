@@ -2,11 +2,11 @@ from __future__ import print_function
 import numpy as np
 
 class DynamicArray(object):
-    def __init__(self, dtype, size=10):
+    def __init__(self, dtype, size=10, stride=10):
         self.dtype = np.dtype(dtype)
         self.length = 0
         self.size = size
-        self.STRIDE = size
+        self.STRIDE = stride
         self._data = np.empty(self.size, dtype=self.dtype)
 
     def __len__(self):
@@ -19,15 +19,18 @@ class DynamicArray(object):
         self._data[self.length] = val
         self.length +=1
 
-    def __getitem__(self,index):
-        i = index
-        if index<0:
-            i = self.length + index 
-        if i<self.length and i>=0:
-            return self._data[i]
+    def __getitem__(self,key):
+        if isinstance(key,int):
+            i = key
+            if i<0:
+                i = self.length + i 
+            if i<self.length and i>=0:
+                return self._data[i]
+            else:
+                raise IndexError('index',key,' is out of bounds. Size:',self.length)
         else:
-            raise IndexError('index',index,' is out of bounds. Size:',self.length)
-
+            return self._data[key][0:self.length]
+            
     def __setitem__(self,index,val):
         self._data[index] = val
 
@@ -41,7 +44,6 @@ class DynamicArray(object):
     def __reversed__(self):
         for i in xrange(self.length-1,-1,-1):
             yield self._data[i]
-
             
     def push_back(self, val):
         self.append(val)
@@ -59,7 +61,9 @@ class DynamicArray(object):
         self.size = size
         self._data = np.resize(self._data, self.size)
 
-
+    def savetxt(self, filename):
+        np.savetxt(filename, self._data[:self.length])
+        
     @property
     def data(self):
         return self._data[:self.length]    

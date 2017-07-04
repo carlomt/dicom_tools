@@ -29,10 +29,13 @@ args = parser.parse_args()
 
 if args.outfile:
     outfname = args.outfile
-out_file = open(outfname,"w")
+# out_file = open(outfname,"w")
 
 inputdir = args.inputdirecotry
 print("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt",file=out_file)
+
+vars = [("patientID",np.uint8),("timeflag",np.uint8),("nVoxel",np.uint8),("ypT",np.uint8)
+        ,("mean",np.float16),("stdDev",np.float16),("skewness",np.float16),("kurt",np.float16)]
 
 if args.verbose:
     print("Verbose dicom_make_histo_indir.py \n")
@@ -47,6 +50,8 @@ if args.justone:
 if args.exclude:
     print("Excluding dir",args.exclude)
 
+results = DynamicArray(vars,len(patiendirs)*3)
+    
 for patientdir in patientdirs:
 
     print(patientdir)
@@ -121,10 +126,10 @@ for patientdir in patientdirs:
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        print(patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt, file=out_file)
+        results.append(patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt)
 
 
 
+results.savetxt(outfname)
 
-
-out_file.close()
+#out_file.close()

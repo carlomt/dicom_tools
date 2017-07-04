@@ -131,6 +131,6 @@ for patientdir in patientdirs:
 
 
 
-results.savetxt(outfname)
+results.savetxtROOT(outfname)
 
 #out_file.close()

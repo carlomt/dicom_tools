@@ -44,6 +44,15 @@ if args.verbose:
 minEntropySide = 3
 maxEntropySide = 21
 
+for i in xrange(minEntropySide, maxEntropySide+1, 2):
+    vars.append("thisEntropySide"+str(i), np.uint8)
+    vars.append("meanEntropy"+str(i), np.float16)
+    vars.append("stdDevEntropy"+str(i), np.float16)
+    vars.append("minEntropy"+str(i), np.float16)
+    vars.append("maxEntropy"+str(i), np.float16)    
+    vars.append("skewnessEntropy"+str(i), np.float16)    
+    vars.append("kurtosisEntropy"+str(i), np.float16)    
+
 patientdirs= glob.glob(inputdir+"*/")
 
 if args.justone:
@@ -120,14 +129,26 @@ for patientdir in patientdirs:
             print("skipping this analysis len(data)",len(data),"len(ROI)",len(ROI))
             continue
 
-
+        
         nzdata = data[ROI>0]
         nVoxel = len(nzdata.ravel())
         mean = nzdata.mean()
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        results.append((patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt))
+        this_result = (patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt)
+
+        layer = getLayerWithLargerROI(ROI)
+        
+        for i in xrange(minEntropySide, maxEntropySide+1, 2):
+            entropy = getEntropyCircleMask(data[layer],ROI[layer], circle_radius=i, args.verbose)
+            nzentropy = entropy[ROI[layer]>0]
+            entropymean = nzentropy.mean()
+            entropyStdDev = nzentropy.std()
+            entropySkewness = skew(nzentropy)
+            entropyKurt = kurtosis(nzentropy)
+            this_result.append(i, entropymean, entropyStdDev, min(nzentropy), max(nzentropy), entropySkewness, entropyKurt)
+        results.append(this_result)
 
 
 

@@ -12,6 +12,7 @@ from dicom_tools.timeflagconverter import timeflagconverter_string2int
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from scipy.stats import skew, kurtosis
 from dicom_tools.getEntropy import getEntropyCircleMask
+from dicom_tools.DynamicArray import DynamicArray
 
 outfname="out.txt"
 
@@ -32,9 +33,9 @@ if args.outfile:
 # out_file = open(outfname,"w")
 
 inputdir = args.inputdirecotry
-print("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt",file=out_file)
+# print("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt",file=out_file)
 
-vars = [("patientID",np.uint8),("timeflag",np.uint8),("nVoxel",np.uint8),("ypT",np.uint8)
+vars = [("patientID",'|S10'),("timeflag",np.uint8),("nVoxel",np.uint8),("ypT",np.uint8)
         ,("mean",np.float16),("stdDev",np.float16),("skewness",np.float16),("kurt",np.float16)]
 
 if args.verbose:
@@ -50,7 +51,7 @@ if args.justone:
 if args.exclude:
     print("Excluding dir",args.exclude)
 
-results = DynamicArray(vars,len(patiendirs)*3)
+results = DynamicArray(vars,len(patientdirs)*3)
     
 for patientdir in patientdirs:
 
@@ -126,7 +127,7 @@ for patientdir in patientdirs:
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        results.append(patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt)
+        results.append((patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt))
 
 
 

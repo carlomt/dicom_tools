@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+from dicom_tools.convertTypes import convertTypes
 
 class DynamicArray(object):
     def __init__(self, dtype, size=10, stride=10):
@@ -62,7 +63,17 @@ class DynamicArray(object):
         self._data = np.resize(self._data, self.size)
 
     def savetxt(self, filename):
-        np.savetxt(filename, self._data[:self.length])
+        types = self.getTypes()
+        sformat = ""
+        for this_type in types:
+            sformat+= convertTypes(this_type)+" "
+        np.savetxt(filename, self._data[:self.length], sformat)
+
+    def getTypes(self):
+        res = []
+        for var in self._data.dtype.names:
+            res.append(type(self._data[var]))
+        return res
         
     @property
     def data(self):

@@ -45,13 +45,13 @@ minEntropySide = 3
 maxEntropySide = 21
 
 for i in xrange(minEntropySide, maxEntropySide+1, 2):
-    vars.append("thisEntropySide"+str(i), np.uint8)
-    vars.append("meanEntropy"+str(i), np.float16)
-    vars.append("stdDevEntropy"+str(i), np.float16)
-    vars.append("minEntropy"+str(i), np.float16)
-    vars.append("maxEntropy"+str(i), np.float16)    
-    vars.append("skewnessEntropy"+str(i), np.float16)    
-    vars.append("kurtosisEntropy"+str(i), np.float16)    
+    vars.append(("thisEntropySide"+str(i), np.uint8))
+    vars.append(("meanEntropy"+str(i), np.float16))
+    vars.append(("stdDevEntropy"+str(i), np.float16))
+    vars.append(("minEntropy"+str(i), np.float16))
+    vars.append(("maxEntropy"+str(i), np.float16))    
+    vars.append(("skewnessEntropy"+str(i), np.float16))    
+    vars.append(("kurtosisEntropy"+str(i), np.float16))
 
 patientdirs= glob.glob(inputdir+"*/")
 
@@ -136,19 +136,19 @@ for patientdir in patientdirs:
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        this_result = (patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt)
+        this_result = [patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt]
 
         layer = getLayerWithLargerROI(ROI)
         
         for i in xrange(minEntropySide, maxEntropySide+1, 2):
-            entropy = getEntropyCircleMask(data[layer],ROI[layer], circle_radius=i, args.verbose)
+            entropy = getEntropyCircleMask(data[layer],ROI[layer], circle_radius=i, verbose=args.verbose)
             nzentropy = entropy[ROI[layer]>0]
             entropymean = nzentropy.mean()
             entropyStdDev = nzentropy.std()
             entropySkewness = skew(nzentropy)
             entropyKurt = kurtosis(nzentropy)
-            this_result.append(i, entropymean, entropyStdDev, min(nzentropy), max(nzentropy), entropySkewness, entropyKurt)
-        results.append(this_result)
+            this_result.extend([i, entropymean, entropyStdDev, min(nzentropy), max(nzentropy), entropySkewness, entropyKurt])
+        results.append(tuple(this_result))
 
 
 

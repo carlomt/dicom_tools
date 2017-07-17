@@ -35,7 +35,7 @@ if args.outfile:
 inputdir = args.inputdirecotry
 # print("patientID/I:timeflag:nVoxel:ypT:mean/F:stdDev:skewness:kurt",file=out_file)
 
-vars = [("patientID",'|S10'),("timeflag",np.uint8),("nVoxel",np.uint8),("ypT",np.uint8)
+vars = [("patientID",'|S10'),("timeflag",np.uint8),("nVoxel",np.uint8),("ypT",np.uint8),("ypT2",np.uint8)
         ,("mean",np.float16),("stdDev",np.float16),("skewness",np.float16),("kurt",np.float16)]
 
 if args.verbose:
@@ -94,6 +94,7 @@ for patientdir in patientdirs:
         infos = info_file_parser(analasisysdir + "info.txt")
         timeflag = timeflagconverter_string2int(infos["time"])
         ypT = int(infos["ypT"])
+        ypT2 = int(infos["ypT2"])
         
         #         # data, ROI = read_files(pathT2, pathROI, args.verbose, True)
         freader = FileReader(pathT2, pathROI, args.verbose)
@@ -136,7 +137,7 @@ for patientdir in patientdirs:
         stdDev = nzdata.std()
         skewness = skew(nzdata)
         kurt = kurtosis(nzdata)
-        this_result = [patientID, timeflag, nVoxel, ypT, mean, stdDev, skewness, kurt]
+        this_result = [patientID, timeflag, nVoxel, ypT, ypT2,  mean, stdDev, skewness, kurt]
 
         layer = getLayerWithLargerROI(ROI)
         

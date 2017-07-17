@@ -12,11 +12,12 @@ install_req=[
     'scikit-learn>=0.18',
     'nose>=1.3.7',
     'SimpleITK>=0.10.0',
-    'tabulate>=0.7.7'
+    'tabulate>=0.7.7',
+    'openpyxl>=2.4.0'
 ]
 
 setup(name='dicom_tools',
-      version='0.7',
+      version='0.8',
       description='Dicom Tool',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

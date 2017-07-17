@@ -1,6 +1,8 @@
 #!/usr/bin/python
 from __future__ import print_function
 import argparse
+import os
+import glob
 from dicom_tools.xlsReader import xlsReader
 from dicom_tools.info_file_parser import info_file_parser
 from tabulate import tabulate
@@ -35,17 +37,17 @@ for irow, row in enumerate(sheet[2:]):
 
     print(anoname,ypt)
 
-    patientdir = "/data/dicoms/retti_test_anon/"+anoname
+    patientdir = "/data/dicoms/retti_test_anon/"+anoname+"/"
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:
         if os.path.isdir(analasisysdir):
             print(analasisysdir, " dir found.")
             infos = info_file_parser(analasisysdir + "info.txt")
-            out_file = open("info2.txt","w")
+            out_file = open(analasisysdir +"info2.txt","w")
             for key, value in infos.iteritems():
-                outfile.write(key+":\t"+value)
+                out_file.write(key+":\t"+value+"\n")
             
-            out_file.write("ypT2:\t"+ypt)                
+            out_file.write("ypT2:\t"+str(ypt)+"\n")                
             out_file.close()
         else:
             print(analasisysdir, " dir NOT found.")                

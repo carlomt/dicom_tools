@@ -91,7 +91,7 @@ for patientdir in patientdirs:
         if os.path.isdir(pathROI):
             print("ROI dir found.")
 
-        infos = info_file_parser(analasisysdir + "info.txt")
+        infos = info_file_parser(analasisysdir + "info2.txt")
         timeflag = timeflagconverter_string2int(infos["time"])
         ypT = int(infos["ypT"])
         ypT2 = int(infos["ypT2"])

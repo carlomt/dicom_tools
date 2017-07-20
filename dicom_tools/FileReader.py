@@ -58,6 +58,8 @@ class FileReader:
 
 
     def read(self,  raw=False):
+        if self.verbose:
+            print("FileReader::read\n")
         verbose = self.verbose
         inpathROI = self.inpathROI
         
@@ -113,10 +115,13 @@ class FileReader:
             self.dataRGB[i,:,:,2] = self.dataRGB[i,:,:,0] = self.data[i] = pix_arr.T
             self.dataRGB[i,:,:,1]  = pix_arr.T - np.multiply(pix_arr.T, self.ROI[i])
         self.PatientName = dicoms[0].PatientName
+
+        if self.verbose:
+            print("FileReader::read type(self.data): ", type(self.data)," type(self.data[0,0,0]): ",type(self.data[0,0,0])," \n")            
         
         if raw:
-            if verbose:
-                print("returning raw data")
+            if self.verbose:
+                print("FileReader::read returning raw\n")                
             return self.data[:,:,::-1], self.ROI[:,:,:]
 
             
@@ -140,6 +145,8 @@ class FileReader:
 
 
     def readUsingGDCM(self, raw=False, sitkout=False):
+        if self.verbose:
+            print("FileReader::readUsingGDCM\n")
         reader = sitk.ImageSeriesReader()
         filenamesDICOM = reader.GetGDCMSeriesFileNames(self.inpath)
         reader.SetFileNames(filenamesDICOM)
@@ -149,12 +156,18 @@ class FileReader:
         self.data = sitk.GetArrayFromImage(imgOriginal)
         self.data = self.data.swapaxes(1,2)
         self.data = self.data[::-1,:,::-1]
+        if self.verbose:
+            print("FileReader::readUsingGDCM type(self.data): ", type(self.data)," type(self.data[0,0,0]): ",type(self.data[0,0,0])," \n")            
         self.scaleFactor = imgOriginal.GetSpacing()[2]/imgOriginal.GetSpacing()[0]
         if raw:
+            if self.verbose:
+                print("FileReader::readUsingGDCM returning raw\n")            
             return self.data
         else:
             self.dataRGB=np.zeros(self.data.shape+tuple([3]))
             self.dataRGB[:,:,:,0] = self.dataRGB[:,:,:,1] = self.dataRGB[:,:,:,2] = self.data
+            if self.verbose:
+                print("FileReader::readUsingGDCM returning RGB\n")            
             return self.dataRGB
 
 

@@ -18,6 +18,7 @@ from dicom_tools.timeflagconverter import timeflagconverter_string2int
 # from dicom_tools.getEntropy import getEntropyCircleMask
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from dicom_tools.make_histo_entropy import make_histo_entropy
+from scipy.stats import skew, kurtosis
 
 outfname="out.root"
 
@@ -281,70 +282,76 @@ for patientdir in patientdirs:
         if args.verbose:
             print(patientID, nFette[0])
 
-        layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)            
-        for i in xrange(minEntropySide, maxEntropySide+1, 2):            
-            hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, None, args.verbose, roinorm, args.norm)
-            thisEntropySide[i][0]  = i
-            meanEntropy[i][0]      = hisEntropy.GetMean()
-            stdDevEntropy[i][0]    = hisEntropy.GetStdDev()
-            maxEntropy[i][0]       = hisEntropy.GetMaximum()
-            minEntropy[i][0]       = hisEntropy.GetMinimum()
-            skewnessEntropy[i][0]       = hisEntropy.GetSkewness()
-            kurtosisEntropy[i][0]       = hisEntropy.GetKurtosis()
+        # layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)            
+        # for i in xrange(minEntropySide, maxEntropySide+1, 2):            
+        #     hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, None, args.verbose, roinorm, args.norm)
+        #     thisEntropySide[i][0]  = i
+        #     meanEntropy[i][0]      = hisEntropy.GetMean()
+        #     stdDevEntropy[i][0]    = hisEntropy.GetStdDev()
+        #     maxEntropy[i][0]       = hisEntropy.GetMaximum()
+        #     minEntropy[i][0]       = hisEntropy.GetMinimum()
+        #     skewnessEntropy[i][0]       = hisEntropy.GetSkewness()
+        #     kurtosisEntropy[i][0]       = hisEntropy.GetKurtosis()
 
-            hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, layerMaxROI, args.verbose, roinorm, args.norm)
-            thisEntropySideFM[i][0]  = i
-            meanEntropyFM[i][0]      = hisEntropy.GetMean()
-            stdDevEntropyFM[i][0]    = hisEntropy.GetStdDev()
-            maxEntropyFM[i][0]       = hisEntropy.GetMaximum()
-            minEntropyFM[i][0]       = hisEntropy.GetMinimum()
-            skewnessEntropyFM[i][0]       = hisEntropy.GetSkewness()
-            kurtosisEntropyFM[i][0]       = hisEntropy.GetKurtosis()            
+        #     hisEntropy, allHisEntropy = make_histo_entropy(data, ROI, patientsuffix, i, layerMaxROI, args.verbose, roinorm, args.norm)
+        #     thisEntropySideFM[i][0]  = i
+        #     meanEntropyFM[i][0]      = hisEntropy.GetMean()
+        #     stdDevEntropyFM[i][0]    = hisEntropy.GetStdDev()
+        #     maxEntropyFM[i][0]       = hisEntropy.GetMaximum()
+        #     minEntropyFM[i][0]       = hisEntropy.GetMinimum()
+        #     skewnessEntropyFM[i][0]       = hisEntropy.GetSkewness()
+        #     kurtosisEntropyFM[i][0]       = hisEntropy.GetKurtosis()            
             
             
-        # for layer in xrange(0, len(data)):
-        #     if args.verbose:
-        #         print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
-        #     for i in xrange(minEntropySide, maxEntropySide+1, 2):
-        #         entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
-        #         nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        #         thisEntropySide[i]  = i                
-        #         if nonZeroEntropy.any():
-        #             meanEntropy[i][0]      = np.mean(nonZeroEntropy)
-        #             stdDevEntropy[i][0]    = np.std(nonZeroEntropy)
-        #             maxEntropy[i][0]       = np.max(nonZeroEntropy)
-        #             minEntropy[i][0]       = np.min(nonZeroEntropy)
-        #             if args.verbose:
-        #                 print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
-        #                 print("data stored:",meanEntropy[i][0],stdDevEntropy[i][0],maxEntropy[i][0],minEntropy[i][0])
-        #         else:
-        #             meanEntropyFM[i][0]      = -1
-        #             stdDevEntropyFM[i][0]    = -1
-        #             maxEntropyFM[i][0]       = -1
-        #             minEntropyFM[i][0]       = -1
+        for layer in xrange(0, len(data)):
+            if args.verbose:
+                print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
+            for i in xrange(minEntropySide, maxEntropySide+1, 2):
+                entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
+                nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+                thisEntropySide[i]  = i                
+                if nonZeroEntropy.any():
+                    meanEntropy[i][0]      = np.mean(nonZeroEntropy)
+                    stdDevEntropy[i][0]    = np.std(nonZeroEntropy)
+                    maxEntropy[i][0]       = np.max(nonZeroEntropy)
+                    minEntropy[i][0]       = np.min(nonZeroEntropy)
+                    skewnessEntropy[i][0]  = skew(nonZeroEntropy)
+                    kurtosisEntropy[i][0]  = kurtosis(nonZeroEntropy)                   
+                    if args.verbose:
+                        print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
+                        print("data stored:",meanEntropy[i][0],stdDevEntropy[i][0],maxEntropy[i][0],minEntropy[i][0])
+                else:
+                    meanEntropyFM[i][0]      = -1
+                    stdDevEntropyFM[i][0]    = -1
+                    maxEntropyFM[i][0]       = -1
+                    minEntropyFM[i][0]       = -1
+                    skewnessEntropy[i][0]  = -1                    
+                    kurtosisEntropy[i][0]  = -1
 
-
-        # layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)
-        # if args.verbose:
-        #     print("working on entropies from",minEntropySide,"to",maxEntropySide)
-        # for i in xrange(minEntropySide, maxEntropySide+1, 2):
-        #     entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
-        #     nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
-        #     thisEntropySide[i]  = i                
-        #     if nonZeroEntropy.any():
-        #         meanEntropyFM[i][0]      = np.mean(nonZeroEntropy)
-        #         stdDevEntropyFM[i][0]    = np.std(nonZeroEntropy)
-        #         maxEntropyFM[i][0]       = np.max(nonZeroEntropy)
-        #         minEntropyFM[i][0]       = np.min(nonZeroEntropy)
-        #         if args.verbose:
-        #             print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
-        #             print("data stored:",meanEntropyFM[i][0],stdDevEntropyFM[i][0],maxEntropyFM[i][0],minEntropyFM[i][0])
-        #     else:
-        #         meanEntropyFM[i][0]      = -1
-        #         stdDevEntropyFM[i][0]    = -1
-        #         maxEntropyFM[i][0]       = -1
-        #         minEntropyFM[i][0]       = -1
-                
+        layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)
+        if args.verbose:
+            print("working on entropies from",minEntropySide,"to",maxEntropySide)
+        for i in xrange(minEntropySide, maxEntropySide+1, 2):
+            entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
+            nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+            thisEntropySide[i]  = i                
+            if nonZeroEntropy.any():
+                meanEntropyFM[i][0]      = np.mean(nonZeroEntropy)
+                stdDevEntropyFM[i][0]    = np.std(nonZeroEntropy)
+                maxEntropyFM[i][0]       = np.max(nonZeroEntropy)
+                minEntropyFM[i][0]       = np.min(nonZeroEntropy)
+                skewnessEntropyFM[i][0]  = skew(nonZeroEntropy)
+                kurtosisEntropyFM[i][0]  = kurtosis(nonZeroEntropy)                                   
+                if args.verbose:
+                    print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
+                    print("data stored:",meanEntropyFM[i][0],stdDevEntropyFM[i][0],maxEntropyFM[i][0],minEntropyFM[i][0])
+            else:
+                meanEntropyFM[i][0]      = -1
+                stdDevEntropyFM[i][0]    = -1
+                maxEntropyFM[i][0]       = -1
+                minEntropyFM[i][0]       = -1
+                skewnessEntropyFM[i][0]  = -1                    
+                kurtosisEntropyFM[i][0]  = -1                
             
 
         #CV gclm parameters

@@ -18,7 +18,9 @@ from dicom_tools.timeflagconverter import timeflagconverter_string2int
 # from dicom_tools.getEntropy import getEntropyCircleMask
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from dicom_tools.make_histo_entropy import make_histo_entropy
-from scipy.stats import skew, kurtosis
+from dicom_tools.getEntropy import getEntropyCircleMask
+from scipy.stats import skew
+from scipy.stats import kurtosis as sc_kurt
 
 outfname="out.root"
 
@@ -221,7 +223,9 @@ for patientdir in patientdirs:
         try:
             data, ROI = freader.read(raw=True)
         except NotImplementedError:
-            data = freader.readUsingGDCM(raw=True)
+            # data = freader.readUsingGDCM(raw=True)
+            dataTMP = freader.readUsingGDCM(raw=False)
+            data = dataTMP[:,:,:,0]
             ROI = freader.readROI()
         except ValueError:
             continue
@@ -307,7 +311,7 @@ for patientdir in patientdirs:
             if args.verbose:
                 print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
             for i in xrange(minEntropySide, maxEntropySide+1, 2):
-                entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
+                entropyImg = getEntropyCircleMask(data[layer], ROI[layer], i)                        
                 nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
                 thisEntropySide[i]  = i                
                 if nonZeroEntropy.any():
@@ -316,7 +320,7 @@ for patientdir in patientdirs:
                     maxEntropy[i][0]       = np.max(nonZeroEntropy)
                     minEntropy[i][0]       = np.min(nonZeroEntropy)
                     skewnessEntropy[i][0]  = skew(nonZeroEntropy)
-                    kurtosisEntropy[i][0]  = kurtosis(nonZeroEntropy)                   
+                    kurtosisEntropy[i][0]  = sc_kurt(nonZeroEntropy)                   
                     if args.verbose:
                         print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
                         print("data stored:",meanEntropy[i][0],stdDevEntropy[i][0],maxEntropy[i][0],minEntropy[i][0])
@@ -341,7 +345,7 @@ for patientdir in patientdirs:
                 maxEntropyFM[i][0]       = np.max(nonZeroEntropy)
                 minEntropyFM[i][0]       = np.min(nonZeroEntropy)
                 skewnessEntropyFM[i][0]  = skew(nonZeroEntropy)
-                kurtosisEntropyFM[i][0]  = kurtosis(nonZeroEntropy)                                   
+                kurtosisEntropyFM[i][0]  = sc_kurt(nonZeroEntropy)                                   
                 if args.verbose:
                     print("entropy results:",np.mean(nonZeroEntropy),np.std(nonZeroEntropy),np.max(nonZeroEntropy),np.min(nonZeroEntropy))
                     print("data stored:",meanEntropyFM[i][0],stdDevEntropyFM[i][0],maxEntropyFM[i][0],minEntropyFM[i][0])

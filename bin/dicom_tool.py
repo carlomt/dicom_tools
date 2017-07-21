@@ -968,7 +968,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if len(self.ROI)!=0:
             if not np.any(self.ROI[self.layer]): return
             image = image*self.ROI[self.layer]
-            entropyImg = getEntropy(self.arr[:,:,2], ROI=self.ROI[self.layer])
+            # entropyImg = getEntropy(self.arr[:,:,2], ROI=self.ROI[self.layer])
             entropyImg = getEntropyCircleMask(self.arr[:,:,2], ROI=self.ROI[self.layer],circle_radius=7)            
         else:
             entropyImg = getEntropyCircleMask(self.arr[:,:,2],ROI=None,circle_radius=7)

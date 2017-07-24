@@ -7,8 +7,22 @@ from dicom_tools.xlsReader import xlsReader
 from dicom_tools.info_file_parser import info_file_parser
 from tabulate import tabulate
 
-sheets = xlsReader('responders.xls')
-sheet = sheets[0]
+infile = 'responders.xls'
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+parser.add_argument("-i", "--inputfile", help="path of the xls input filey (default ./responders.xls)")
+
+args = parser.parse_args()
+
+if args.inputfile:
+    infile = args.inputfile
+
+if args.verbose:
+    print("Reading file: ",infile)
+sheets = xlsReader(infile)
+sheet = sheets[0]    
 
 for irow, row in enumerate(sheet[2:]):
     if len(row) < 3: continue
@@ -41,14 +55,15 @@ for irow, row in enumerate(sheet[2:]):
     elif "nr" in val.lower():
         ypt = 5
     else:
-        print("WARNING line: ",irow," cognome: ",cognome," nome: ",nome," identifier: ",anoname, "cold D: ",val," not identified, setting ypt2 to -1")
+        print("WARNING line: ",irow," cognome: ",cognome," nome: ",nome," identifier: ",anoname, "cold D: \"",val,"\" not identified, setting ypt2 to -1")
     print(anoname,ypt)
 
     patientdir = "/data/dicoms/retti_test_anon/"+anoname+"/"
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:
         if os.path.isdir(analasisysdir):
-            print(analasisysdir, " dir found.")
+            if args.verbose:
+                print(analasisysdir, " dir found.")
             infos = info_file_parser(analasisysdir + "info.txt")
             out_file = open(analasisysdir +"info2.txt","w")
             for key, value in infos.iteritems():

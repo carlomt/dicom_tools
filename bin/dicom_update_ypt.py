@@ -22,19 +22,26 @@ for irow, row in enumerate(sheet[2:]):
         continue
         
     ypt = -1
-    if val == "CR 0":
+    # if val == "CR 0":
+    if "cr 0" in val.lower() or "cr0" in val.lower():
         ypt = 0
-    elif val == "CR 1":
-        ypt = 1
-    elif val == "PR DA 3 A 2":
+    # elif val == "CR 1":
+    elif "cr 1" in val.lower():
+        ypt = 1        
+    # elif val == "PR DA 3 A 2":
+    elif "pr da 3 a 2" in val.lower():
         ypt = 2
-    elif val == "PR DA 4 A 2":
+    # elif val == "PR DA 4 A 2":
+    elif "pr da 4 a 2" in val.lower():
         ypt = 3
-    elif val == "PR DA 4 A 3":        
+    # elif val == "PR DA 4 A 3":
+    elif "pr da 4 a 3" in val.lower():
         ypt = 4
-    elif val == "NR":
+    # elif val == "NR":
+    elif "nr" in val.lower():
         ypt = 5
-
+    else:
+        print("WARNING line: ",irow," cognome: ",cognome," nome: ",nome," identifier: ",anoname, "cold D: ",val," not identified, setting ypt2 to -1")
     print(anoname,ypt)
 
     patientdir = "/data/dicoms/retti_test_anon/"+anoname+"/"

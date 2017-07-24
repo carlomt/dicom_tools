@@ -62,8 +62,7 @@ for irow, row in enumerate(sheet[2:]):
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:
         if os.path.isdir(analasisysdir):
-            if args.verbose:
-                print(analasisysdir, " dir found.")
+            print(analasisysdir, " dir found.")
             infos = info_file_parser(analasisysdir + "info.txt")
             out_file = open(analasisysdir +"info2.txt","w")
             for key, value in infos.iteritems():

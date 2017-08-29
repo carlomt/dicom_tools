@@ -12,6 +12,9 @@ on mac you could install them with:
 
 `brew install homebrew/science/simpleitk`
 
+this package uses qt4, to install qt4 instead of qt5:
+https://github.com/cartr/homebrew-qt4
+
 on a debian linux:
 
 `apt-get install python-pip python-qt4  python-sip  python-scipy python-matplotlib`

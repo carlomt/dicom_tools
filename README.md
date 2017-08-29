@@ -10,7 +10,7 @@ on mac you could install them with:
 
 `brew install sip`
 
-`brew install simpleitk`
+`brew install homebrew/science/`
 
 on a debian linux:
 

@@ -5,11 +5,15 @@ from skimage import exposure #CV
 from dicom_tools.rescale import rescale8bit #CV
 # from tabulate import tabulate
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
+from dicom_tools.fractal import fractal #AR
+from scipy import ndimage #AR
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0):
     nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
+    #CV resize bin if Intensity cut is required
+    if(ICut>0): binmax = binmax*ICut
     # meannorm = 1
     # if ROInorm:
     #     binmin=0.
@@ -52,6 +56,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     hStdDev = ROOT.TH1F("hStdDev"+suffix,"StdDev",nFette,-0.5,nFette+0.5)
     hSkewness = ROOT.TH1F("hSkewness"+suffix,"Skewness",nFette,-0.5,nFette+0.5)
     hKurtosis = ROOT.TH1F("hKurtosis"+suffix,"Kurtosis",nFette,-0.5,nFette+0.5)
+    hfra = ROOT.TH1F("hfra"+suffix,"fra",nFette,-0.5,nFette+0.5) #AR
+    hCfra = ROOT.TH1F("hCfra"+suffix,"hCfra",nFette,-0.5,nFette+0.5) #AR
     #CV II order histo
     # Horizontal
     hdissH = ROOT.TH1F("hdissH"+suffix,"Horizontal dissimilarity",nFette,-0.5,nFette+0.5)
@@ -87,10 +93,16 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     for layer in xrange(0,nFette):
         fetta = data[layer]
         fettaROI = mask[layer]
-        # fettaROI = fettaROI.astype(np.uint8)
-        #CV gclm
+        #CV gclm and cut in intensity
         fetta8bit = rescale8bit(fetta)
-        glcmdata = fettaROI*fetta8bit
+        fettaROI2 = fettaROI.astype(int) 
+        glcmdata = fettaROI2*fetta8bit        
+        fettaTMP = fettaROI2*fetta
+        if(ICut>0):
+             Imax = fettaTMP.max()
+             fetta[fetta > (ICut*Imax)] = 0
+             glcmdata[glcmdata > (ICut*Imax)] = 0
+        #CV gclm
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:
         #     print("fetta.min():",fetta.min(),"type:",type(fetta[0][0]))
@@ -129,12 +141,22 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         # res = []
         thishisto = ROOT.TH1F("h"+str(layer)+suffix,"h"+str(layer),nbin,binmin,binmax)
         meaninroi = 1
+        #AR
+        frattale=0
+        frattalecont=0
+        if fettaROI.max() > 0:
+            frattale=fractal().frattali(fettaROI)
+            frattalecont=fractal().frattali(fetta*np.subtract(fettaROI,ndimage.binary_erosion(fettaROI).astype(fettaROI.dtype)))
+            #        print("FRATTALE",frattale)
+            #        print("FRATTALECONT",frattalecont)
+            #end AR
         if fettaROI.any():
             if normalize:
                 meaninroi = calculateMeanInROI(fetta, ROInorm[layer],verbose)
                 if verbose:
                     print("make_histo: layer",layer,"meaninroi",meaninroi)
             # for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
+            
             for val, inROI in zip(fetta.ravel(),fettaROI.ravel()):
                 if inROI>0 :
                     if normalize:
@@ -147,8 +169,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                     # else:
                     if val >  binmax:
                         print("make_histo: Warning in layer",layer,"there is a value in overflow:",val,"normalization",meaninroi)
-                    his.Fill(val)
-                    thishisto.Fill(val)
+                    if val > 0:    
+                      his.Fill(val)
+                      thishisto.Fill(val)
 
                     
             hEntries.SetBinContent(layer,thishisto.GetEntries())
@@ -156,6 +179,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
             hStdDev.SetBinContent(layer,thishisto.GetStdDev())
             hSkewness.SetBinContent(layer,thishisto.GetSkewness())
             hKurtosis.SetBinContent(layer,thishisto.GetKurtosis())
+            hfra.SetBinContent(layer,frattale) #AR
+            hCfra.SetBinContent(layer,frattalecont) #AR
+
         if verbose:
             print layer, thishisto.GetEntries()
         # layer+=1
@@ -181,6 +207,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     histogiafatti.append(hStdDev)
     histogiafatti.append(hSkewness)
     histogiafatti.append(hKurtosis)
+    histogiafatti.append(hfra) #AR
+    histogiafatti.append(hCfra) #AR
+
 
     #CV
     histogclm.append(hdissH)

@@ -33,6 +33,8 @@ parser.add_argument("-jo", "--justone", help="limit the analisys to one subdirec
 parser.add_argument("-ex", "--exclude", help="exclude one subdirecotry from the analisys")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
+parser.add_argument("-ic", "--icut", help="cut intensity > Imax*icut",default=0,type=float)
+
 
 args = parser.parse_args()
 
@@ -99,6 +101,9 @@ stdDevPF   = array('f', nmax*[0])
 skewnessPF = array('f', nmax*[0])
 kurtosisPF = array('f', nmax*[0])
 
+#CV AR
+fractalPF = array('f', nmax*[0])
+fractalCPF = array('f', nmax*[0])
 #CV
 dissHPF = array('f', nmax*[0])
 corrHPF = array('f', nmax*[0])
@@ -154,6 +159,10 @@ tree.Branch("meanPF",meanPF,"meanPF[nFette]/F")
 tree.Branch("stdDevPF",stdDevPF,"stdDevPF[nFette]/F")
 tree.Branch("skewnessPF",skewnessPF,"skewnessPF[nFette]/F")
 tree.Branch("kurtosisPF",kurtosisPF,"kurtosisPF[nFette]/F")
+
+#CV AR
+tree.Branch("fractalPF",fractalPF,"fractalPF[nFette]/F")
+tree.Branch("fractalCPF",fractalCPF,"fractalCPF[nFette]/F")
 
 #CV
 tree.Branch("dissHPF",dissHPF,"dissHPF[nFette]/F")
@@ -254,7 +263,7 @@ for patientdir in patientdirs:
             continue
         
         patientsuffix = patID + infos["time"]
-        his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
+        his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.icut)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
@@ -283,6 +292,12 @@ for patientdir in patientdirs:
                 thishisto.Write()
         for thishisto in histogiafatti:
                 thishisto.Write()
+                #CV AR
+                for n in range(0,nlayer):
+                    if n<(firstL) or n>(firstL+nFette[0]-1):
+                        continue
+                    if 'hfra' in thishisto.GetName(): fractalPF[n-firstL] = thishisto.GetBinContent(n)
+                    if 'hCfra' in thishisto.GetName(): fractalCPF[n-firstL] = thishisto.GetBinContent(n)
         if args.verbose:
             print(patientID, nFette[0])
 

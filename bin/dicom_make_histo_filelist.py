@@ -22,6 +22,7 @@ parser.add_argument("-v", "--verbose", help="increase output verbosity",
 parser.add_argument("-o", "--outfile", help="define output file name (default out.root)")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
+parser.add_argument("-ic", "--icut", help="cut intensity > Imax*icut",default=0,type=float)
 
 args = parser.parse_args()
 
@@ -129,7 +130,7 @@ with open(inputfile,'r') as fin:
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
             raise NameError('OutOfRange')
-        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm)
+        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.icut)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

@@ -293,11 +293,18 @@ for patientdir in patientdirs:
         for thishisto in histogiafatti:
                 thishisto.Write()
                 #CV AR
+                fettaMax=nFette[0]
+                scale=0
                 for n in range(0,nlayer):
-                    if n<(firstL) or n>(firstL+nFette[0]-1):
+                    if n<(firstL) or n>(firstL+fettaMax-1):
                         continue
-                    if 'hfra' in thishisto.GetName(): fractalPF[n-firstL] = thishisto.GetBinContent(n)
-                    if 'hCfra' in thishisto.GetName(): fractalCPF[n-firstL] = thishisto.GetBinContent(n)
+                    if 'hfra' in thishisto.GetName() or 'hCfra' in thishisto.GetName():
+                        if thishisto.GetBinContent(n)==0:
+                            fettaMax = fettaMax + 1
+                            scale = scale + 1
+                            continue
+                        if 'hfra' in thishisto.GetName() : fractalPF[n-firstL-scale] = thishisto.GetBinContent(n)
+                        if 'hCfra' in thishisto.GetName() : fractalCPF[n-firstL-scale] = thishisto.GetBinContent(n)
         if args.verbose:
             print(patientID, nFette[0])
 

@@ -18,6 +18,7 @@ from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 import scipy
 from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
+from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 from dicom_tools.connectedThreshold import connectedThreshold
 from dicom_tools.morphologicalWatershed import morphologicalWatershed
 from dicom_tools.wardHierarchical import wardHierarchical
@@ -230,6 +231,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         CurvatureFlowImageFilterAction = QtGui.QAction("&Apply Curvature Flow Filter",self)
         CurvatureFlowImageFilterAction.setStatusTip("Apply Curvature Flow Filter")
         CurvatureFlowImageFilterAction.triggered.connect(self.CurvatureFlowImageFilter)
+#AR
+        LaplacianFilterAction = QtGui.QAction("&Apply Gaussian Laplace Filter",self)
+        LaplacianFilterAction.setStatusTip("Apply Gaussian Laplace Filter")
+        LaplacianFilterAction.triggered.connect(self.GaussianLaplaceFilter)
 
         MorphologicalWatershedAction = QtGui.QAction("&Apply Morphological Watershed",self)
         MorphologicalWatershedAction.setStatusTip("Apply Morphological Watershed")
@@ -294,7 +299,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
-
+        filtersMenu.addAction(LaplacianFilterAction) #AR
 
         segmentationMenu = mainMenu.addMenu('&Segmentation')
         segmentationMenu.addAction(activateManualRoiDesignerAction)
@@ -867,6 +872,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def CurvatureFlowImageFilter(self):
         filtered = curvatureFlowImageFilter(self.arr, self.verbose)
+        self.img1b.setImage(filtered)
+        self.p2.autoRange()
+        self.img1b.updateImage()
+
+    def GaussianLaplaceFilter(self):
+        filtered = GaussianLaplaceFilter(self.arr,2.5,0, self.verbose) 
         self.img1b.setImage(filtered)
         self.p2.autoRange()
         self.img1b.updateImage()

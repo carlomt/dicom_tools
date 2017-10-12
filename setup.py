@@ -4,9 +4,9 @@ import glob
 packs=find_packages()
 scripts_list=glob.glob('./bin/*.py')
 install_req=[
-    'pydicom>=0.9.9',
-    'numpy>=1.10.0',
     'scipy>=0.17.1',
+    'numpy>=1.10.0',    
+    'pydicom>=0.9.9',
     'pynrrd>=0.2.1',
     'scikit-image>=0.12.3',
     'scikit-learn>=0.18',

@@ -15,6 +15,6 @@ def curvatureFlowImageFilter(img, verbose=False):
                                         timeStep=0.125,
                                         numberOfIterations=5)
     if convertOutput:
-        imgSmooth = sitk.GetArrayFromImage(imgSmooth)
+        imgSmooth = sitk.GetArrayFromImage(imgSmooth).astype(float) 
 
     return imgSmooth

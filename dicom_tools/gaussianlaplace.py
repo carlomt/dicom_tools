@@ -6,12 +6,14 @@ import scipy
 
 def GaussianLaplaceFilter(image,sigma,simple, verbose=False):
 
-    bx = image[:,1,1].size
-    by = image[1,:,1].size
+    # bx = image[:,1,1].size
+    # by = image[1,:,1].size
 
-    pr_out=np.zeros((bx, by))
+    # pr_out=np.zeros((bx, by))
 
-    prova=scipy.ndimage.filters.gaussian_laplace(image[:,:,0],sigma,pr_out, mode='constant', cval=0.0)
+    pr_out = np.zeros(image.shape)
+    
+    prova=scipy.ndimage.filters.gaussian_laplace(image, sigma, pr_out, mode='constant', cval=0.0)
 
     if simple:
         pr_out[pr_out[:,:]<1] = 0;

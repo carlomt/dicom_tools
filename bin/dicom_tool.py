@@ -877,10 +877,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.img1b.updateImage()
 
     def GaussianLaplaceFilter(self):
-        filtered = GaussianLaplaceFilter(self.arr,2.5,0, self.verbose) 
+        filtered = GaussianLaplaceFilter(self.arr[:,:,2], 2.5, 0, self.verbose) 
         self.img1b.setImage(filtered)
         self.p2.autoRange()
         self.img1b.updateImage()
+
+        print("type: ", type(filtered), "shape", filtered.shape)
 
     def mouseMoved(self, pos):
         # print(type(pos))

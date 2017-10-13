@@ -14,7 +14,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     #CV resize bin if Intensity cut is required
-    if(ICut>0): binmax = binmax*ICut
+    #if(ICut>0): binmax = binmax*ICut
     #CV AR filter
     if filter:
        binmin=-10
@@ -110,8 +110,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         fettaTMP = fettaROI2*fetta
         if(ICut>0):
              Imax = fettaTMP.max()
-             fetta[fetta > (ICut*Imax)] = 0
-             glcmdata[glcmdata > (ICut*Imax)] = 0
+             fetta[fetta < (ICut*Imax)] = 0
+             glcmdata[glcmdata < (ICut*Imax)] = 0
         #CV gclm
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:

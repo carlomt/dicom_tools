@@ -23,6 +23,8 @@ parser.add_argument("-o", "--outfile", help="define output file name (default ou
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
 parser.add_argument("-ic", "--icut", help="cut intensity > Imax*icut",default=0,type=float)
+parser.add_argument("-f", "--filter", help="apply gaussian laplace filter sigma=2.5pixels",
+                    action="store_true")
 
 args = parser.parse_args()
 
@@ -130,7 +132,7 @@ with open(inputfile,'r') as fin:
         if timeflag[0] != 0 and timeflag[0] != 1 and timeflag[0] != 2:
             print("ERROR: timeflag (0 for pre, 1 for int and 2 for post) of patient "+lines[0]+ "is: "+timeflag[0])
             raise NameError('OutOfRange')
-        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.icut)
+        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.icut,args.filter)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()

@@ -7,13 +7,18 @@ from dicom_tools.rescale import rescale8bit #CV
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
 from dicom_tools.fractal import fractal #AR
 from scipy import ndimage #AR
+from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0,filter = False):
     nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     #CV resize bin if Intensity cut is required
     if(ICut>0): binmax = binmax*ICut
+    #CV AR filter
+    if filter:
+       binmin=-10
+       binmax=binmax/10.
     # meannorm = 1
     # if ROInorm:
     #     binmin=0.
@@ -91,7 +96,12 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     
     # for fetta,fettaROI in zip(data,mask) :
     for layer in xrange(0,nFette):
+    
         fetta = data[layer]
+        # CV AR gaussian laplacian filter
+        if filter:
+           filtered = GaussianLaplaceFilter(fetta, 2.5, 0, verbose)
+           fetta= filtered
         fettaROI = mask[layer]
         #CV gclm and cut in intensity
         fetta8bit = rescale8bit(fetta)

@@ -106,19 +106,21 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         #CV gclm and cut in intensity
         fetta8bit = rescale8bit(fetta)
         fettaROI2 = fettaROI.astype(int) 
-        glcmdata = fettaROI2*fetta8bit        
         fettaTMP = fettaROI2*fetta
+        fetta8bitTMP = fettaROI2*fetta8bit
         if(ICut>0):
              Imax = fettaTMP.max()
+             Imax2 = fetta8bitTMP.max()
              fetta[fetta < (ICut*Imax)] = 0
-             glcmdata[glcmdata < (ICut*Imax)] = 0
+             fetta8bit[fetta8bit < (ICut*Imax2)] = 0
+        glcmdata = fettaROI2*fetta8bit     
         #CV gclm
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:
-        #     print("fetta.min():",fetta.min(),"type:",type(fetta[0][0]))
-        #     print("fettaROI.min():",fettaROI.min(),"type:",type(fettaROI[0][0]))
-        #     print("fetta8bit.min():",fetta8bit.min(),"type:",type(fetta8bit[0][0]))
-        #     print("glcmdata.min():",glcmdata.min(),"type:",type(glcmdata[0][0]))            
+        #print("fetta.max():",fetta.max(),"type:",type(fetta[0][0]))
+        #print("fettaROI2.max():",fettaROI2.max(),"type:",type(fettaROI2[0][0]))
+        #print("fetta8bit.max():",fetta8bit.max(),"type:",type(fetta8bit[0][0]))
+        #print("glcmdata.max():",glcmdata.max(),"type:",type(glcmdata[0][0]))            
         glcm1 = greycomatrix(glcmdata, [1], [0], 256, symmetric=True, normed=True)
         glcm2 = greycomatrix(glcmdata, [1], [np.pi/2], 256, symmetric=True, normed=True)
         glcm3 = greycomatrix(glcmdata, [1], [np.radians(45)], 256, symmetric=True, normed=True)

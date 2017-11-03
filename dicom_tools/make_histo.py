@@ -9,15 +9,18 @@ from dicom_tools.fractal import fractal #AR
 from scipy import ndimage #AR
 from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0,filter = False):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0,filter = False, sigma= 2.5, scala = False):
     nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
     #CV resize bin if Intensity cut is required
     #if(ICut>0): binmax = binmax*ICut
     #CV AR filter
+    if scala:
+       binmin = -5
+       binmax = 5
     if filter:
-       binmin=-10
+       binmin=-binmax/10.
        binmax=binmax/10.
     # meannorm = 1
     # if ROInorm:
@@ -98,13 +101,23 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     for layer in xrange(0,nFette):
     
         fetta = data[layer]
+        #fetta8bit = rescale8bit(fetta)
+        if scala:
+            media = np.mean(fetta)
+            rms = np.std(fetta)
+            fetta = (fetta - media)/rms
         # CV AR gaussian laplacian filter
         if filter:
-           filtered = GaussianLaplaceFilter(fetta, 2.5, 0, verbose)
+           # note: after filter there are pixels with negative values!!
+           # fetta8bit = rescale8bit(fetta)
+           # filtered8bit = GaussianLaplaceFilter(fetta8bit, 2.5, 0, verbose)                             
+           # fetta8bit= filtered8bit
+           filtered = GaussianLaplaceFilter(fetta, sigma, 0, verbose)
            fetta= filtered
+           fetta8bit = (rescale8bit(fetta))
+        else:
+            fetta8bit = (rescale8bit(fetta))
         fettaROI = mask[layer]
-        #CV gclm and cut in intensity
-        fetta8bit = rescale8bit(fetta)
         fettaROI2 = fettaROI.astype(int) 
         fettaTMP = fettaROI2*fetta
         fetta8bitTMP = fettaROI2*fetta8bit
@@ -118,9 +131,13 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:
         #print("fetta.max():",fetta.max(),"type:",type(fetta[0][0]))
-        #print("fettaROI2.max():",fettaROI2.max(),"type:",type(fettaROI2[0][0]))
-        #print("fetta8bit.max():",fetta8bit.max(),"type:",type(fetta8bit[0][0]))
-        #print("glcmdata.max():",glcmdata.max(),"type:",type(glcmdata[0][0]))            
+        #if fettaROI.any():
+        #    print("fetta.min():",fetta.min(),"type:",type(fetta[0][0]))            
+        #    print("fetta.max():",fetta.max(),"type:",type(fetta[0][0]))
+        #    print("fettaROI2.max():",fettaROI2.max(),"type:",type(fettaROI2[0][0]))
+        #    print("fetta8bit.max():",fetta8bit.max(),"type:",type(fetta8bit[0][0]))
+        #    print("fetta8bit.minx():",fetta8bit.min(),"type:",type(fetta8bit[0][0]))
+        #    print("glcmdata.max():",glcmdata.max(),"type:",type(glcmdata[0][0]))            
         glcm1 = greycomatrix(glcmdata, [1], [0], 256, symmetric=True, normed=True)
         glcm2 = greycomatrix(glcmdata, [1], [np.pi/2], 256, symmetric=True, normed=True)
         glcm3 = greycomatrix(glcmdata, [1], [np.radians(45)], 256, symmetric=True, normed=True)
@@ -181,9 +198,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                     # else:
                     if val >  binmax:
                         print("make_histo: Warning in layer",layer,"there is a value in overflow:",val,"normalization",meaninroi)
-                    if val > 0:    
-                      his.Fill(val)
-                      thishisto.Fill(val)
+                    # if val > 0:    
+                    his.Fill(val)
+                    thishisto.Fill(val)
 
                     
             hEntries.SetBinContent(layer,thishisto.GetEntries())

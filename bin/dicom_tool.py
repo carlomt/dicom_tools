@@ -608,6 +608,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             
     def myroi_file_open(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
+        if QtCore.QT_VERSION_STR == '5.9.1':
+            filename = filename[0]
         reader = roiFileHandler()
         originalpath = reader.dicomsPath
         self.rois, self.roisSetted = reader.read(filename)
@@ -650,6 +652,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def normalizeToROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
+        if QtCore.QT_VERSION_STR == '5.9.1':
+            filename = filename[0]        
         reader = roiFileHandler()
         roisForNorm, roisNormSetted = reader.read(filename)
         if len(roisForNorm) != len(self.dataZ[:,:,:,2]):
@@ -818,6 +822,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
+        if QtCore.QT_VERSION_STR == '5.9.1':
+            filename = filename[0]
         self.read_nrrd_roi(filename)
         
     def read_nrrd_roi(self, filename):
@@ -832,14 +838,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.read_roi_dicom_in_folder(str(path))    
 
     def highlightMyROI(self, colorchannel=0):
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')        
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')
+        if QtCore.QT_VERSION_STR == '5.9.1':
+            filename = filename[0]
         reader = roiFileHandler(self.verbose)
         myroi, roisSetted = reader.read(filename)
         self.ROI = myroi2roi(myroi, self.data[:,:,:,0].shape, self.verbose)
         self.highlightROI(self.ROI)
 
     def saveToImage(self, extension):
-        filename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File'))
+        filename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File'))        
         if not filename.endswith(extension):
             filename = filename+extension
         print(filename)

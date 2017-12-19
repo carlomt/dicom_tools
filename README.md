@@ -33,3 +33,8 @@ install the package with:
 on linux maybe you want to install it only for your user
 
 `python setup.py install --user`
+
+it could be necessary to install ITK before SimpleITK
+`apt-get install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
+`pip uninstall SimpleITK`
+`pip install SimpleITK`

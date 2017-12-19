@@ -27,6 +27,9 @@ parser.add_argument("-o", "--outfile", help="define output file name (default ou
 parser.add_argument("-jo", "--justone", help="limit the analisys to one subdirecotry")
 parser.add_argument("-n", "--norm", help="normalize to the mean defined in a myroi file",
                     action="store_true")
+parser.add_argument("-ic", "--icut", help="cut intensity > Imax*icut",default=0,type=float)
+parser.add_argument("-f", "--filter", help="apply gaussian laplace filter sigma=2.5pixels",
+                    action="store_true")
 
 args = parser.parse_args()
 
@@ -198,7 +201,7 @@ for patientdir in patientdirs:
             
         patientsuffix = patID + infos["time"]
 
-        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix, args.verbose,roinorm,args.norm)
+        his, allhistos, histogiafatti,histogclm = make_histo(data,ROI,patientsuffix, args.verbose,roinorm,args.norm,args.icut,args.filter)
         entropy_his, allentropy_his = make_histo_entropy(data,ROI,patientsuffix,
                                                          args.verbose)
         nVoxel[0]   = int(his.GetEntries())

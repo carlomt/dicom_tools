@@ -608,7 +608,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             
     def myroi_file_open(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
-        if QtCore.QT_VERSION_STR == '5.9.1':
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
             filename = filename[0]
         reader = roiFileHandler()
         originalpath = reader.dicomsPath
@@ -652,7 +652,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def normalizeToROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
-        if QtCore.QT_VERSION_STR == '5.9.1':
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
             filename = filename[0]        
         reader = roiFileHandler()
         roisForNorm, roisNormSetted = reader.read(filename)
@@ -822,7 +822,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def highlightnrrdROI(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.nrrd)')
-        if QtCore.QT_VERSION_STR == '5.9.1':
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
             filename = filename[0]
         self.read_nrrd_roi(filename)
         
@@ -839,7 +839,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def highlightMyROI(self, colorchannel=0):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','MyROI files (*.myroi)')
-        if QtCore.QT_VERSION_STR == '5.9.1':
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
             filename = filename[0]
         reader = roiFileHandler(self.verbose)
         myroi, roisSetted = reader.read(filename)

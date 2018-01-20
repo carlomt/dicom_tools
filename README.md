@@ -17,13 +17,17 @@ https://github.com/cartr/homebrew-qt4
 
 on a debian linux:
 
-`apt-get install python-pip python-qt4  python-sip  python-scipy python-matplotlib`
+`apt install python-pip python-qt4  python-sip`
+
+on debian it is necessary to install also scikit-image and some other packages with apt:
+
+`apt install python-skimage python-scipy python-matplotlib`
 
 it could be necessary to upgrade pip before to install the package, as it could not find some dependencies:
 
 `pip install --upgrade pip`
 
-`apt-get install build-essential`
+`apt install build-essential`
 
 
 install the package with:
@@ -35,6 +39,6 @@ on linux maybe you want to install it only for your user
 `python setup.py install --user`
 
 it could be necessary to install ITK before SimpleITK
-`apt-get install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
+`apt install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
 `pip uninstall SimpleITK`
 `pip install SimpleITK`

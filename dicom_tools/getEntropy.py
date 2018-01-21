@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from skimage.filters.rank import entropy as skim_entropy
 from skimage.morphology import disk as skim_disk
@@ -22,10 +23,21 @@ def getEntropy(image, ROI=None, square_size=5, verbose=False):
     return entropyImg
 
 def getEntropyCircleMask(image, ROI=None, circle_radius=5, verbose=False):
-    image = rescale8bit(image)
+    if verbose:
+        message = "getEntropyCircleMask "
+        if ROI is not None:
+            message += "ROI length "+str(len(ROI))
+        message += "circle radius "+str(circle_radius)
+        print(message)
+        print("type(image) ",type(image))
+        print("type(image[0][0]) ",type(image[0][0]))        
+    image = rescale8bit(image, verbose)
+    if verbose:
+        print("type(image[0][0]) ",type(image[0][0]))        
     if ROI is None:
         entropyImg = skim_entropy(image,skim_disk(circle_radius))
     else:
+        ROI = ROI.astype(np.bool)
         entropyImg = skim_entropy(image,skim_disk(circle_radius), mask=ROI)
     return entropyImg
 

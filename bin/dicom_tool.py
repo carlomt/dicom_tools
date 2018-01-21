@@ -71,7 +71,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
-        self.setWindowTitle("DICOM tool (v3.0)")
+        self.setWindowTitle("DICOM tool (v3.1) [dicom_tools v 0.9]")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
 
         widgetWindow = QtGui.QWidget(self)

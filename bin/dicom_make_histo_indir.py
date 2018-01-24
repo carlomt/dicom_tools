@@ -339,7 +339,7 @@ for patientdir in patientdirs:
                 print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
             for i in xrange(minEntropySide, maxEntropySide+1, 2):
                 entropyImg = getEntropyCircleMask(data[layer], ROI[layer], i)                        
-                nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+                nonZeroEntropy= entropyImg[np.nonzero( ROI[layer] )]
                 thisEntropySide[i]  = i                
                 if nonZeroEntropy.any():
                     meanEntropy[i][0]      = np.mean(nonZeroEntropy)
@@ -364,7 +364,7 @@ for patientdir in patientdirs:
             print("working on entropies from",minEntropySide,"to",maxEntropySide)
         for i in xrange(minEntropySide, maxEntropySide+1, 2):
             entropyImg = getEntropyCircleMask(data[layerMaxROI], ROI[layerMaxROI], i)                        
-            nonZeroEntropy= entropyImg[np.nonzero(entropyImg)]
+            nonZeroEntropy= entropyImg[np.nonzero( ROI[layerMaxROI] )]
             thisEntropySide[i]  = i                
             if nonZeroEntropy.any():
                 meanEntropyFM[i][0]      = np.mean(nonZeroEntropy)

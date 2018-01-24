@@ -1046,9 +1046,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
     def setlabel2values(self, img):
         imgO = img
-        img = img[np.nonzero(img)]
+        if len(self.ROI)!=0:
+            if np.count_nonzero(self.ROI[self.layer]) !=0:
+                img = img[np.nonzero(self.ROI[self.layer])]
+        
         minval = np.min(img )
-        self.label2_shape.setText("shape: "+str(imgO.shape))
+        self.label2_shape.setText("shape: "+str(img.shape))
         self.label2_size.setText("size: "+str(img.size))
         self.label2_min.setText("min: "+str(minval))
         self.label2_max.setText("max: "+str( np.max(img)))

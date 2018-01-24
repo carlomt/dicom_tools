@@ -116,17 +116,16 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
            fetta= filtered
            fetta8bit = (rescale8bit(fetta))
         else:
-            fetta8bit = (rescale8bit(fetta))
-        fettaROI = mask[layer]
-        fettaROI2 = fettaROI.astype(int) 
-        fettaTMP = fettaROI2*fetta
-        fetta8bitTMP = fettaROI2*fetta8bit
+           fetta8bit = (rescale8bit(fetta))
+        fettaROI = mask[layer].astype(np.bool) 
+        fettaTMP = fettaROI*fetta
+        fetta8bitTMP = fettaROI*fetta8bit
         if(ICut>0):
              Imax = fettaTMP.max()
              Imax2 = fetta8bitTMP.max()
              fetta[fetta < (ICut*Imax)] = 0
              fetta8bit[fetta8bit < (ICut*Imax2)] = 0
-        glcmdata = fettaROI2*fetta8bit     
+        glcmdata = fettaROI*fetta8bit     
         #CV gclm
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:

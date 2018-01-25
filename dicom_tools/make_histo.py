@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ROOT
 import numpy as np
 from skimage.feature import greycomatrix, greycoprops #CV
@@ -113,8 +114,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
            # filtered8bit = GaussianLaplaceFilter(fetta8bit, 2.5, 0, verbose)                             
            # fetta8bit= filtered8bit
            filtered = GaussianLaplaceFilter(fetta, sigma, 0, verbose)
-           fetta= filtered
-           fetta8bit = (rescale8bit(fetta))
+           fetta= (filtered+abs(filtered.min()))
+           fetta8bit = (rescale8bit(fetta*100))
         else:
            fetta8bit = (rescale8bit(fetta))
         fettaROI = mask[layer].astype(np.bool) 
@@ -184,6 +185,10 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                 if verbose:
                     print("make_histo: layer",layer,"meaninroi",meaninroi)
             # for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
+
+            if fettaROI.any():
+                print("non zero pixels:",np.count_nonzero(fetta))
+
             
             for val, inROI in zip(fetta.ravel(),fettaROI.ravel()):
                 if inROI>0 :
@@ -197,9 +202,9 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                     # else:
                     if val >  binmax:
                         print("make_histo: Warning in layer",layer,"there is a value in overflow:",val,"normalization",meaninroi)
-                    # if val > 0:    
-                    his.Fill(val)
-                    thishisto.Fill(val)
+                    if val > 0:    
+                        his.Fill(val)
+                        thishisto.Fill(val)
 
                     
             hEntries.SetBinContent(layer,thishisto.GetEntries())
@@ -211,7 +216,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
             hCfra.SetBinContent(layer,frattalecont) #AR
 
         if verbose:
-            print layer, thishisto.GetEntries()
+            print("make_histo","layer",layer, "entries",thishisto.GetEntries())
         # layer+=1
         allhistos.append(thishisto)
 

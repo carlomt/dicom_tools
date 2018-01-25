@@ -9,10 +9,12 @@ def rescale16bit(imgIn, verbose=False):
     # print("rescale16bit: WARNING imgIn has values greater than 2^16, rescaling (max: ",imgIn.max(),")")
     # return exposure.rescale_intensity(imgIn,in_range='uint16')
     #.astype(np.uint16)
-    # imgIn /= imgIn.max()    
+    # imgIn /= imgIn.max()
+    if imgIn.min()<0:
+        imgIn += abs(imgIn.min())
     imgOut = exposure.rescale_intensity(imgIn, in_range='uint16', out_range='uint16')
     if imgOut.min()<0:
-        print("rescale16bit: WARNING imgOut has negative value")    
+        print("rescale16bit: WARNING imgOut has negative value")        
     # imgOut *= 2**16
     imgOut = imgOut.astype(np.uint16)
     out = img_as_uint(imgOut)
@@ -31,7 +33,9 @@ def rescale8bit(imgIn, verbose=False):
     #.astype(np.uint8)
     # imgIn = exposure.rescale_intensity(imgIn, in_range='uint16')    
     # imgIn /= imgIn.max()
-    # return img_as_ubyte(imgOut)    
+    # return img_as_ubyte(imgOut)
+    if imgIn.min()<0:
+        imgIn += abs(imgIn.min())    
     imgOut = exposure.rescale_intensity(imgIn, in_range='uint16', out_range='uint8')
     if imgOut.min()<0:
         print("rescale8bit: WARNING imgOut has negative value")    

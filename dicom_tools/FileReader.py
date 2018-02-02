@@ -123,8 +123,8 @@ class FileReader:
             if self.verbose:
                 print("FileReader::read returning raw\n")                
             return self.data[:,:,::-1], self.ROI[:,:,:]
-
-            
+        if inpathROI:
+            ROI = ROI.astype(np.bool)            
         return self.dataRGB[:,:,::-1,:], self.ROI[:,:,:]
                 
         # dataRGB[i*scaleFactorInt-2,:,:,1] = (dataRGB[i*scaleFactorInt-3,:,:,1] + dataRGB[i*scaleFactorInt-1,:,:,1])/2
@@ -216,5 +216,6 @@ class FileReader:
             for i, thisROI in enumerate(reversed(dicomsROI)):
                 pix_arr = thisROI.pixel_array
                 self.ROI[i] = pix_arr.T
-
+        
+        ROI = ROI.astype(np.bool)            
         return self.ROI[:,:,::-1]

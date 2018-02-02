@@ -10,7 +10,7 @@ from dicom_tools.fractal import fractal #AR
 from scipy import ndimage #AR
 from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False,ICut=0,filter = False, sigma= 2.5, scala = False):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False, scala = False):
     nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
@@ -20,9 +20,12 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     if scala:
        binmin = -5
        binmax = 5
-    if filter:
-       binmin=-binmax/10.
-       binmax=binmax/10.
+
+    #TODO
+    # if filter:
+    #    binmin=-binmax/10.
+    #    binmax=binmax/10.
+
     # meannorm = 1
     # if ROInorm:
     #     binmin=0.
@@ -97,6 +100,8 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     histogiafatti = []
     histogclm = [] #CV
     # nfetta=0
+
+    filter = False
     
     # for fetta,fettaROI in zip(data,mask) :
     for layer in xrange(0,nFette):
@@ -113,7 +118,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
            # fetta8bit = rescale8bit(fetta)
            # filtered8bit = GaussianLaplaceFilter(fetta8bit, 2.5, 0, verbose)                             
            # fetta8bit= filtered8bit
-           filtered = GaussianLaplaceFilter(fetta, sigma, 0, verbose)
+           filtered = GaussianLaplaceFilter(fetta, 2.5, 0, verbose)
            fetta= (filtered+abs(filtered.min()))
            fetta8bit = (rescale8bit(fetta*100))
         else:
@@ -121,11 +126,11 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
         fettaROI = mask[layer].astype(np.bool) 
         fettaTMP = fettaROI*fetta
         fetta8bitTMP = fettaROI*fetta8bit
-        if(ICut>0):
-             Imax = fettaTMP.max()
-             Imax2 = fetta8bitTMP.max()
-             fetta[fetta < (ICut*Imax)] = 0
-             fetta8bit[fetta8bit < (ICut*Imax2)] = 0
+        # if(ICut>0):
+        #      Imax = fettaTMP.max()
+        #      Imax2 = fetta8bitTMP.max()
+        #      fetta[fetta < (ICut*Imax)] = 0
+        #      fetta8bit[fetta8bit < (ICut*Imax2)] = 0
         glcmdata = fettaROI*fetta8bit     
         #CV gclm
         #glcmdata = fetta8bit[fettaROI]
@@ -186,7 +191,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
                     print("make_histo: layer",layer,"meaninroi",meaninroi)
             # for val, inROI in zip(np.nditer(fetta),np.nditer(fettaROI)):
 
-            if fettaROI.any():
+            if fettaROI.any() and verbose:                
                 print("non zero pixels:",np.count_nonzero(fetta))
 
             

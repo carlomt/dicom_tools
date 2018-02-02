@@ -19,6 +19,7 @@ from dicom_tools.timeflagconverter import timeflagconverter_string2int
 from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from dicom_tools.make_histo_entropy import make_histo_entropy
 from dicom_tools.getEntropy import getEntropyCircleMask
+from dicom_tools.intensity_cut import intensity_cut
 from scipy.stats import skew
 from scipy.stats import kurtosis as sc_kurt
 
@@ -80,6 +81,7 @@ maxEntropyFM        = {}
 minEntropyFM        = {}
 skewnessEntropyFM = {}
 kurtosisEntropyFM = {}
+hEntropies = {}
 
 for i in xrange(minEntropySide, maxEntropySide+1, 2):
     thisEntropySide[i]   = array('i', [0])
@@ -95,7 +97,8 @@ for i in xrange(minEntropySide, maxEntropySide+1, 2):
     maxEntropyFM[i]        = array('f', [0])
     minEntropyFM[i]        = array('f', [0])
     skewnessEntropyFM[i]        = array('f', [0])
-    kurtosisEntropyFM[i]        = array('f', [0])    
+    kurtosisEntropyFM[i]        = array('f', [0])
+
 
 nmax = 100
 nFette   = array('i', [0])
@@ -206,7 +209,10 @@ for patientdir in patientdirs:
 
     if args.exclude:
         if args.exclude in patientdir: continue
-    
+
+    for i in xrange(minEntropySide, maxEntropySide+1, 2):
+        hEntropies[i] = ROOT.TH1F("hEntropies"+str(i)+patientdir,"Entropies"+str(i)+patientdir,100,-0.5,5.5)
+        
     analasisysdirs=glob.glob(patientdir+"*/")
     for analasisysdir in analasisysdirs:
         print("\t",analasisysdir)
@@ -267,8 +273,12 @@ for patientdir in patientdirs:
             print("skipping this analysis len(data)",len(data),"len(ROI)",len(ROI))
             continue
         
+        if args.icut:
+            print("appliyng an intensity cut",str(args.icut))
+            data = intensity_cut(data, ROI, args.icut, args.verbose)
+        
         patientsuffix = patID + infos["time"]
-        his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.icut,args.filter,args.sigma,args.scala)
+        his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.scala)
     
         nVoxel[0]   = int(his.GetEntries())
         mean[0]     = his.GetMean()
@@ -278,6 +288,7 @@ for patientdir in patientdirs:
         if args.verbose:
             print(patientID, timeflag[0], nVoxel[0], ypT[0], mean[0], stdDev[0], skewness[0], kurtosis[0])
         his.Write()
+        
         nlayer=0 #CV
         firstL=0 #CV
         count=0 #CV 
@@ -338,14 +349,20 @@ for patientdir in patientdirs:
             if args.verbose:
                 print("working on entropies from",minEntropySide,"to",maxEntropySide, "layer", layer)
             for i in xrange(minEntropySide, maxEntropySide+1, 2):
-                entropyImg = getEntropyCircleMask(data[layer], ROI[layer], i)                        
+                entropyImg = getEntropyCircleMask(data[layer], ROI[layer], i)                
                 nonZeroEntropy= entropyImg[np.nonzero( ROI[layer] )]
+                for val in nonZeroEntropy:
+                    hEntropies[i].Fill(val)
+                outfile.cd()
+                hEntropies[i].Write()
+                if args.verbose:
+                    print("hEntropies["+str(i)+"].Write()")
                 thisEntropySide[i]  = i                
                 if nonZeroEntropy.any():
                     meanEntropy[i][0]      = np.mean(nonZeroEntropy)
                     stdDevEntropy[i][0]    = np.std(nonZeroEntropy)
                     maxEntropy[i][0]       = np.max(nonZeroEntropy)
-                    minEntropy[i][0]       = np.min(nonZeroEntropy)
+                    minEntropy[i][0]       = np.min(nonZeroEntropy[np.nonzero(nonZeroEntropy)])
                     skewnessEntropy[i][0]  = skew(nonZeroEntropy)
                     kurtosisEntropy[i][0]  = sc_kurt(nonZeroEntropy)                   
                     if args.verbose:
@@ -358,7 +375,7 @@ for patientdir in patientdirs:
                     minEntropyFM[i][0]       = -1
                     skewnessEntropy[i][0]  = -1                    
                     kurtosisEntropy[i][0]  = -1
-
+            
         layerMaxROI = getLayerWithLargerROI(ROI, args.verbose)
         if args.verbose:
             print("working on entropies from",minEntropySide,"to",maxEntropySide)
@@ -370,7 +387,7 @@ for patientdir in patientdirs:
                 meanEntropyFM[i][0]      = np.mean(nonZeroEntropy)
                 stdDevEntropyFM[i][0]    = np.std(nonZeroEntropy)
                 maxEntropyFM[i][0]       = np.max(nonZeroEntropy)
-                minEntropyFM[i][0]       = np.min(nonZeroEntropy)
+                minEntropyFM[i][0]       = np.min(nonZeroEntropy[np.nonzero(nonZeroEntropy)])
                 skewnessEntropyFM[i][0]  = skew(nonZeroEntropy)
                 kurtosisEntropyFM[i][0]  = sc_kurt(nonZeroEntropy)                                   
                 if args.verbose:

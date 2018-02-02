@@ -20,6 +20,7 @@ from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 from dicom_tools.make_histo_entropy import make_histo_entropy
 from dicom_tools.getEntropy import getEntropyCircleMask
 from dicom_tools.intensity_cut import intensity_cut
+from dicom_tools.gaussianlaplace import GaussianLaplaceFilter
 from scipy.stats import skew
 from scipy.stats import kurtosis as sc_kurt
 
@@ -276,7 +277,12 @@ for patientdir in patientdirs:
         if args.icut:
             print("appliyng an intensity cut",str(args.icut))
             data = intensity_cut(data, ROI, args.icut, args.verbose)
-        
+
+        if args.filter:
+            print("applying a Gaussian Laplace filter with a sigma of:",args.sigma)
+            data = GaussianLaplaceFilter(data, args.sigma, args.verbose)
+            
+            
         patientsuffix = patID + infos["time"]
         his, allhistos, histogiafatti, histogclm  = make_histo(data,ROI,patientsuffix,args.verbose,roinorm,args.norm,args.scala)
     

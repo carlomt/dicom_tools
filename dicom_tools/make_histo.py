@@ -10,7 +10,7 @@ from dicom_tools.fractal import fractal #AR
 from scipy import ndimage #AR
 from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 
-def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False, scala = False):
+def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=False, scala = False, filtered=False):
     nbin = 10000
     binmin=data.min() *0.8
     binmax=data.max() *1.2
@@ -21,8 +21,7 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
        binmin = -5
        binmax = 5
 
-    #TODO
-    # if filter:
+    # if filtered:
     #    binmin=-binmax/10.
     #    binmax=binmax/10.
 
@@ -101,8 +100,6 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
     histogclm = [] #CV
     # nfetta=0
 
-    filter = False
-    
     # for fetta,fettaROI in zip(data,mask) :
     for layer in xrange(0,nFette):
     
@@ -112,26 +109,11 @@ def make_histo(data, mask, suffix="", verbose=False, ROInorm=False, normalize=Fa
             media = np.mean(fetta)
             rms = np.std(fetta)
             fetta = (fetta - media)/rms
-        # CV AR gaussian laplacian filter
-        if filter:
-           # note: after filter there are pixels with negative values!!
-           # fetta8bit = rescale8bit(fetta)
-           # filtered8bit = GaussianLaplaceFilter(fetta8bit, 2.5, 0, verbose)                             
-           # fetta8bit= filtered8bit
-           filtered = GaussianLaplaceFilter(fetta, 2.5, 0, verbose)
-           fetta= (filtered+abs(filtered.min()))
-           fetta8bit = (rescale8bit(fetta*100))
-        else:
-           fetta8bit = (rescale8bit(fetta))
-        fettaROI = mask[layer].astype(np.bool) 
-        fettaTMP = fettaROI*fetta
-        fetta8bitTMP = fettaROI*fetta8bit
-        # if(ICut>0):
-        #      Imax = fettaTMP.max()
-        #      Imax2 = fetta8bitTMP.max()
-        #      fetta[fetta < (ICut*Imax)] = 0
-        #      fetta8bit[fetta8bit < (ICut*Imax2)] = 0
-        glcmdata = fettaROI*fetta8bit     
+        fetta8bit = (rescale8bit(fetta))
+        
+        # fettaROI = mask[layer].astype(np.bool)
+        fettaROI = mask[layer]
+        glcmdata = mask[layer]*fetta8bit     
         #CV gclm
         #glcmdata = fetta8bit[fettaROI]
         # if verbose:

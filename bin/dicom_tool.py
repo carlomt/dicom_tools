@@ -885,8 +885,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.img1b.updateImage()
 
     def GaussianLaplaceFilter(self):
-        filtered = GaussianLaplaceFilter(self.arr[:,:,2], 2.5, 0, self.verbose) 
-        self.img1b.setImage(filtered)
+        filtered = GaussianLaplaceFilter(self.data[:,:,:,0], 2.5, self.verbose) 
+        self.img1b.setImage(filtered[self.layer])
         self.p2.autoRange()
         self.img1b.updateImage()
 

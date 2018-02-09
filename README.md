@@ -29,6 +29,16 @@ it could be necessary to upgrade pip before to install the package, as it could 
 
 `apt install build-essential`
 
+on CentOS 7 (or Scientific Linux):
+ `yum install centos-release-scl`
+ `yum install devtoolset-7`
+ `scl enable devtoolset-7 bash`
+ `yum install python27`
+ `scl enable python27 bash`
+ `yum install python27-python-devel`
+ `yum install python27-pythyon-pip python27-python-six python27-numpy python27-scipy python27-python-tools python-qt4 python-matplotlib`
+ `pip install --upgrade pip`
+ `python -m pip install scikit-build`
 
 install the package with:
 

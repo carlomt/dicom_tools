@@ -1,6 +1,6 @@
 # dicom_tools
 
-PyQt4, sip and SimpleITK have to be installed
+PyQt4 or PyQt5, sip and SimpleITK have to be installed
 
 on mac you could install them with:
 
@@ -12,8 +12,10 @@ on mac you could install them with:
 
 `brew install homebrew/science/simpleitk`
 
+<strike>
 this package uses qt4, to install qt4 instead of qt5:
 https://github.com/cartr/homebrew-qt4
+</strike>
 
 on a debian linux:
 

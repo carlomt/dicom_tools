@@ -8,7 +8,7 @@ Package for DICOM medical images analysis.
 [PyQt4 or PyQt5](https://sourceforge.net/projects/pyqt/), [sip](https://www.riverbankcomputing.com/software/sip/download), [SimpleITK](http://www.simpleitk.org/)  and [ROOT](https://root.cern.ch/) have to be installed
 
 
-### MacOsx
+### Mac OS X
 
 on mac you could install everything with brew:
 

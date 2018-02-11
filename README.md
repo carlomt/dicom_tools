@@ -31,7 +31,7 @@ finally, install the package with:
 
 `python setup.py install`
 
-### Debian linux:
+### Debian (or Ubuntu):
 
 `apt install python-pip python-qt4  python-sip`
 

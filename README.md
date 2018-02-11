@@ -1,8 +1,16 @@
 # dicom_tools
 
-PyQt4 or PyQt5, sip and SimpleITK have to be installed
+Package for DICOM medical images analysis.
+[For more information](http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tool)
 
-on mac you could install them with:
+## Installation instructions
+
+PyQt4 or PyQt5, sip, SimpleITK  and ROOT have to be installed
+
+
+### MacOsx
+
+on mac you could install everything with brew:
 
 `brew install qt`
 
@@ -12,12 +20,18 @@ on mac you could install them with:
 
 `brew install homebrew/science/simpleitk`
 
+`brew install homebrew/science/root`
+
 <strike>
 this package uses qt4, to install qt4 instead of qt5:
 https://github.com/cartr/homebrew-qt4
 </strike>
 
-on a debian linux:
+finally, install the package with:
+
+`python setup.py install`
+
+### Debian linux:
 
 `apt install python-pip python-qt4  python-sip`
 
@@ -31,7 +45,24 @@ it could be necessary to upgrade pip before to install the package, as it could 
 
 `apt install build-essential`
 
-on CentOS 7 (or Scientific Linux):
+it could be necessary to install ITK before SimpleITK
+
+`apt install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
+
+`pip uninstall SimpleITK`
+
+`pip install SimpleITK`
+
+finally, install the package with:
+
+`python setup.py install`
+
+on linux maybe you want to install it only for your user
+
+`python setup.py install --user`
+
+
+### CentOS 7 (or Scientific Linux):
 
 `yum install centos-release-scl`
 
@@ -79,10 +110,3 @@ on linux maybe you want to install it only for your user
 
 `python setup.py install --user`
 
-on debian it could be necessary to install ITK before SimpleITK
-
-`apt install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
-
-`pip uninstall SimpleITK`
-
-`pip install SimpleITK`

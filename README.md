@@ -37,7 +37,7 @@ finally, install the package with:
 
 on debian it is necessary to install also scikit-image and some other packages with apt:
 
-`apt install python-skimage python-scipy python-matplotlib`
+`apt install python-numpy python-skimage python-sklearn python-scipy python-matplotlib`
 
 it could be necessary to upgrade pip before to install the package, as it could not find some dependencies:
 

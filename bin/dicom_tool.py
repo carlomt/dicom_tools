@@ -1149,6 +1149,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 so you can access its data members via 'thisapp.data'.
 Yf you loaded dicom files the content is stored in 'thisapp.data' 
 the ROI in 'thisapp.ROI'. 
+To see the effect of your commands to the GUI pause the shell with Ctrl-d.
 Exit this shell to get back to the GUI.\n""")
         
 if __name__ == '__main__':

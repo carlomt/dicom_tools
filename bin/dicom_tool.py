@@ -1145,12 +1145,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.updatemain()
 
     def launchShell(self):
-        ipythonembed()
+        ipythonembed(banner2="""The dicom_tool application instance is called 'thisapp' 
+so you can access its data members via 'thisapp.data'.
+Yf you loaded dicom files the content is stored in 'thisapp.data' 
+the ROI in 'thisapp.ROI'. 
+Exit this shell to get back to the GUI.\n""")
         
 if __name__ == '__main__':
 
     import sys
     app = QtGui.QApplication(sys.argv)
-    window = Window_dicom_tool()
-    window.show()
+    thisapp = Window_dicom_tool()
+    thisapp.show()
     sys.exit(app.exec_())

@@ -37,12 +37,14 @@ from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
 import matplotlib.pyplot as plt
 
-from IPython import embed as ipythonembed
+from qtconsole.rich_ipython_widget import RichJupyterWidget
+from qtconsole.inprocess import QtInProcessKernelManager
+from IPython.lib import guisupport
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
-
+        
         self.closeButton = QtGui.QPushButton(self.tr("&Close"))
         self.closeButton.setDefault(True)
         
@@ -75,7 +77,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # self.setGeometry(50, 50, 500, 300)
         self.setWindowTitle("DICOM tool (v3.1) [dicom_tools v 0.9]")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
-
+        
         widgetWindow = QtGui.QWidget(self)
         self.setCentralWidget(widgetWindow)
         
@@ -1145,17 +1147,54 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.updatemain()
 
     def launchShell(self):
-        ipythonembed(banner2="""The dicom_tool application instance is called 'thisapp' 
+        kernel_client = kernel_manager.client()
+        kernel_client.start_channels()
+
+        def stop():
+            kernel_client.stop_channels()
+            kernel_manager.shutdown_kernel()
+            app.exit()
+        
+        message="""dicom_tool interactive shell.
+
+The dicom_tool application instance is called 'thisapp' 
 so you can access its data members via 'thisapp.data'.
-Yf you loaded dicom files the content is stored in 'thisapp.data' 
+If you loaded dicom files the content is stored in 'thisapp.data', 
 the ROI in 'thisapp.ROI'. 
-To see the effect of your commands to the GUI pause the shell with Ctrl-d.
-Exit this shell to get back to the GUI.\n""")
+\n"""
+        
+        control = RichJupyterWidget(banner=message)
+        control.kernel_manager = kernel_manager
+        control.kernel_client = kernel_client
+        control.exit_requested.connect(stop)
+        control.show()
         
 if __name__ == '__main__':
 
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    thisapp = Window_dicom_tool()
-    thisapp.show()
-    sys.exit(app.exec_())
+    # kernel_manager.start_kernel()
+    # kernel = kernel_manager.kernel
+    # kernel.gui = 'qt4'
+    
+    # import sys
+
+    # app = QtGui.QApplication(sys.argv)
+
+    # # app = guisupport.get_app_qt4()
+            
+
+    # sys.exit(app.exec_())
+
+    app = guisupport.get_app_qt4()
+
+    kernel_manager = QtInProcessKernelManager()
+    kernel_manager.start_kernel()
+    kernel = kernel_manager.kernel
+    kernel.gui = 'qt4'
+
+    thisapp =  Window_dicom_tool()
+
+    kernel.shell.push({'thisapp': thisapp, 'thisapp.show()': thisapp.show()})
+    
+
+
+    guisupport.start_event_loop_qt4(app)

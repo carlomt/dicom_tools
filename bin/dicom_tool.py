@@ -37,6 +37,8 @@ from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
 import matplotlib.pyplot as plt
 
+from IPython import embed as ipythonembed
+
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
@@ -220,6 +222,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         goToLayerWithLargerROIAction.setStatusTip('Go to the layer with larger ROI')
         goToLayerWithLargerROIAction.triggered.connect(self.goToLayerWithLargerROI)
 
+        shellAction = QtGui.QAction("&Launch interactive shell",self)
+        shellAction.setStatusTip('Launch interactive shell')
+        shellAction.triggered.connect(self.launchShell)
+        
         entropyInAllROIAction = QtGui.QAction("&Entropy in a 3D ROI (nrrd)",self)
         entropyInAllROIAction.setStatusTip('Entropy in a 3D ROI (nrrd)"')
         entropyInAllROIAction.triggered.connect(self.entropyInAllROI)
@@ -296,6 +302,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         analysisMenu.addAction(entropyInAllROIAction)
         analysisMenu.addAction(gradientAction)
         analysisMenu.addAction(goToLayerWithLargerROIAction)
+        analysisMenu.addAction(shellAction)        
 
         filtersMenu = mainMenu.addMenu('&Filters')
         filtersMenu.addAction(CurvatureFlowImageFilterAction)
@@ -1136,6 +1143,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
     def goToLayerWithLargerROI(self):
         self.layer = getLayerWithLargerROI(self.ROI)
         self.updatemain()
+
+    def launchShell(self):
+        ipythonembed()
         
 if __name__ == '__main__':
 

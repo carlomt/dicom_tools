@@ -13,11 +13,12 @@ install_req=[
     'nose>=1.3.7',
     'SimpleITK>=0.10.0',
     'tabulate>=0.7.7',
-    'openpyxl>=2.4.0'
+    'openpyxl>=2.4.0',
+    'ipython<6'
 ]
 
 setup(name='dicom_tools',
-      version='0.9',
+      version='0.9.1',
       description='Dicom Tool',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

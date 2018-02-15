@@ -7,6 +7,11 @@ Package for DICOM medical images analysis.
 
 [PyQt5](https://sourceforge.net/projects/pyqt/), [sip](https://www.riverbankcomputing.com/software/sip/download), [SimpleITK](http://www.simpleitk.org/)  and [ROOT](https://root.cern.ch/) have to be installed
 
+Once the prerequisites non available no PyPi are installed, the package can be installed with pip:
+
+`pip install dicom_tools`
+
+se below the instructions to install the necessary software for Mac OS X and the most used Linux distributions.
 
 ### Mac OS X
 
@@ -28,6 +33,10 @@ https://github.com/cartr/homebrew-qt4
 </strike>
 
 finally, install the package with:
+
+`pip install dicom_tools`
+
+or, if you want to use the development version:
 
 `python setup.py install`
 
@@ -59,9 +68,15 @@ it could be necessary to install ITK before SimpleITK
 
 finally, install the package with:
 
+`pip install dicom_tools`
+
+or, if you want to use the development version:
+
 `python setup.py install`
 
 on linux maybe you want to install it only for your user
+
+`pip install dicom_tools --user`
 
 `python setup.py install --user`
 
@@ -78,7 +93,7 @@ on linux maybe you want to install it only for your user
 
 `yum install python27-pythyon-pip python27-python-six python27-numpy python27-scipy python27-python-tools`
 
-Install Qt (I used `qt-unified-linux-x64-3.0.2-online.run`)
+Install Qt5 (I used `qt-unified-linux-x64-3.0.2-online.run`)
 
 Install OpenGL headers, for QtGui and QtWidgets
 
@@ -108,9 +123,15 @@ update pip and compile scikit
 
 finally, install the package with:
 
+`pip install dicom_tools`
+
+or, if you want to use the development version:
+
 `python setup.py install`
 
 on linux maybe you want to install it only for your user
+
+`pip install dicom_tools --user`
 
 `python setup.py install --user`
 

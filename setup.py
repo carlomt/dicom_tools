@@ -20,8 +20,8 @@ install_req=[
 
 setup(name='dicom_tools',
       version='1.0',
-      description='Package for DICOM medical images analysis. For more information: http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tool',
-      url='https://github.com/carlomt/dicom_tools',
+      description='Package for DICOM medical images analysis.',
+      url='http://www.roma1.infn.it/~mancinit/Software/dicom_tools',
       download_url = 'https://github.com/carlomt/dicom_tools/archive/1.0.tar.gz',
       author='Carlo Mancini Terracciano',
       author_email='carlo.mancini.terracciano@roma1.infn.it',

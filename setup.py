@@ -14,11 +14,12 @@ install_req=[
     'SimpleITK>=0.10.0',
     'tabulate>=0.7.7',
     'openpyxl>=2.4.0',
-    'ipython<6'
+    'ipython<6',
+    'qtconsole'
 ]
 
 setup(name='dicom_tools',
-      version='0.9.1',
+      version='0.10',
       description='Dicom Tool',
       url='https://github.com/carlomt/dicom_tools',
       author='Carlo Mancini Terracciano',

@@ -5,7 +5,7 @@ Package for DICOM medical images analysis.
 
 ## Installation instructions
 
-[PyQt4 or PyQt5](https://sourceforge.net/projects/pyqt/), [sip](https://www.riverbankcomputing.com/software/sip/download), [SimpleITK](http://www.simpleitk.org/)  and [ROOT](https://root.cern.ch/) have to be installed
+[PyQt5](https://sourceforge.net/projects/pyqt/), [sip](https://www.riverbankcomputing.com/software/sip/download), [SimpleITK](http://www.simpleitk.org/)  and [ROOT](https://root.cern.ch/) have to be installed
 
 
 ### Mac OS X
@@ -33,7 +33,11 @@ finally, install the package with:
 
 ### Debian (or Ubuntu):
 
+<strike>
 `apt install python-pip python-qt4  python-sip`
+</strike>
+
+`apt install python-pip python-pyqt5 python-pyqt5.qtsvg python-sip`
 
 on debian it is necessary to install also scikit-image and some other packages with apt:
 
@@ -88,7 +92,7 @@ I manually compiled SIP but I'm not sure if it is enought to do so via pip (I us
 
 `make install`
 
-Download PyQt source code (I tested PyQt5_gpl-5.10)
+Download PyQt5 source code (I tested PyQt5_gpl-5.10)
 
 `python configure.py --qmake /path/to/Qt/5.10.0/gcc_64/bin/qmake`
 

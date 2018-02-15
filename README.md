@@ -33,11 +33,9 @@ finally, install the package with:
 
 ### Debian (or Ubuntu):
 
-`
 <strike>
-apt install python-pip python-qt4  python-sip
+`apt install python-pip python-qt4  python-sip`
 </strike>
-`
 
 `apt install python-pip python-pyqt5 python-pyqt5.qtsvg python-sip`
 

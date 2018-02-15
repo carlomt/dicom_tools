@@ -1157,10 +1157,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
         message="""dicom_tool interactive shell.
 
-The dicom_tool application instance is called 'thisapp' 
-so you can access its data members via 'thisapp.data'.
-If you loaded dicom files the content is stored in 'thisapp.data', 
-the ROI in 'thisapp.ROI'. 
+The dicom_tool application instance is called 'instance' 
+so you can access its data members via 'instance.data'.
+If you loaded dicom files the content is stored in 'instance.data', 
+the ROI in 'instance.ROI'. 
 \n"""
         
         control = RichJupyterWidget(banner=message)
@@ -1170,7 +1170,6 @@ the ROI in 'thisapp.ROI'.
         control.show()
         
 if __name__ == '__main__':
-
     # kernel_manager.start_kernel()
     # kernel = kernel_manager.kernel
     # kernel.gui = 'qt4'
@@ -1189,11 +1188,11 @@ if __name__ == '__main__':
     kernel_manager = QtInProcessKernelManager()
     kernel_manager.start_kernel()
     kernel = kernel_manager.kernel
-    kernel.gui = 'qt4'
+    kernel.gui = 'qt'
 
-    thisapp =  Window_dicom_tool()
+    instance =  Window_dicom_tool()
 
-    kernel.shell.push({'thisapp': thisapp, 'thisapp.show()': thisapp.show()})
+    kernel.shell.push({'instance': instance, 'instance.show()': instance.show()})
     
 
 

@@ -4,9 +4,6 @@ import os
 import glob
 import argparse
 import numpy as np
-
-from dicom_tools.dicom import mydicom
-
 from dicom_tools.FileReader import FileReader
 from dicom_tools.info_file_parser import info_file_parser
 from dicom_tools.myroi2roi import myroi2roi

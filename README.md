@@ -1,7 +1,7 @@
 # dicom_tools
 
 Package for DICOM medical images analysis.
-[For more information](http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tool)
+[For more information](http://www.roma1.infn.it/~mancinit/Software/dicom_tools)
 
 ## Installation instructions
 

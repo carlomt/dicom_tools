@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from scipy.spatial import ConvexHull
 import dicom_tools.pyqtgraph as pg
@@ -19,7 +20,7 @@ def roi2myroi(ROI, verbose=False):
             if firsttime:
                 firsttime = False
                 for point in points:
-                    print point
+                    print(point)
                         
             hull = ConvexHull(points)
             rois[layer] = pg.PolyLineROI(hull.simplices.tolist(), pen=(6,9), closed=True).saveState()

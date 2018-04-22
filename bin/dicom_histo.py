@@ -1,9 +1,14 @@
 #!/usr/bin/python
+from __future__ import print_function
 
 import glob
 import argparse
 import numpy as np
-import dicom
+try:
+    import dicom
+except ImportError:
+    import pydicom as dicom
+
 import ROOT
 
 outfname="out.root"

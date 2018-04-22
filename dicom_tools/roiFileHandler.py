@@ -1,4 +1,9 @@
-import cPickle as pickle
+from __future__ import print_function
+
+try:
+    import cPickle as pickle
+except ModuleNotFoundError:
+    import pickle
 from dicom_tools.roiData import roiData
 
 class roiFileHandler:

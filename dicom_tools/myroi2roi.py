@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from skimage.measure import grid_points_in_poly
 from dicom_tools.roiFileHandler import roiFileHandler

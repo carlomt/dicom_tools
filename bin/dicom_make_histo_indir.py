@@ -4,7 +4,6 @@ import os
 import glob
 import argparse
 import numpy as np
-import dicom
 import sys
 from dicom_tools.make_histo import make_histo
 # from dicom_tools.read_files import read_files

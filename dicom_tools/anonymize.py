@@ -29,9 +29,12 @@ the DICOM standard, e.g in Annex E of PS3.15-2011.
 
 import os
 import os.path
-import dicom
-from dicom.errors import InvalidDicomError
-
+try:
+    import dicom
+    from dicom.errors import InvalidDicomError
+except ImportError:
+    import pydicom as dicom
+    from pydicom.errors import InvalidDicomError
 
 def anonymizefile(filename, output_filename, new_person_name="AUTO",
               new_patient_id="id", remove_curves=True, remove_private_tags=True):

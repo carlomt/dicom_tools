@@ -5,7 +5,6 @@ import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
-import dicom
 from dicom_tools.FileReader import FileReader
 from scipy import ndimage
 import os
@@ -681,7 +680,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         else:
             dataRGB, unusedROI = freader.read(False)
         if freader.PatientName is not None:
-            self.setWindowTitle("DICOM tool - "+freader.PatientName)
+            self.setWindowTitle("DICOM tool - "+str(freader.PatientName))
         self.xview=False
         self.yview=False
         self.zview=True        

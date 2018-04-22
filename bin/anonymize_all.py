@@ -6,7 +6,7 @@ from dicom_tools.ifNeededMkdir import ifNeededMkdir
 from dicom_tools.newNameFromMetadata import newNameFromMetadata
 from dicom_tools.splitWithEscapes import splitWithEscapes
 from dicom_tools.timeflagconverter import timeflagconverter_int2string
-import dicom, os, shutil
+import os, shutil
 
 usage = """
 Usage:

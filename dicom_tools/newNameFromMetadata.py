@@ -1,5 +1,9 @@
+from __future__ import print_function
 import os
-import dicom
+try:
+    import dicom
+except ImportError:
+    import pydicom as dicom
 
 def newNameFromMetadata(in_dir, verbose=False):
     filenames = os.listdir(in_dir)

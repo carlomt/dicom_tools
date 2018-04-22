@@ -1,7 +1,11 @@
+from __future__ import print_function
 
 import glob
 import numpy as np
-import dicom
+try:
+    import dicom
+except ImportError:
+    import pydicom as dicom
 import nrrd
 import os
 #from dicom_tools.roiFileHandler import roiFileHandler

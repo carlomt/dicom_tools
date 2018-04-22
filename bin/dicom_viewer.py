@@ -5,7 +5,6 @@ import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 import dicom_tools.pyqtgraph as pg
-import dicom
 import sys
 from dicom_tools.make_histo import make_histo
 from dicom_tools.read_files import read_files

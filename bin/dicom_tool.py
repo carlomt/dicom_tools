@@ -36,6 +36,8 @@ from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 
 import matplotlib.pyplot as plt
 
+from dicom_tools.BrukerMRI import ReadFolder as brukerReadFolder
+
 from qtconsole.rich_ipython_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from IPython.lib import guisupport
@@ -56,7 +58,7 @@ class AboutWindow(QtGui.QDialog):
 
         
         self.textBrowser = QtGui.QTextBrowser(self)
-        self.textBrowser.append("DICOM tool (v3.0)")
+        self.textBrowser.append("DICOM tool (v2.0)")
         self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
 
         self.verticalLayout = QtGui.QVBoxLayout(self)
@@ -87,6 +89,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         parser.add_argument("-v", "--verbose", help="increase output verbosity",
                             action="store_true")
         parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
+        parser.add_argument("-ib", "--inputbruker", help="path of the Bruker directory")        
         parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
         parser.add_argument("-l", "--layer", help="select layer",
                             type=int)
@@ -131,7 +134,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         
         openDicomDirectoryGDCM = QtGui.QAction("&Open DICOM Directory with GDCM", self)
         openDicomDirectoryGDCM.setStatusTip("Open DICOM Directory with GDCM (dcm also compressed)")
-        openDicomDirectoryGDCM.triggered.connect(self.select_dicom_folderGDCM)    
+        openDicomDirectoryGDCM.triggered.connect(self.select_dicom_folderGDCM)
+
+        openDicomDirectoryBruker = QtGui.QAction("&Open Bruker Directory", self)
+        openDicomDirectoryBruker.setStatusTip("Open Bruker Directory with data files")
+        openDicomDirectoryBruker.triggered.connect(self.select_dicom_folderBruker)    
         
         openMyROIFile = QtGui.QAction("&Open MyROI File", self)
         # openFile.setShortcut("Ctrl+O")
@@ -268,6 +275,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         fileMenu = mainMenu.addMenu('&File')
         fileMenu.addAction(openDicomDirectory)
         fileMenu.addAction(openDicomDirectoryGDCM)
+        fileMenu.addAction(openDicomDirectoryBruker)        
         fileMenu.addAction(aboutAction)
         
         ROIfileMenu = mainMenu.addMenu('&ROI')
@@ -466,6 +474,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if args.roifile:
             self.read_nrrd_roi(args.roifile)
 
+        if args.inputbruker:
+            self.read_dicom_in_folder(args.inputbruker,useBruker=True)
+            
             
     def update(self):
         if self.manualROI:
@@ -673,12 +684,19 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.allineateViews()            
         self.updatemain()
         
-    def read_dicom_in_folder(self, path, useGDCM=False):
+    def read_dicom_in_folder(self, path, useGDCM=False, useBruker=False):
         freader = FileReader(path, False, self.verbose)
         if useGDCM:
             dataRGB = freader.readUsingGDCM(False)
+        elif useBruker:
+            tmp = brukerReadFolder(path,True).proc_data
+            dataRGB=np.zeros(tuple([1])+tmp.shape)            
+            dataRGB[0,:,:,:] = tmp
         else:
-            dataRGB, unusedROI = freader.read(False)
+            try:
+                dataRGB, unusedROI = freader.read(False)
+            except NotImplementedError:
+                dataRGB = freader.readUsingGDCM(False)                
         if freader.PatientName is not None:
             self.setWindowTitle("DICOM tool - "+str(freader.PatientName))
         self.xview=False
@@ -725,7 +743,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
             print(path)
-        self.read_dicom_in_folder(str(path),useGDCM=True)        
+        self.read_dicom_in_folder(str(path),useGDCM=True)
+
+    def select_dicom_folderBruker(self):
+        path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
+        if self.verbose:
+            print(path)
+        self.read_dicom_in_folder(str(path),useBruker=True)                
 
     def switchToXView(self):
         if self.xview:

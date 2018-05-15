@@ -690,8 +690,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
             dataRGB = freader.readUsingGDCM(False)
         elif useBruker:
             tmp = brukerReadFolder(path,True).proc_data
-            dataRGB=np.zeros(tuple([1])+tmp.shape)            
-            dataRGB[0,:,:,:] = tmp
+            dataRGB = np.zeros(tuple([tmp.shape[2]])+tmp.shape[0:2]+tuple([3]))
+            for i in range(0,tmp.shape[2]):
+                dataRGB[i,:,:,0] = dataRGB[i,:,:,1] = dataRGB[i,:,:,2] = tmp[:,:,i]
         else:
             try:
                 dataRGB, unusedROI = freader.read(False)

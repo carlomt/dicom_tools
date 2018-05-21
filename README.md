@@ -23,9 +23,11 @@ on mac you could install everything with brew:
 
 `brew install sip`
 
-`brew install homebrew/science/simpleitk`
+~~`brew install homebrew/science/simpleitk`~~
+`brew install brewsci/science/`
 
-`brew install homebrew/science/root`
+~~`brew install homebrew/science/root`~~
+`brew install root`
 
 <strike>
 this package uses qt4, to install qt4 instead of qt5:

@@ -96,9 +96,12 @@ class FileReader:
         if verbose:
             print("scaleFactor",self.scaleFactor)
 
-        self.data=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape)
+        self.data=np.zeros(tuple([len(dicoms)])
+                           +tuple([dicoms[0].pixel_array.shape[1],dicoms[0].pixel_array.shape[0]]) )
             
-        self.dataRGB=np.zeros(tuple([len(dicoms)])+dicoms[0].pixel_array.shape+tuple([3]))
+        self.dataRGB=np.zeros(tuple([len(dicoms)])
+                              +tuple([dicoms[0].pixel_array.shape[1],dicoms[0].pixel_array.shape[0]])
+                              +tuple([3]))
         if verbose:
             print("data.shape",self.data.shape)            
             print("dataRGB.shape",self.dataRGB.shape)

@@ -37,6 +37,7 @@ from dicom_tools.getLayerWithLargerROI import getLayerWithLargerROI
 import matplotlib.pyplot as plt
 
 from dicom_tools.BrukerMRI import ReadFolder as brukerReadFolder
+from dicom_tools.read_plist_roi_file import read_plist_roi_file
 
 from qtconsole.rich_ipython_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
@@ -95,6 +96,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
                             type=int)
         parser.add_argument("-fp", "--roipath", help="filter the image with a ROI (DICOM folder path)")
         parser.add_argument("-fn", "--roifile", help="filter the image with a ROI (nrrd file)")
+        parser.add_argument("-fo", "--roiosirix", help="filter the image with a ROI from Osirix (xml file)")        
         parser.add_argument("-c","--colorRange", help="highlight a color range (expects sometghin like 100:200)")
         parser.add_argument("-r","--raw", help="do not normalize",action="store_true")
         group = parser.add_mutually_exclusive_group()
@@ -144,6 +146,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # openFile.setShortcut("Ctrl+O")
         openMyROIFile.setStatusTip('Open ROI File (myroi format)')
         openMyROIFile.triggered.connect(self.myroi_file_open)
+
+        openOsirixROIFile = QtGui.QAction("&Open Osirix ROI File", self)
+        openOsirixROIFile.setStatusTip('Open Osirix ROI File (xml format)')
+        openOsirixROIFile.triggered.connect(self.osirix_roi_file_open)        
         
         saveMyROIFile = QtGui.QAction("&Save ROI on File", self)
         saveMyROIFile.setShortcut("Ctrl+S")
@@ -281,6 +287,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         ROIfileMenu = mainMenu.addMenu('&ROI')
         # fileMenu.addAction(extractAction)
         ROIfileMenu.addAction(openMyROIFile)
+        ROIfileMenu.addAction(openOsirixROIFile)        
         ROIfileMenu.addAction(saveMyROIFile)
         ROIfileMenu.addAction(saveROIonNRRD)
         ROIfileMenu.addAction(highlightDCMROIaction)
@@ -474,6 +481,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if args.roifile:
             self.read_nrrd_roi(args.roifile)
 
+        if args.roiosirix:
+            self.osirix_roi_file_open(args.roiosirix)
+            
         if args.inputbruker:
             self.read_dicom_in_folder(args.inputbruker,useBruker=True)
             
@@ -624,14 +634,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if self.connectedThreshold:
             ROI = self.bitmapROI
         writer.write(filename, ROI)
-            
-    def myroi_file_open(self):
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
-        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
-            filename = filename[0]
-        reader = roiFileHandler()
-        originalpath = reader.dicomsPath
-        self.rois, self.roisSetted = reader.read(filename)
+
+    def updateImageBecauseOfRoi(self):
         self.updatemain()
         self.label2_roisSetted.setText("ROI setted: "+str(self.roisSetted))
         ROI = myroi2roi(self.rois, self.data[:,:,:,0].shape, self.verbose)
@@ -639,7 +643,24 @@ class Window_dicom_tool(QtGui.QMainWindow):
         regiontohighlight = self.dataZ[:,:,:,colorchannel]*ROI                
         referenceValue = self.dataZ[:,:,:,colorchannel].max()/regiontohighlight.max()/2.        
         self.dataZ[:,:,:,colorchannel] = self.dataZ[:,:,:,colorchannel] + regiontohighlight*referenceValue 
+        
+        
+    def myroi_file_open(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.myroi)')
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
+            filename = filename[0]
+        reader = roiFileHandler()
+        originalpath = reader.dicomsPath
+        self.rois, self.roisSetted = reader.read(filename)
+        self.updateImageBecauseOfRoi()
 
+    def osirix_roi_file_open(self,filename=False):
+        if not filename:
+            filename = QtGui.QFileDialog.getOpenFileName(self, 'Open File','ROI','ROI files (*.xml)')
+            if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
+                filename = filename[0]
+        self.rois, self.roisSetted = read_plist_roi_file(filename)
+        self.updateImageBecauseOfRoi()
         
     def slider_jump_to(self):
         self.layer = self.slider.value()-1

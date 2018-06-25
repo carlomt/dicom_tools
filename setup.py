@@ -19,7 +19,7 @@ install_req=[
 ]
 
 setup(name='dicom_tools',
-      version='2.0',
+      version='2.1',
       description='Package for DICOM medical images analysis.',
       url='http://www.roma1.infn.it/~mancinit/Software/dicom_tools',
       download_url = 'https://github.com/carlomt/dicom_tools/archive/1.0.tar.gz',

@@ -972,7 +972,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # thisSeed = (100,100)
         if self.verbose:        
             print(thisSeed)
-        thisImage = self.arr#[:,:,0]
+        thisImage = self.arr[:,:,0]
         # thisImage = self.img1a.getImage()
         # # print(type(thisImage))
         # # print(thisImage.shape)
@@ -981,14 +981,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         if self.connectedThreshold:
             self.dehighlightROI(1)
-            thresPer = 0.20
+            thresPer = 0.20        
             lowThres = value - value*thresPer
             if lowThres<0:
                 lowThres = 0
             hiThres = value + value*thresPer
-            print("range",lowThres, hiThres)
+            if self.verbose:                    
+                print("range",lowThres, hiThres)
             if self.filterBeforeSegmentation:
                 thisImage =  curvatureFlowImageFilter(thisImage,self.verbose)
+            if self.verbose:                        
+                print("this seed:", thisSeed)
+                print("thisImage.shape",thisImage.shape)
             self.tmpBitmapROI = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
             if self.tmpBitmapROI.any():
                 self.highlightROI(self.tmpBitmapROI ,1)

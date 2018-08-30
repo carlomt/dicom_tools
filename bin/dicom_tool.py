@@ -4,6 +4,7 @@ import glob
 import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
+from dicom_tools.pyqtgraph.Qt import QtWidgets
 import dicom_tools.pyqtgraph as pg
 from dicom_tools.FileReader import FileReader
 from scipy import ndimage
@@ -53,15 +54,17 @@ class AboutWindow(QtGui.QDialog):
         self.buttonBox = QtGui.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
+        self.closeButton.clicked.connect(self.close)
         # self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         # self.closeButton.connect(self.o)
-        QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.o)
+        # QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.o)
 
         
         self.textBrowser = QtGui.QTextBrowser(self)
-        self.textBrowser.append("DICOM tool (v2.0)")
+        self.textBrowser.append("DICOM tool (v2.2)")
+        self.textBrowser.append("for comments and bug reports please write to:")
         self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
-
+        # self.textBrowser.append("site: http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tools")
         self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.addWidget(self.textBrowser)
         self.verticalLayout.addWidget(self.buttonBox)
@@ -118,6 +121,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.secondaryImage3D = False
         self.ROI=[]
         self.lastSeed=(1,1)
+        self.leftSideTemporaryWidgets = []
+
         
         if args.outfile:
             outfname = args.outfile
@@ -278,7 +283,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         activateManualRoiDesignerAction.triggered.connect(self.ActivateManualRoiDesigner)
         
         mainMenu = self.menuBar()
-
+        
         fileMenu = mainMenu.addMenu('&File')
         fileMenu.addAction(openDicomDirectory)
         fileMenu.addAction(openDicomDirectoryGDCM)
@@ -1050,6 +1055,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.manualROI = False
         self.connectedThreshold = True
         self.filterBeforeSegmentation=False
+        for aWidget in  self.leftSideTemporaryWidgets:
+            aWidget.deleteLater() 
 
         self.LowThresSliderLabel = QtGui.QLabel("Lower threshold [%]")
         self.layout.addWidget(self.LowThresSliderLabel,7,self.LeftButtonsCol)        
@@ -1080,19 +1087,21 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layout.addWidget(self.HighThresSlider,12,self.LeftButtonsCol)
         self.HighThresLabel = QtGui.QLabel("value: ")
         self.layout.addWidget(self.HighThresLabel,11,self.LeftButtonsCol)                        
-
+        self.leftSideTemporaryWidgets.append(self.LowThresSliderLabel)
+        self.leftSideTemporaryWidgets.append(self.LowThresSlider)
+        self.leftSideTemporaryWidgets.append(self.LowThresLabel)
+        self.leftSideTemporaryWidgets.append(self.HighThresSliderLabel)
+        self.leftSideTemporaryWidgets.append(self.HighThresSlider)
+        self.leftSideTemporaryWidgets.append(self.HighThresLabel)
         
     def ActivateManualRoiDesigner(self):
         self.label.setText("Click on a line segment to add a new handle. Right click on a handle to remove.")
         self.manualROI = True
         self.connectedThreshold = False
         self.filterBeforeSegmentation=False
-        self.LowThresSliderLabel.deleteLater() 
-        self.LowThresSlider.deleteLater() 
-        self.LowThresLabel.deleteLater()
-        self.HighThresSliderLabel.deleteLater() 
-        self.HighThresSlider.deleteLater() 
-        self.HighThresLabel.deleteLater()         
+        for aWidget in  self.leftSideTemporaryWidgets:
+            aWidget.deleteLater() 
+
         
     def ActivateConnectedThresholdFiltered(self):
         self.ActivateConnectedThreshold()

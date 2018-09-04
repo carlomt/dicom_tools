@@ -982,7 +982,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if seedX <0:
             seedX = 0
         if seedY <0:
-            seedY = 0 
+            seedY = 0
+        if seedX>= len(self.arr[:,0,0]):
+            seedX = len(self.arr[:,0,0])-1
+        if seedY>= len(self.arr[0,:,0]):
+            seedY = len(self.arr[0,:,0])-1            
         self.lastSeed = (seedX, seedY)        
         thisImage = self.arr[:,:,0]
         # thisImage = self.img1a.getImage()

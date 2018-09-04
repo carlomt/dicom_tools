@@ -5,7 +5,7 @@ import ctypes
 def to_uint32(i):
     return ctypes.c_uint32(i).value
 
-def connectedThreshold(img, seed, lowerThreshold, upperThreshold):
+def connectedThreshold(img, seedCoordinates, lowerThreshold, upperThreshold):
     imgOriginal = img
     convertOutput = False
     if type(img) != sitk.SimpleITK.Image:

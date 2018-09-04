@@ -4,6 +4,7 @@ import glob
 import argparse
 import numpy as np
 from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
+from dicom_tools.pyqtgraph.Qt import QtWidgets
 import dicom_tools.pyqtgraph as pg
 from dicom_tools.FileReader import FileReader
 from scipy import ndimage
@@ -53,15 +54,17 @@ class AboutWindow(QtGui.QDialog):
         self.buttonBox = QtGui.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.addButton(self.closeButton, QtGui.QDialogButtonBox.ActionRole)
+        self.closeButton.clicked.connect(self.close)
         # self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         # self.closeButton.connect(self.o)
-        QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.o)
+        # QtCore.QObject.connect(self.closeButton, QtCore.SIGNAL("clicked()"), self.o)
 
         
         self.textBrowser = QtGui.QTextBrowser(self)
-        self.textBrowser.append("DICOM tool (v2.0)")
+        self.textBrowser.append("DICOM tool (v2.2)")
+        self.textBrowser.append("for comments and bug reports please write to:")
         self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
-
+        # self.textBrowser.append("site: http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tools")
         self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.addWidget(self.textBrowser)
         self.verticalLayout.addWidget(self.buttonBox)
@@ -117,6 +120,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.imgScaleFactor = 1
         self.secondaryImage3D = False
         self.ROI=[]
+        self.lastSeed=(1,1)
+        self.leftSideTemporaryWidgets = []
+
         
         if args.outfile:
             outfname = args.outfile
@@ -277,7 +283,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         activateManualRoiDesignerAction.triggered.connect(self.ActivateManualRoiDesigner)
         
         mainMenu = self.menuBar()
-
+        
         fileMenu = mainMenu.addMenu('&File')
         fileMenu.addAction(openDicomDirectory)
         fileMenu.addAction(openDicomDirectoryGDCM)
@@ -364,19 +370,19 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.button_prev.clicked.connect(self.previmg)
         # layout = QtGui.QVBoxLayout(self)
         # layout = QtGui.QGridLayout(self)
-        layout = QtGui.QGridLayout(widgetWindow)
-        layout.addWidget(self.button_next,1,self.RightButtonsCol)
-        layout.addWidget(self.button_prev,2,self.RightButtonsCol)
+        self.layout = QtGui.QGridLayout(widgetWindow)
+        self.layout.addWidget(self.button_next,1,self.RightButtonsCol)
+        self.layout.addWidget(self.button_prev,2,self.RightButtonsCol)
         self.button_setroi = QtGui.QPushButton('Set ROI', self)
         self.button_setroi.clicked.connect(self.setROI)
-        layout.addWidget(self.button_setroi,12,self.RightButtonsCol)
+        self.layout.addWidget(self.button_setroi,12,self.RightButtonsCol)
         self.button_delroi = QtGui.QPushButton('Del ROI', self)
         self.button_delroi.clicked.connect(self.delROI)
-        layout.addWidget(self.button_delroi,13,self.RightButtonsCol)
+        self.layout.addWidget(self.button_delroi,13,self.RightButtonsCol)
         
         self.label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.label,0,self.CentralAreaCol)
+        self.layout.addWidget(self.label,0,self.CentralAreaCol)
         self.manualROI = True
         self.connectedThreshold = False
         self.filterBeforeSegmentation=False
@@ -389,14 +395,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label_mean = QtGui.QLabel("mean: ")
         self.label_sd = QtGui.QLabel("sd: ")
         self.label_sum = QtGui.QLabel("sum: ")
-        layout.addWidget(self.label_layer,3,self.RightButtonsCol)
-        layout.addWidget(self.label_shape,4,self.RightButtonsCol)
-        layout.addWidget(self.label_size,5,self.RightButtonsCol)
-        layout.addWidget(self.label_min,6,self.RightButtonsCol)
-        layout.addWidget(self.label_max,7,self.RightButtonsCol)
-        layout.addWidget(self.label_mean,8,self.RightButtonsCol)
-        layout.addWidget(self.label_sd,9,self.RightButtonsCol)
-        layout.addWidget(self.label_sum,10,self.RightButtonsCol)
+        self.layout.addWidget(self.label_layer,3,self.RightButtonsCol)
+        self.layout.addWidget(self.label_shape,4,self.RightButtonsCol)
+        self.layout.addWidget(self.label_size,5,self.RightButtonsCol)
+        self.layout.addWidget(self.label_min,6,self.RightButtonsCol)
+        self.layout.addWidget(self.label_max,7,self.RightButtonsCol)
+        self.layout.addWidget(self.label_mean,8,self.RightButtonsCol)
+        self.layout.addWidget(self.label_sd,9,self.RightButtonsCol)
+        self.layout.addWidget(self.label_sum,10,self.RightButtonsCol)
 
         self.roisSetted = 0
         self.label2_roisSetted = QtGui.QLabel("ROI setted: 0")
@@ -407,14 +413,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label2_mean = QtGui.QLabel()
         self.label2_sd = QtGui.QLabel()
         self.label2_sum = QtGui.QLabel()
-        layout.addWidget(self.label2_roisSetted,14,self.RightButtonsCol)
-        layout.addWidget(self.label2_shape,15,self.RightButtonsCol)
-        layout.addWidget(self.label2_size,16,self.RightButtonsCol)
-        layout.addWidget(self.label2_min,17,self.RightButtonsCol)
-        layout.addWidget(self.label2_max,18,self.RightButtonsCol)
-        layout.addWidget(self.label2_mean,19,self.RightButtonsCol)
-        layout.addWidget(self.label2_sd,20,self.RightButtonsCol)
-        layout.addWidget(self.label2_sum,21,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_roisSetted,14,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_shape,15,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_size,16,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_min,17,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_max,18,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_mean,19,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_sd,20,self.RightButtonsCol)
+        self.layout.addWidget(self.label2_sum,21,self.RightButtonsCol)
                                       
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,self.imgScaleFactor)
@@ -424,13 +430,13 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p1.scene().sigMouseClicked.connect(self.mouseMoved)
 
         # imv = pg.ImageView(imageItem=img1a)
-        layout.addWidget(self.p1,1, self.CentralAreaCol,10,1)
+        self.layout.addWidget(self.p1,1, self.CentralAreaCol,10,1)
 
         self.ExposureSliderLabel = QtGui.QLabel("Exposure")
-        layout.addWidget(self.ExposureSliderLabel,1,self.LeftButtonsCol)
+        self.layout.addWidget(self.ExposureSliderLabel,1,self.LeftButtonsCol)
             
         self.ExposureSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
-        self.ExposureSlider.setFixedWidth(100);
+        self.ExposureSlider.setFixedWidth(150);
         self.ExposureSlider.setMinimum(1)
         self.ExposureSlider.setMaximum(10000)
         self.ExposureSlider.setValue(10000-3143)
@@ -438,7 +444,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.ExposureSlider.setTickInterval(1000)
         self.ExposureSlider.setSingleStep(1)
         self.ExposureSlider.valueChanged.connect(self.changeMainExposure)
-        layout.addWidget(self.ExposureSlider,2,self.LeftButtonsCol)
+        self.layout.addWidget(self.ExposureSlider,2,self.LeftButtonsCol)
+
+        self.label_spacer      = QtGui.QLabel("                        ")        
+        self.label_coordinates = QtGui.QLabel("coordinates: (    ,    )")
+        self.label_intensity = QtGui.QLabel("intensity: ")
+        self.label_spacer2      = QtGui.QLabel("                        ")                
+        self.layout.addWidget(self.label_spacer, 3, self.LeftButtonsCol)
+        self.layout.addWidget(self.label_coordinates,4,self.LeftButtonsCol)
+        self.layout.addWidget(self.label_intensity,5,self.LeftButtonsCol)        
+        self.layout.addWidget(self.label_spacer2, 6, self.LeftButtonsCol)
         
         # self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.slider = QtGui.QScrollBar(QtCore.Qt.Horizontal)
@@ -452,7 +467,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         # self.slider.sliderMoved.connect(self.slider_jump_to)
         self.slider.valueChanged.connect(self.slider_jump_to)
-        layout.addWidget(self.slider,11,self.CentralAreaCol)
+        self.layout.addWidget(self.slider,11,self.CentralAreaCol)
 
         self.img1b = pg.ImageItem()
         self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
@@ -466,7 +481,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2ViewBox = self.p2.plotItem.vb
 
         self.roi.sigRegionChanged.connect(self.update)
-        layout.addWidget(self.p2,12, self.CentralAreaCol,10,1)
+        self.layout.addWidget(self.p2,12, self.CentralAreaCol,10,1)
 
         proxy = pg.SignalProxy(self.p2.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved2)
         self.p2.scene().sigMouseClicked.connect(self.mouseMoved2)
@@ -948,7 +963,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
     def mouseMoved(self, pos):
         # print(type(pos))
-        print(pos)
+        if self.verbose:        
+            print(pos)
         # # print("lastPos",pos.lastPos())
         # print("pos",pos.pos())
         # print("scenePos",pos.scenePos())        
@@ -966,33 +982,50 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if seedX <0:
             seedX = 0
         if seedY <0:
-            seedY = 0 
-        thisSeed = (seedX, seedY)
-        # print(type(thisSeed[0]))
-        # thisSeed = (100,100)
-        if self.verbose:        
-            print(thisSeed)
-        thisImage = self.arr#[:,:,0]
+            seedY = 0
+        if seedX>= len(self.arr[:,0,0]):
+            seedX = len(self.arr[:,0,0])-1
+        if seedY>= len(self.arr[0,:,0]):
+            seedY = len(self.arr[0,:,0])-1            
+        self.lastSeed = (seedX, seedY)        
+        thisImage = self.arr[:,:,0]
         # thisImage = self.img1a.getImage()
         # # print(type(thisImage))
         # # print(thisImage.shape)
-        value = thisImage[thisSeed]
-        print("value",value)
+        value = thisImage[self.lastSeed]
+        if self.verbose:                
+            print("value",value)
+        self.label_coordinates.setText("coordinates: "+str(self.lastSeed))
+        self.label_intensity.setText("intensity: "+str(value))
 
         if self.connectedThreshold:
             self.dehighlightROI(1)
-            thresPer = 0.20
-            lowThres = value - value*thresPer
-            if lowThres<0:
-                lowThres = 0
-            hiThres = value + value*thresPer
+            self.callConnectedThreshold()
+
+    def callConnectedThreshold(self):
+        thisImage = self.arr[:,:,0]
+        value = thisImage[self.lastSeed]        
+        lowThres = value - value* self.LowThresSlider.value()*0.01
+        if lowThres<0:
+            lowThres = 0
+        hiThres = value + value* self.HighThresSlider.value()*0.01
+        if hiThres<lowThres:
+            hiThres = lowThres *1.001
+        if self.verbose:                    
             print("range",lowThres, hiThres)
-            if self.filterBeforeSegmentation:
-                thisImage =  curvatureFlowImageFilter(thisImage,self.verbose)
-            self.tmpBitmapROI = connectedThreshold(thisImage, thisSeed, lowThres, hiThres)
-            if self.tmpBitmapROI.any():
-                self.highlightROI(self.tmpBitmapROI ,1)
-            print("number of selected pixel:", np.count_nonzero(self.tmpBitmapROI))
+        self.LowThresLabel.setText("value: "+str(lowThres))
+        self.HighThresLabel.setText("value: "+str(hiThres))
+        self.LowThresSliderLabel.setText("Lower threshold ["+str(self.LowThresSlider.value())+"%]")        
+        self.HighThresSliderLabel.setText("Higher threshold ["+str(self.HighThresSlider.value())+"%]")
+        if self.filterBeforeSegmentation:
+            thisImage =  curvatureFlowImageFilter(thisImage,self.verbose)
+        if self.verbose:                        
+            print("seed:", self.lastSeed)
+            print("thisImage.shape",thisImage.shape)
+        self.tmpBitmapROI = connectedThreshold(thisImage, self.lastSeed, lowThres, hiThres)
+        if self.tmpBitmapROI.any():
+            self.highlightROI(self.tmpBitmapROI ,1)
+        print("number of selected pixel:", np.count_nonzero(self.tmpBitmapROI))
 
     def mouseMoved2(self, pos):
         print(pos)
@@ -1026,12 +1059,53 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.manualROI = False
         self.connectedThreshold = True
         self.filterBeforeSegmentation=False
+        for aWidget in  self.leftSideTemporaryWidgets:
+            aWidget.deleteLater() 
+
+        self.LowThresSliderLabel = QtGui.QLabel("Lower threshold [%]")
+        self.layout.addWidget(self.LowThresSliderLabel,7,self.LeftButtonsCol)        
+        self.LowThresSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.LowThresSlider.setFixedWidth(150);
+        self.LowThresSlider.setMinimum(1)
+        self.LowThresSlider.setMaximum(100)
+        self.LowThresSlider.setValue(10)
+        self.LowThresSlider.setTickPosition(2)
+        self.LowThresSlider.setTickInterval(100)
+        self.LowThresSlider.setSingleStep(1)
+        self.LowThresSlider.valueChanged.connect(self.callConnectedThreshold)
+        self.layout.addWidget(self.LowThresSlider,9,self.LeftButtonsCol)
+        self.LowThresLabel = QtGui.QLabel("value: ")
+        self.layout.addWidget(self.LowThresLabel,8,self.LeftButtonsCol)                
+
+        self.HighThresSliderLabel = QtGui.QLabel("Higher threshold [%]")
+        self.layout.addWidget(self.HighThresSliderLabel,10,self.LeftButtonsCol)        
+        self.HighThresSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.HighThresSlider.setFixedWidth(150);
+        self.HighThresSlider.setMinimum(1)
+        self.HighThresSlider.setMaximum(100)
+        self.HighThresSlider.setValue(10)
+        self.HighThresSlider.setTickPosition(2)
+        self.HighThresSlider.setTickInterval(100)
+        self.HighThresSlider.setSingleStep(1)
+        self.HighThresSlider.valueChanged.connect(self.callConnectedThreshold)
+        self.layout.addWidget(self.HighThresSlider,12,self.LeftButtonsCol)
+        self.HighThresLabel = QtGui.QLabel("value: ")
+        self.layout.addWidget(self.HighThresLabel,11,self.LeftButtonsCol)                        
+        self.leftSideTemporaryWidgets.append(self.LowThresSliderLabel)
+        self.leftSideTemporaryWidgets.append(self.LowThresSlider)
+        self.leftSideTemporaryWidgets.append(self.LowThresLabel)
+        self.leftSideTemporaryWidgets.append(self.HighThresSliderLabel)
+        self.leftSideTemporaryWidgets.append(self.HighThresSlider)
+        self.leftSideTemporaryWidgets.append(self.HighThresLabel)
         
     def ActivateManualRoiDesigner(self):
         self.label.setText("Click on a line segment to add a new handle. Right click on a handle to remove.")
         self.manualROI = True
         self.connectedThreshold = False
         self.filterBeforeSegmentation=False
+        for aWidget in  self.leftSideTemporaryWidgets:
+            aWidget.deleteLater() 
+
         
     def ActivateConnectedThresholdFiltered(self):
         self.ActivateConnectedThreshold()

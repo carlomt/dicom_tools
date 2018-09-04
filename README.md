@@ -24,7 +24,7 @@ on mac you could install everything with brew:
 `brew install sip`
 
 ~~`brew install homebrew/science/simpleitk`~~
-`brew install brewsci/science/simpleitk`
+`brew install brewsci/science/simpleitk (--with-python3)`
 
 ~~`brew install homebrew/science/root`~~
 `brew install root`

@@ -1,5 +1,5 @@
 from setuptools import setup,find_packages
-import glob
+import os, glob, re
 
 packs=find_packages()
 scripts_list=glob.glob('./bin/*.py')
@@ -18,14 +18,26 @@ install_req=[
     'qtconsole'
 ]
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+# with open("README.md", "r") as fh:
+#     long_description = fh.read()
 
-setup(name='dicom_tools',
-      version='2.2',
+PKG = "dicom_tools"
+VERSIONFILE = os.path.join(PKG, "__init__.py")
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+    verstr = mo.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+    
+
+setup(name=PKG,
+      version=verstr,
       description='Package for DICOM medical images analysis.',
+      long_description="dicom_tools is a library with a Graphical User Interface (GUI), dicom_tool.py, to analyze medical images. It is possible to apply filters, perform automatic segmentation and compute several texture parameters, of both the first and second order. All the functions are available via the GUI, developed with the Qt libraries and compatible with Qt4 and Qt5. The GUI shows to the user the medical image once imported as a numpy array tensor with 3 indices. The lightness of the GUI allows an agile use of the software remotely, via an SSH connection. It is also possible to open an interactive python shell that have access to all the memory of the GUI instance and the functions of the package and can interact with the GUI. The package is interfaced with the most powerful libraries for images and medical images analysis, ensuring the opportune conversions of data types.",
       url='http://www.roma1.infn.it/~mancinit/Software/dicom_tools',
-      download_url = 'https://github.com/carlomt/dicom_tools/archive/1.0.tar.gz',
+      download_url = 'https://github.com/carlomt/dicom_tools/archive/'+verstr+'.tar.gz',
       author='Carlo Mancini Terracciano',
       author_email='carlo.mancini.terracciano@roma1.infn.it',
       license='MIT',

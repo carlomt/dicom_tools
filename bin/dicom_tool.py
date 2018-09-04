@@ -1,5 +1,7 @@
 #!/usr/bin/python
 from __future__ import print_function
+from dicom_tools import __version__ as dicom_tools__version__
+
 import glob
 import argparse
 import numpy as np
@@ -47,6 +49,7 @@ from IPython.lib import guisupport
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
+
         
         self.closeButton = QtGui.QPushButton(self.tr("&Close"))
         self.closeButton.setDefault(True)
@@ -61,7 +64,7 @@ class AboutWindow(QtGui.QDialog):
 
         
         self.textBrowser = QtGui.QTextBrowser(self)
-        self.textBrowser.append("DICOM tool (v2.2)")
+        self.textBrowser.append("DICOM tool (v"+dicom_tools__version__+")")
         self.textBrowser.append("for comments and bug reports please write to:")
         self.textBrowser.append("carlo.mancini.terracciano@roma1.infn.it")
         # self.textBrowser.append("site: http://www.roma1.infn.it/~mancinit/?action=Software/dicom_tools")
@@ -80,7 +83,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # QtGui.QWidget.__init__(self)
         super(Window_dicom_tool, self).__init__()
         # self.setGeometry(50, 50, 500, 300)
-        self.setWindowTitle("DICOM tool (v3.1) [dicom_tools v 0.9]")
+        self.setWindowTitle("DICOM tool [dicom_tools v"+dicom_tools__version__+"]")
         # self.setWindowIcon(QtGui.QIcon('pythonlogo.png'))
         
         widgetWindow = QtGui.QWidget(self)
@@ -375,10 +378,12 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layout.addWidget(self.button_prev,2,self.RightButtonsCol)
         self.button_setroi = QtGui.QPushButton('Set ROI', self)
         self.button_setroi.clicked.connect(self.setROI)
-        self.layout.addWidget(self.button_setroi,12,self.RightButtonsCol)
+        rightposition = 13
+        self.layout.addWidget(self.button_setroi,rightposition,self.RightButtonsCol)
         self.button_delroi = QtGui.QPushButton('Del ROI', self)
         self.button_delroi.clicked.connect(self.delROI)
-        self.layout.addWidget(self.button_delroi,13,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.button_delroi,rightposition,self.RightButtonsCol)
         
         self.label = QtGui.QLabel("Click on a line segment to add a new handle. Right click on a handle to remove.")        
         # label.setAlignment(Qt.AlignCenter)
@@ -395,6 +400,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label_mean = QtGui.QLabel("mean: ")
         self.label_sd = QtGui.QLabel("sd: ")
         self.label_sum = QtGui.QLabel("sum: ")
+        self.label_type = QtGui.QLabel("type: ")        
         self.layout.addWidget(self.label_layer,3,self.RightButtonsCol)
         self.layout.addWidget(self.label_shape,4,self.RightButtonsCol)
         self.layout.addWidget(self.label_size,5,self.RightButtonsCol)
@@ -403,6 +409,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.layout.addWidget(self.label_mean,8,self.RightButtonsCol)
         self.layout.addWidget(self.label_sd,9,self.RightButtonsCol)
         self.layout.addWidget(self.label_sum,10,self.RightButtonsCol)
+        self.layout.addWidget(self.label_type,11,self.RightButtonsCol)
 
         self.roisSetted = 0
         self.label2_roisSetted = QtGui.QLabel("ROI setted: 0")
@@ -413,14 +420,26 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label2_mean = QtGui.QLabel()
         self.label2_sd = QtGui.QLabel()
         self.label2_sum = QtGui.QLabel()
-        self.layout.addWidget(self.label2_roisSetted,14,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_shape,15,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_size,16,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_min,17,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_max,18,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_mean,19,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_sd,20,self.RightButtonsCol)
-        self.layout.addWidget(self.label2_sum,21,self.RightButtonsCol)
+        self.label2_type = QtGui.QLabel()
+        rightposition+=1
+        self.layout.addWidget(self.label2_roisSetted,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_shape,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_size,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_min,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_max,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_mean,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_sd,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_sum,rightposition,self.RightButtonsCol)
+        rightposition+=1
+        self.layout.addWidget(self.label2_type,rightposition,self.RightButtonsCol)
+        rightposition+=1
                                       
         self.p1 = pg.PlotWidget()
         self.p1.setAspectLocked(True,self.imgScaleFactor)
@@ -430,7 +449,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p1.scene().sigMouseClicked.connect(self.mouseMoved)
 
         # imv = pg.ImageView(imageItem=img1a)
-        self.layout.addWidget(self.p1,1, self.CentralAreaCol,10,1)
+        self.layout.addWidget(self.p1,1, self.CentralAreaCol,11,1)
 
         self.ExposureSliderLabel = QtGui.QLabel("Exposure")
         self.layout.addWidget(self.ExposureSliderLabel,1,self.LeftButtonsCol)
@@ -467,7 +486,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         # self.slider.sliderMoved.connect(self.slider_jump_to)
         self.slider.valueChanged.connect(self.slider_jump_to)
-        self.layout.addWidget(self.slider,11,self.CentralAreaCol)
+        self.layout.addWidget(self.slider,12,self.CentralAreaCol)
 
         self.img1b = pg.ImageItem()
         self.roi = pg.PolyLineROI([[80, 60], [90, 30], [60, 40]], pen=(6,9), closed=True)
@@ -481,7 +500,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2ViewBox = self.p2.plotItem.vb
 
         self.roi.sigRegionChanged.connect(self.update)
-        self.layout.addWidget(self.p2,12, self.CentralAreaCol,10,1)
+        self.layout.addWidget(self.p2,13, self.CentralAreaCol,11,1)
 
         proxy = pg.SignalProxy(self.p2.scene().sigMouseClicked, rateLimit=60, slot=self.mouseMoved2)
         self.p2.scene().sigMouseClicked.connect(self.mouseMoved2)
@@ -515,10 +534,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.setlabel2values(toshowvalues)
         # self.p2.autoRange()
 
-    def setImgToMain(self, img):
+    def showImg(self, img):
         self.arr = img
         self.img1a.setImage(img)
-        self.img1a.updateImage() 
+        self.img1a.updateImage()
+        self.setlabel1values(img)
+
+    def showImg2(self, img):
+        self.img1b.setImage(img)
+        self.img1b.updateImage()
+        self.setlabel2values(img)
         
     def updatemain(self):
         
@@ -550,14 +575,15 @@ class Window_dicom_tool(QtGui.QMainWindow):
                 # self.p1.addItem(self.roi)
                 
             self.update()
-            self.label_layer.setText("layer: "+str(self.layer)+"/"+str(len(self.data[:,:,:,0])))
-            self.label_shape.setText("shape: "+str(self.arr[:,:,2].shape))
-            self.label_size.setText("size: "+str(self.arr[:,:,2].size))
-            self.label_min.setText("min: "+str(self.arr[:,:,2].min()))
-            self.label_max.setText("max: "+str(self.arr[:,:,2].max()))
-            self.label_mean.setText("mean: "+str(self.arr[:,:,2].mean()))
-            self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,2])))
-            self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,2])))
+            self.setlabel1values(self.arr[:,:,2], self.layer, len(self.data[:,:,:,0]) )
+            # self.label_layer.setText("layer: "+str(self.layer)+"/"+str(len(self.data[:,:,:,0])))
+            # self.label_shape.setText("shape: "+str(self.arr[:,:,2].shape))
+            # self.label_size.setText("size: "+str(self.arr[:,:,2].size))
+            # self.label_min.setText("min: "+str(self.arr[:,:,2].min()))
+            # self.label_max.setText("max: "+str(self.arr[:,:,2].max()))
+            # self.label_mean.setText("mean: "+str(self.arr[:,:,2].mean()))
+            # self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,2])))
+            # self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,2])))
         self.img1a.updateImage()
         if self.secondaryImage3D:
             # self.p2.autoRange()
@@ -1171,6 +1197,18 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.p2.autoRange()
         self.img1b.updateImage()
         self.setlabel2values(gradientImg)
+
+    def setlabel1values(self, img, layer=0, totLayer=0):
+        self.label_layer.setText("layer: "+str(layer)+"/"+str(totLayer))
+        self.label_shape.setText("shape: "+str(img.shape))
+        self.label_size.setText("size: "+str(img.size))
+        self.label_min.setText("min: "+str(img.min()))
+        self.label_max.setText("max: "+str(img.max()))
+        self.label_mean.setText("mean: "+str(img.mean()))
+        self.label_sd.setText("sd: "+str(ndimage.standard_deviation(img)))
+        self.label_sum.setText("sum: "+str(ndimage.sum(img)))
+        theType = str(type(img[0,0])).replace(">","").replace("<","").replace("'","").replace("class","")
+        self.label_type.setText("type: "+theType)
         
     def setlabel2values(self, img):
         imgO = img
@@ -1186,6 +1224,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label2_mean.setText("mean: "+str(img.mean()))
         self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(img) ))
         self.label2_sum.setText("sum: "+str( ndimage.sum(img) ))
+        theType = str(type(img[0,0])).replace(">","").replace("<","").replace("'","").replace("class","")        
+        self.label2_type.setText("type: "+theType)
 
     def colorMainImg(self):
         col = colorize(self.arr[:,:,2])
@@ -1259,7 +1299,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         primImg[secImg>0] = secImg[secImg>0]
 
-        self.setImgToMain(primImg)
+        self.showImg(primImg)
 
     def goToLayerWithLargerROI(self):
         self.layer = getLayerWithLargerROI(self.ROI)

@@ -1,4 +1,9 @@
-import ROOT
+try:
+    import ROOT
+    ROOTfound=True
+except ImportError:
+    ROOTfound=False
+    print("WARNING Normalizer.py: ROOT not found")
 import numpy as np
 from dicom_tools.FileReader import FileReader
 

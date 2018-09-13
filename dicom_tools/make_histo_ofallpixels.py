@@ -1,4 +1,10 @@
-import ROOT
+try:
+    import ROOT
+    ROOTfound=True
+except ImportError:
+    ROOTfound=False
+    print("WARNING make_histo_ofallpixels.py: ROOT not found")    
+import numpy as np
 import numpy as np
 from dicom_tools.hist_match import match_all
 # from tabulate import tabulate

@@ -5,7 +5,12 @@ from skimage.morphology import disk as skim_disk
 from skimage.morphology import square as skim_square
 from skimage import exposure
 from skimage import img_as_uint, img_as_ubyte
-import ROOT
+try:
+    import ROOT
+    ROOTfound=True
+except ImportError:
+    ROOTfound=False
+    print("WARNING getEntropy.py: ROOT not found")    
 from dicom_tools.histFromArray import histFromArray
 from dicom_tools.rescale import rescale16bit, rescale8bit
 

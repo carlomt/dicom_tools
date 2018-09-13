@@ -1,5 +1,10 @@
 import numpy as np
-import ROOT
+try:
+    import ROOT
+    ROOTfound=True
+except ImportError:
+    ROOTfound=False
+    print("WARNING histFromArray.py: ROOT not found")    
 
 def histFromArray(array, nbin=100, name="h", verbose=False):
     if len(array[np.nonzero(array)]) == 0: return

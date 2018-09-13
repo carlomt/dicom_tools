@@ -1,5 +1,10 @@
 from __future__ import print_function
-import ROOT
+try:
+    import ROOT
+    ROOTfound=True
+except ImportError:
+    ROOTfound=False
+    print("WARNING make_histo.py: ROOT not found")    
 import numpy as np
 from skimage.feature import greycomatrix, greycoprops #CV
 from skimage import exposure #CV

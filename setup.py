@@ -18,8 +18,11 @@ install_req=[
     'qtconsole'
 ]
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(name='dicom_tools',
-      version='2.0',
+      version='2.2',
       description='Package for DICOM medical images analysis.',
       url='http://www.roma1.infn.it/~mancinit/Software/dicom_tools',
       download_url = 'https://github.com/carlomt/dicom_tools/archive/1.0.tar.gz',
@@ -30,5 +33,8 @@ setup(name='dicom_tools',
       install_requires=install_req,
       packages=packs,
       keywords = ['medical','image-analysis'],
-      classifiers = [],
+      classifiers = ["Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+      ],
 )

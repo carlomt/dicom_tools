@@ -639,7 +639,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             self.bitmapROI[self.layer] += self.tmpBitmapROI.astype(dtype=bool)
             image = self.arr[:,:,2] * self.bitmapROI[self.layer] 
             self.img1b.setImage(image, levels=(0, image.max()))
-            self.p2.autoRange()
+            # self.p2.autoRange()
             self.img1b.updateImage()
             
         self.roisSetted = np.count_nonzero(self.rois)
@@ -1026,6 +1026,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         if self.connectedThreshold:
             self.dehighlightROI(1)
+            self.highlightROI(self.bitmapROI[self.layer],1)            
             self.callConnectedThreshold()
 
     def callConnectedThreshold(self):

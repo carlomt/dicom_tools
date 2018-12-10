@@ -42,9 +42,14 @@ import matplotlib.pyplot as plt
 from dicom_tools.BrukerMRI import ReadFolder as brukerReadFolder
 from dicom_tools.read_plist_roi_file import read_plist_roi_file
 
+from dicom_tools.ml_out_roi import ml_out_roi
+from dicom_tools.ml_out_roi import check_import_keras
+
 from qtconsole.rich_ipython_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from IPython.lib import guisupport
+
+
 
 class AboutWindow(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -284,6 +289,11 @@ class Window_dicom_tool(QtGui.QMainWindow):
         activateManualRoiDesignerAction = QtGui.QAction("&Use Manual ROI definition",self)
         activateManualRoiDesignerAction.setStatusTip("Use Manual ROI definition")
         activateManualRoiDesignerAction.triggered.connect(self.ActivateManualRoiDesigner)
+
+        if check_import_keras:
+            MLRoiAction = QtGui.QAction("&Find ROI with DL",self)
+            MLRoiAction.setStatusTip("Find ROI using Deep Learning")
+            MLRoiAction.triggered.connect(self.CallDLFindROI)
         
         mainMenu = self.menuBar()
         
@@ -339,7 +349,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         segmentationMenu.addAction(connectedThresholdFilteredAction)                
         segmentationMenu.addAction(MorphologicalWatershedAction)
         segmentationMenu.addAction(WardHierarchicalAction)
-
+        if check_import_keras:
+            segmentationMenu.addAction(MLRoiAction)
             
         helpMenu = mainMenu.addMenu('&Help')
         helpMenu.addAction(aboutAction)
@@ -529,11 +540,22 @@ class Window_dicom_tool(QtGui.QMainWindow):
             toshowvalues = np.ma.masked_array(self.arr[:,:,2],mask=np.logical_not(convertedROI))
         if self.connectedThreshold:
             toshowvalues = thisroi = self.arr[:,:,2]*self.bitmapROI[self.layer]
-        self.secondaryImage2D = thisroi    
-        self.img1b.setImage(thisroi, levels=(0, thisroi.max()))
-        self.setlabel2values(toshowvalues)
+        if self.secondaryImage3D:
+            # self.p2.autoRange()
+            self.setlabel2values(self.secondaryImage[self.layer])
+            self.secondaryImage2D = self.secondaryImage[self.layer]
+            if self.colorizeSecondaryImage and self.colorizeSecondaryImageWithROI:
+                self.secondaryImage2D = colorize(self.secondaryImage2D,'jet',self.ROI[self.layer],self.verbose)
+
+            self.img1b.setImage(self.secondaryImage2D)
+            self.img1b.updateImage()
+        else:
+            self.secondaryImage2D = thisroi    
+            self.img1b.setImage(thisroi, levels=(0, thisroi.max()))
+            self.setlabel2values(toshowvalues)
         # self.p2.autoRange()
 
+        
     def showImg(self, img):
         self.arr = img
         self.img1a.setImage(img)
@@ -585,15 +607,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
             # self.label_sd.setText("sd: "+str(ndimage.standard_deviation(self.arr[:,:,2])))
             # self.label_sum.setText("sum: "+str(ndimage.sum(self.arr[:,:,2])))
         self.img1a.updateImage()
-        if self.secondaryImage3D:
-            # self.p2.autoRange()
-            self.setlabel2values(self.secondaryImage[self.layer])
-            self.secondaryImage2D = self.secondaryImage[self.layer]
-            if self.colorizeSecondaryImage and self.colorizeSecondaryImageWithROI:
-                self.secondaryImage2D = colorize(self.secondaryImage2D,'jet',self.ROI[self.layer],self.verbose)
 
-            self.img1b.setImage(self.secondaryImage2D)
-            self.img1b.updateImage()
         
     def nextimg(self):
         if self.layer < (len(self.data[:,:,:,0])-1):
@@ -1081,6 +1095,22 @@ class Window_dicom_tool(QtGui.QMainWindow):
         thisImage = self.arr[:,:,0]
         wardHierarchical(thisImage)
 
+    def CallDLFindROI(self):
+        if check_import_keras:
+            # self.rois = ml_out_roi(self.dataZ)
+            # self.roisSetted = 1
+            # self.updateImageBecauseOfRoi()        
+            DLroi = ml_out_roi(self.dataZ)
+            # writer = nrrdFileHandler(True)
+            # writer.write("ml_roi.nrrd", self.DLroi)
+            # self.highlightROI(self.DLroi)
+            self.secondaryImage3D = True
+            self.secondaryImage = DLroi
+            self.colorizeSecondaryImage = True
+            self.manualROI = False
+            self.connectedThreshold = False
+            self.updatemain()        
+
     def ActivateConnectedThreshold(self):
         self.label.setText("Click on a region to select its neighborhood.")
         self.manualROI = False
@@ -1225,8 +1255,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         self.label2_mean.setText("mean: "+str(img.mean()))
         self.label2_sd.setText("sd: "+str( ndimage.standard_deviation(img) ))
         self.label2_sum.setText("sum: "+str( ndimage.sum(img) ))
-        theType = str(type(img[0,0])).replace(">","").replace("<","").replace("'","").replace("class","")        
-        self.label2_type.setText("type: "+theType)
+        # theType = str(type(img[0,0])).replace(">","").replace("<","").replace("'","").replace("class","")        
+        # self.label2_type.setText("type: "+theType)
 
     def colorMainImg(self):
         col = colorize(self.arr[:,:,2])

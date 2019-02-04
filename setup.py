@@ -15,7 +15,10 @@ install_req=[
     'tabulate>=0.7.7',
     'openpyxl>=2.4.0',
     'ipython<6',
-    'qtconsole'
+    'qtconsole',
+    'opencv-python',
+    'tensorflow',
+    'keras'
 ]
 
 # with open("README.md", "r") as fh:

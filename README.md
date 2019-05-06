@@ -48,39 +48,45 @@ or, if you want to use the development version:
 `apt install python-pip python-qt4  python-sip`
 </strike>
 
+<strike>
 `apt install python-pip python-pyqt5 python-pyqt5.qtsvg python-sip`
+ </strike>
+`sudo apt install python3-pip python3-pyqt5 python3-pyqt5.qtsvg python3-sip`
 
 on debian it is necessary to install also scikit-image and some other packages with apt:
 
+<strike>
 `apt install python-numpy python-skimage python-sklearn python-scipy python-matplotlib`
+ </strike>
+`sudo apt install python3-skimage python3-sklearn python3-scipy python3-matplotlib`
 
 it could be necessary to upgrade pip before to install the package, as it could not find some dependencies:
 
-`pip install --upgrade pip`
+`pip3 install --upgrade pip`
 
 `apt install build-essential`
 
 it could be necessary to install ITK before SimpleITK
 
-`apt install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
+`sudo apt install insighttoolkit4-python insighttoolkit4-examples libinsighttoolkit4-dev libinsighttoolkit4.10`
 
-`pip uninstall SimpleITK`
+`pip3 uninstall SimpleITK`
 
-`pip install SimpleITK`
+`pip3 install SimpleITK`
 
 finally, install the package with:
 
-`pip install dicom_tools`
+`pip3 install dicom_tools`
 
 or, if you want to use the development version:
 
-`python setup.py install`
+`python3 setup.py install`
 
 on linux maybe you want to install it only for your user
 
-`pip install dicom_tools --user`
+`pip3 install dicom_tools --user`
 
-`python setup.py install --user`
+`python3 setup.py install --user`
 
 
 ### CentOS 7 (or Scientific Linux):

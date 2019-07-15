@@ -9,16 +9,19 @@ from dicom_tools.pyqtgraph.Qt import QtCore, QtGui
 from dicom_tools.pyqtgraph.Qt import QtWidgets
 import dicom_tools.pyqtgraph as pg
 from dicom_tools.FileReader import FileReader
-from scipy import ndimage
 import os
 import nrrd
 from dicom_tools.roiFileHandler import roiFileHandler
 from dicom_tools.nrrdFileHandler import nrrdFileHandler
+from dicom_tools.matlab_filereader import matlab_filereader
 from dicom_tools.highlight_color import highlight_color
 from dicom_tools.Normalizer import Normalizer
 from dicom_tools.myroi2roi import myroi2roi
 from dicom_tools.calculateMeanInROI import calculateMeanInROI
-import scipy
+#import scipy
+from scipy import ndimage
+from scipy import misc
+from scipy.ndimage.morphology import binary_dilation, binary_erosion
 from dicom_tools.curvatureFlowImageFilter import curvatureFlowImageFilter
 from dicom_tools.gaussianlaplace import GaussianLaplaceFilter #AR
 from dicom_tools.connectedThreshold import connectedThreshold
@@ -101,6 +104,7 @@ class Window_dicom_tool(QtGui.QMainWindow):
         parser.add_argument("-v", "--verbose", help="increase output verbosity",
                             action="store_true")
         parser.add_argument("-i", "--inputpath", help="path of the DICOM directory (default ./)")
+        parser.add_argument("-im", "--inputmatlab", help="path of the MATLAB input file")
         parser.add_argument("-ib", "--inputbruker", help="path of the Bruker directory")        
         parser.add_argument("-o", "--outfile", help="define output file name (default roi.txt)")
         parser.add_argument("-l", "--layer", help="select layer",
@@ -147,6 +151,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         # openDicomFile = QtGui.QAction("&Open DICOM File", self)
         # openDicomFile.setStatusTip("Open DICOM File (dcm uncompressed)")
         # openDicomFile.triggered.connect(self.read_dicom_file)
+
+        openMatlabFile = QtGui.QAction("&Open MATLAB file", self)
+        openMatlabFile.setStatusTip("Open MATLAB file")
+        openMatlabFile.triggered.connect(self.select_matlab_file)
         
         openDicomDirectoryGDCM = QtGui.QAction("&Open DICOM Directory with GDCM", self)
         openDicomDirectoryGDCM.setStatusTip("Open DICOM Directory with GDCM (dcm also compressed)")
@@ -173,6 +181,14 @@ class Window_dicom_tool(QtGui.QMainWindow):
         saveROIonNRRD = QtGui.QAction("&Save ROI on nrrd File", self)
         saveROIonNRRD.setStatusTip('Save ROI on File (nrrd format)')
         saveROIonNRRD.triggered.connect(self.nrrdroi_file_save)
+
+        ROIdilation = QtGui.QAction("&ROI dilation", self)
+        ROIdilation.setStatusTip('ROI dilation')
+        ROIdilation.triggered.connect(self.ROI_dilation)
+
+        ROIerosion = QtGui.QAction("&ROI erosion", self)
+        ROIerosion.setStatusTip('ROI erosion')
+        ROIerosion.triggered.connect(self.ROI_erosion)        
 
         highlightDCMROIaction = QtGui.QAction("&Highlight DICOM ROI", self)
         highlightDCMROIaction.setStatusTip("&Highlight ROI (dcm folder)")
@@ -300,7 +316,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
         fileMenu = mainMenu.addMenu('&File')
         fileMenu.addAction(openDicomDirectory)
         fileMenu.addAction(openDicomDirectoryGDCM)
-        fileMenu.addAction(openDicomDirectoryBruker)        
+        fileMenu.addAction(openDicomDirectoryBruker)
+        fileMenu.addAction(openMatlabFile)
         fileMenu.addAction(aboutAction)
         
         ROIfileMenu = mainMenu.addMenu('&ROI')
@@ -311,7 +328,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         ROIfileMenu.addAction(saveROIonNRRD)
         ROIfileMenu.addAction(highlightDCMROIaction)
         ROIfileMenu.addAction(highlightnrrdROIaction)
-        ROIfileMenu.addAction(highlightMyROIaction)        
+        ROIfileMenu.addAction(highlightMyROIaction)
+        ROIfileMenu.addAction(ROIdilation) 
+        ROIfileMenu.addAction(ROIerosion) 
         
         normMenu = mainMenu.addMenu('&Normalization')
         normMenu.addAction(normalizeHistogramMatching)
@@ -520,6 +539,9 @@ class Window_dicom_tool(QtGui.QMainWindow):
         if args.inputpath:
             self.read_dicom_in_folder(args.inputpath)
 
+        if args.inputmatlab:
+            self.open_matlab_file(args.inputmatlab)
+            
         if args.roipath:
             self.read_roi_dicom_in_folder(args.roipath)
 
@@ -804,7 +826,37 @@ class Window_dicom_tool(QtGui.QMainWindow):
             print("data len:",len(self.data[:,:,:,0]))
 
         self.bitmapROI = np.full( self.dataZ[:,:,:,0].shape,False,dtype=bool)
-                
+
+    def select_matlab_file(self):
+        filename =  QtGui.QFileDialog.getOpenFileName(self, 'Open MATLAB File','MATLAB','MATLAB files (*.mat)')
+        if int(QtCore.QT_VERSION_STR.split('.')[0])>=5:
+            filename = filename[0]        
+        self.open_matlab_file(filename)
+            
+    def open_matlab_file(self, filename):
+        if self.verbose:
+            print(filename)
+        tmp = matlab_filereader(str(filename))            
+        self.dataZ = np.zeros(tuple([tmp.shape[2]])+tmp.shape[0:2]+tuple([3]))
+        for i in range(0,tmp.shape[2]):
+            self.dataZ[i,:,:,0] = self.dataZ[i,:,:,1] = self.dataZ[i,:,:,2] = tmp[:,:,i]
+        self.setWindowTitle("DICOM tool - "+str(filename))
+        self.xview=False
+        self.yview=False
+        self.zview=True
+        self.secondaryImage2D = np.zeros( self.dataZ[0].shape )
+        self.imgScaleFactor= 1.
+        self.data =  self.dataZ
+        self.rois = [None]*len(self.data[:,:,:,0])        
+        self.layerZ=int(len(self.data[:,:,:,0])/2)
+        self.layerX=int(len(self.data[0,:,0,0])/2)
+        self.layerY=int(len(self.data[0,0,:,0])/2)
+        self.layer = self.layerZ
+        self.arr = self.dataZ[self.layerZ]
+        self.slider.setMaximum(len(self.data[:,:,:,0]))
+        self.slider.setValue(self.layer+1)
+        self.updatemain()
+        
     def read_roi_dicom_in_folder(self, path):
         freader = FileReader(path, False, self.verbose)
         self.ROI = freader.readROI()
@@ -826,8 +878,10 @@ class Window_dicom_tool(QtGui.QMainWindow):
         path =  QtGui.QFileDialog.getExistingDirectory(self, 'Open DICOM Directory',os.path.expanduser("~"),QtGui.QFileDialog.ShowDirsOnly)
         if self.verbose:
             print(path)
-        self.read_dicom_in_folder(str(path),useBruker=True)                
+        self.read_dicom_in_folder(str(path),useBruker=True)
 
+
+        
     def switchToXView(self):
         if self.xview:
             return
@@ -966,8 +1020,8 @@ class Window_dicom_tool(QtGui.QMainWindow):
             print(self.arr.shape)
         image = self.arr.transpose(1,0,2)[::-1,:,:]
         sides = image.shape
-        image = scipy.misc.imresize(image,size=tuple([int(sides[0]/self.imgScaleFactor),sides[1]]))
-        scipy.misc.imsave(filename,image)        
+        image = misc.imresize(image,size=tuple([int(sides[0]/self.imgScaleFactor),sides[1]]))
+        misc.imsave(filename,image)        
         
     def saveToTIFFImage(self):
         self.saveToImage(".tiff")
@@ -1332,6 +1386,16 @@ class Window_dicom_tool(QtGui.QMainWindow):
 
         self.showImg(primImg)
 
+    def ROI_dilation(self):
+        if(self.ROI.any()):
+            self.ROI = binary_dilation(self.ROI)
+            self.highlightROI(self.ROI)
+        
+    def ROI_erosion(self):
+        if(self.ROI.any()):
+            self.ROI = binary_erosion(self.ROI)
+            self.highlightROI(self.ROI)        
+        
     def goToLayerWithLargerROI(self):
         self.layer = getLayerWithLargerROI(self.ROI)
         self.updatemain()
